@@ -47,20 +47,39 @@
 </div></div>
 {% endif %}
 
+{%- set featured = h.featured_program ? pages.find(h.featured_program) : null -%}
+{%- set fseries = featured ? featured.children.visible|filter(k => k.template == 'series') : [] -%}
+{% if featured %}
 <section class="sec">
   <div class="wrap">
     <div class="sec-head">
-      <p class="eye">{{ h.programs_eye ?: 'البرامج' }}</p>
-      <h2 class="h2">{{ h.programs_title ?: 'سلاسل وبرامج' }}</h2>
-      {% if h.programs_lead %}<p class="mut" style="font-size:19px">{{ h.programs_lead }}</p>{% endif %}
+      <p class="eye">{{ h.featured_eye ?: featured.title }}</p>
+      <h2 class="h2">{{ h.featured_title ?: (featured.header.series_heading ?: featured.title) }}</h2>
+      {% if h.featured_lead ?: featured.header.summary %}<p class="mut" style="font-size:19px">{{ h.featured_lead ?: featured.header.summary }}</p>{% endif %}
     </div>
-    {% if programs|length %}
-      <div class="grid3">{% for item in programs %}{% include 'partials/card.html.twig' with {item: item} %}{% endfor %}</div>
+    {% if fseries|length %}
+      <div class="grid3">{% for item in fseries %}{% include 'partials/card.html.twig' with {item: item} %}{% endfor %}</div>
     {% else %}
-      {% include 'partials/empty.html.twig' with {msg: 'ستظهر البرامج هنا فور نشرها.'} %}
+      <div class="grid3">{% include 'partials/card.html.twig' with {item: featured} %}</div>
     {% endif %}
   </div>
 </section>
+{% endif %}
+
+{% if progs_page %}
+<section class="sec sec--tight">
+  <div class="wrap">
+    <div class="glass banner" style="padding:clamp(28px,4vw,48px)">
+      <div style="flex:1 1 420px;display:flex;flex-direction:column;gap:12px">
+        <p class="eye">{{ h.more.eye ?: 'المزيد من البرامج' }}</p>
+        <h2 class="h2" style="font-size:clamp(24px,3vw,36px)">{{ h.more.title ?: 'برامج وسلاسل أخرى' }}</h2>
+        {% if h.more.text %}<p class="mut" style="font-size:18px;max-width:40em">{{ h.more.text }}</p>{% endif %}
+      </div>
+      <a href="{{ progs_page.url }}" class="btn gold">{{ h.more.button ?: 'تصفّح كل البرامج' }} ({{ programs|length }})</a>
+    </div>
+  </div>
+</section>
+{% endif %}
 
 {% if questions|length %}
 <section class="sec sec--tight">

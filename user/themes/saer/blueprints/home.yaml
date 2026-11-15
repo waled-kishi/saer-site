@@ -33,8 +33,12 @@ form:
               fields:
                 .n: { type: text, label: الرقم }
                 .label: { type: text, label: الوصف }
-            header.programs_title: { type: text, label: عنوان قسم البرامج }
-            header.programs_lead: { type: text, label: وصف قسم البرامج }
+            header.featured_program: { type: pages, label: البرنامج المميّز في الرئيسية, show_root: false, show_all: true }
+            header.featured_title: { type: text, label: عنوان قسم البرنامج المميّز }
+            header.featured_lead: { type: text, label: وصف قسم البرنامج المميّز }
+            header.more.title: { type: text, label: عنوان قسم المزيد من البرامج }
+            header.more.text: { type: textarea, label: نص قسم المزيد من البرامج, rows: 3 }
+            header.more.button: { type: text, label: نص زر صفحة البرامج }
             header.quote.text: { type: textarea, label: الاقتباس الكبير, rows: 2 }
             header.quote.accent: { type: text, label: الجزء الذهبي من الاقتباس }
             header.quote.caption: { type: text, label: مصدر الاقتباس }
