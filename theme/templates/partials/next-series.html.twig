@@ -1,0 +1,16 @@
+{# Banner pointing to the next sibling series, if any. #}
+{%- set sibs = page.parent ? page.parent.children.visible|filter(s => s.template == 'series') : [] -%}
+{%- set next = null -%}{%- set found = false -%}
+{%- for s in sibs -%}
+  {%- if found and not next -%}{%- set next = s -%}{%- endif -%}
+  {%- if s.route == page.route -%}{%- set found = true -%}{%- endif -%}
+{%- endfor -%}
+{% if next %}
+<div class="glass banner" style="margin-top:20px">
+  <div>
+    <p class="eye">الخطوة التالية{% if next.header.step_label %} · {{ next.header.step_label }}{% endif %}</p>
+    <p class="k" style="margin-top:4px;font-size:24px;font-weight:700;color:#fff;line-height:1.6">{{ next.title }}</p>
+  </div>
+  <a href="{{ next.url }}" class="btn ghost">انتقل إلى السلسلة التالية</a>
+</div>
+{% endif %}

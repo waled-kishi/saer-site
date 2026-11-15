@@ -1,0 +1,11 @@
+{# Embedded YouTube player. Expects: yt (URL or id), title #}
+{%- set vid = (yt ?? '')|yt_id -%}
+{% if vid %}
+<div class="glass video">
+  <div class="video__frame">
+    <iframe src="https://www.youtube-nocookie.com/embed/{{ vid }}?rel=0" title="{{ title ?? 'فيديو' }}" loading="lazy"
+      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  </div>
+</div>
+{% endif %}

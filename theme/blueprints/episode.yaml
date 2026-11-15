@@ -1,0 +1,26 @@
+title: حلقة
+'@extends':
+  type: content-base
+  context: theme://blueprints
+
+form:
+  fields:
+    tabs:
+      fields:
+        content:
+          fields:
+            header.number:
+              type: number
+              label: رقم الحلقة
+              validate: { min: 1 }
+              ordering@: header.title
+            header.youtube:
+              type: text
+              label: رابط فيديو يوتيوب
+              help: الصق الرابط كاملاً
+              ordering@: header.number
+            header.duration:
+              type: text
+              label: المدة
+              placeholder: '2:23'
+              ordering@: header.youtube

@@ -1,0 +1,2 @@
+{# Picks card-<template>.html.twig for the item, falling back to card-default. Expects: item #}
+{% include ['partials/card-' ~ item.template ~ '.html.twig', 'partials/card-default.html.twig'] with {item: item} %}

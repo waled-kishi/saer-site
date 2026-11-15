@@ -1,0 +1,45 @@
+title: سلسلة / برنامج
+'@extends':
+  type: content-base
+  context: theme://blueprints
+
+child_type: episode
+
+form:
+  fields:
+    tabs:
+      fields:
+        content:
+          fields:
+            header.kind:
+              type: select
+              label: النوع
+              default: series
+              options:
+                series: سلسلة حلقات
+                program: برنامج (يضم سلاسل)
+                course: دورة
+              ordering@: header.title
+            header.step_label:
+              type: text
+              label: اسم الخطوة (مثل نُسقِط)
+              ordering@: header.kind
+            header.step_no:
+              type: number
+              label: رقم الخطوة
+              ordering@: header.step_label
+            header.chips:
+              type: array
+              label: كلمات مفتاحية تظهر في البطاقة
+              value_only: true
+              ordering@: header.step_no
+            header.youtube_playlist:
+              type: text
+              label: رابط قائمة تشغيل يوتيوب
+              ordering@: header.chips
+            header.book:
+              type: pages
+              label: الكتيّب المرتبط
+              show_root: false
+              show_all: true
+              ordering@: header.youtube_playlist

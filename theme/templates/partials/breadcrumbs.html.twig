@@ -1,0 +1,25 @@
+{#- Build the trail from the route segments (robust against the root/flex pages) -#}
+{%- set trail = [] -%}
+{%- set path = '' -%}
+{%- set segs = page.route|trim('/')|split('/') -%}
+{%- for seg in segs|slice(0, segs|length - 1) if seg -%}
+  {%- set path = path ~ '/' ~ seg -%}
+  {%- set tp = pages.find(path) -%}
+  {%- if tp -%}{%- set trail = trail|merge([tp]) -%}{%- endif -%}
+{%- endfor -%}
+<nav class="crumbs" aria-label="مسار التصفح">
+  <ol>
+    <li><a href="{{ home_url }}">الرئيسية</a></li>
+    {% for t in trail %}{% if not t.home %}<li><a href="{{ t.url }}">{{ t.menu }}</a></li>{% endif %}{% endfor %}
+    <li aria-current="page">{{ label ?? page.menu }}</li>
+  </ol>
+</nav>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+{"@type":"ListItem","position":1,"name":"الرئيسية","item":"{{ home_url|e('js') }}"}
+{%- set pos = 1 -%}
+{%- for t in trail if not t.home -%}{%- set pos = pos + 1 -%}
+,{"@type":"ListItem","position":{{ pos }},"name":"{{ t.menu|e('js') }}","item":"{{ t.url(true)|e('js') }}"}
+{%- endfor -%}
+,{"@type":"ListItem","position":{{ pos + 1 }},"name":"{{ page.title|e('js') }}"}]}
+</script>

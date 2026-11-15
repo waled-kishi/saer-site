@@ -1,0 +1,17 @@
+{% extends 'partials/base.html.twig' %}
+{% block content %}
+<section class="wrap wrap--narrow page-head">
+  {% if not page.home %}{% include 'partials/breadcrumbs.html.twig' %}{% endif %}
+  <h1>{{ page.title }}</h1>
+  {% if page.header.summary %}<p class="lead">{{ page.header.summary }}</p>{% endif %}
+</section>
+<section class="wrap wrap--narrow" style="padding-bottom:96px">
+  <article class="prose" style="max-width:none">{{ page.content|raw }}</article>
+  {% set kids = page.children.visible %}
+  {% if kids|length %}
+    <div class="grid3" style="margin-top:48px">
+      {% for item in kids %}{% include 'partials/card.html.twig' with {item: item} %}{% endfor %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

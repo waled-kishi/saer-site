@@ -1,0 +1,59 @@
+{% extends 'partials/base.html.twig' %}
+{#
+  A series (list of episodes) or a programme (list of series).
+  header.kind: program | series | course   (default: series)
+#}
+{%- set h = page.header -%}
+{%- set kids = page.children.visible -%}
+{%- set sub_series = kids|filter(k => k.template == 'series') -%}
+{%- set episodes = kids|filter(k => k.template != 'series') -%}
+{%- set book = h.book ? pages.find(h.book) : null -%}
+{%- set first_ep = episodes|first -%}
+
+{% block content %}
+<section class="wrap page-head">
+  {% include 'partials/breadcrumbs.html.twig' %}
+  <span class="chip chip--gold" style="align-self:flex-start;margin-top:10px">
+    {%- if h.step_no %}الخطوة {{ h.step_no }} · {% endif -%}
+    {%- if h.step_label %}{{ h.step_label }} · {% endif -%}
+    {%- if sub_series|length %}{{ sub_series|length }} سلاسل{% else %}{{ episodes|length }} حلقات{% endif -%}
+  </span>
+  <h1>{{ page.title }}</h1>
+  <div class="byline"><span>تقديم: أ. سائر</span></div>
+  {% if h.summary %}<p class="lead">{{ h.summary }}</p>{% endif %}
+  <div class="actions" style="margin-top:8px">
+    {% set pdf = book ? (book.media.files|filter(f => f.extension == 'pdf')|first) : null %}
+    {% if pdf %}<a href="{{ pdf.url }}" class="btn gold" download>تحميل الكتيّب PDF</a>{% endif %}
+    {% if first_ep %}<a href="{{ first_ep.url }}" class="btn ghost">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      ابدأ من الحلقة الأولى</a>{% endif %}
+    {% if h.youtube_playlist %}<a href="https://www.youtube.com/playlist?list={{ h.youtube_playlist|yt_list }}" class="btn ghost" rel="noopener">قائمة التشغيل على يوتيوب</a>{% endif %}
+  </div>
+  {% if page.content|trim %}<div class="prose" style="margin-top:12px">{{ page.content|raw }}</div>{% endif %}
+</section>
+
+{% if sub_series|length %}
+<section class="wrap" style="padding-bottom:64px">
+  <div class="sec-head"><p class="eye">السلاسل</p><h2 class="h2">{{ h.series_heading ?: 'خطوات البرنامج' }}</h2></div>
+  <div class="grid3">
+    {% for item in sub_series %}{% include 'partials/card.html.twig' with {item: item} %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if episodes|length %}
+<section class="wrap" style="padding-bottom:96px">
+  <h2 class="h2" style="margin-bottom:28px">الحلقات</h2>
+  <ol class="rows">
+    {% for ep in episodes %}
+      {% include 'partials/row-item.html.twig' with {item: ep, n: ep.header.number ?: loop.index} %}
+    {% endfor %}
+  </ol>
+  {% include 'partials/next-series.html.twig' %}
+</section>
+{% elseif not sub_series|length %}
+<section class="wrap" style="padding-bottom:96px">
+  {% include 'partials/empty.html.twig' with {msg: 'لم تُنشر حلقات هذه السلسلة بعد.'} %}
+</section>
+{% endif %}
+{% endblock %}

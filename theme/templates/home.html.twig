@@ -1,0 +1,104 @@
+{% extends 'partials/base.html.twig' %}
+{#
+  Home page. Everything is driven by the page header so it can be edited from the admin:
+    hero: {chip, title, title_accent, lead, float_quote, float_stat, float_stat_sub, float_pill, buttons: [{label, url, style}]}
+    portrait: image file name in this page's media
+    stats: [{n, label}]
+    programs_route: /programs
+    quote: {text, accent, caption, chips: []}
+    cta: {title, accent, text, buttons: [{label, url, style}]}
+#}
+{%- set h = page.header -%}
+{%- set hero = h.hero ?? {} -%}
+{%- set portrait = h.portrait ? page.media[h.portrait] : (page.media.images|first) -%}
+{%- set progs_page = pages.find(h.programs_route ?: '/programs') -%}
+{%- set programs = progs_page ? progs_page.children.visible : [] -%}
+{%- set all_items = progs_page ? page.collection({'items': {'@page.descendants': progs_page.route}, 'order': {'by': 'default'}}) : [] -%}
+{%- set questions = all_items|filter(p => p.header.hook_question)|slice(0, 6) -%}
+
+{% macro buttons(list) %}
+  {% for b in list %}
+    <a href="{{ b.url }}" class="btn {{ b.style ?: 'gold' }}">{{ b.label }}</a>
+  {% endfor %}
+{% endmacro %}
+{% import _self as ui %}
+
+{% block content %}
+<section class="wrap hero">
+  <div class="hero__text">
+    {% if hero.chip %}<span class="chip chip--gold" style="align-self:flex-start">{{ hero.chip }}</span>{% endif %}
+    <h1>{{ hero.title ?: site.title }}{% if hero.title_accent %}<br><span class="gold-text">{{ hero.title_accent }}</span>{% endif %}</h1>
+    {% if hero.lead %}<p class="lead">{{ hero.lead }}</p>{% endif %}
+    {% if hero.buttons %}<div class="actions">{{ ui.buttons(hero.buttons) }}</div>{% endif %}
+  </div>
+  {% if portrait %}
+  <div class="hero__media">
+    <div class="glass portrait">{{ portrait.cropZoom(760,760).html('', h.portrait_alt ?: 'محمد سائر الشبعان')|raw }}</div>
+    {% if hero.float_quote %}<div class="glass fl k float float--a">«{{ hero.float_quote }}»</div>{% endif %}
+    {% if hero.float_stat %}<div class="glass fl2 float float--b"><strong class="k gold-text" style="font-size:22px;display:block">{{ hero.float_stat }}</strong><span>{{ hero.float_stat_sub }}</span></div>{% endif %}
+    {% if hero.float_pill %}<div class="glass fl float float--c">{{ hero.float_pill }}</div>{% endif %}
+  </div>
+  {% endif %}
+</section>
+
+{% if h.stats %}
+<div class="wrap"><div class="glass stats">
+  {% for s in h.stats %}<div><strong>{{ s.n }}</strong><span>{{ s.label }}</span></div>{% endfor %}
+</div></div>
+{% endif %}
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eye">{{ h.programs_eye ?: 'البرامج' }}</p>
+      <h2 class="h2">{{ h.programs_title ?: 'سلاسل وبرامج' }}</h2>
+      {% if h.programs_lead %}<p class="mut" style="font-size:19px">{{ h.programs_lead }}</p>{% endif %}
+    </div>
+    {% if programs|length %}
+      <div class="grid3">{% for item in programs %}{% include 'partials/card.html.twig' with {item: item} %}{% endfor %}</div>
+    {% else %}
+      {% include 'partials/empty.html.twig' with {msg: 'ستظهر البرامج هنا فور نشرها.'} %}
+    {% endif %}
+  </div>
+</section>
+
+{% if questions|length %}
+<section class="sec sec--tight">
+  <div class="wrap">
+    <div class="sec-head"><p class="eye">أسئلة تجيب عنها الحلقات</p><h2 class="h2">{{ h.questions_title ?: 'أسئلة نتهامس بها ولا نجرؤ على طرحها' }}</h2></div>
+    <div class="grid3">
+      {% for q in questions %}
+        <a href="{{ q.url }}" class="glass teaser"><span class="teaser__q">{{ q.header.hook_question }}</span><span class="teaser__go">{{ q.title }} ←</span></a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if h.quote.text %}
+<section class="sec sec--tight">
+  <div class="wrap">
+    <figure class="glass quote">
+      <span aria-hidden="true" class="k gold-text" style="font-size:64px;line-height:1">«»</span>
+      <blockquote>{{ h.quote.text }}{% if h.quote.accent %} <span class="gold-text">{{ h.quote.accent }}</span>{% endif %}</blockquote>
+      {% if h.quote.caption %}<figcaption class="mut" style="font-size:17px">{{ h.quote.caption }}</figcaption>{% endif %}
+      {% if h.quote.chips %}<div class="chips" style="justify-content:center;max-width:900px">{% for c in h.quote.chips %}<span class="chip">{{ c }}</span>{% endfor %}</div>{% endif %}
+    </figure>
+  </div>
+</section>
+{% endif %}
+
+{% if page.content|trim %}
+<section class="sec sec--tight"><div class="wrap wrap--narrow"><div class="prose" style="max-width:none">{{ page.content|raw }}</div></div></section>
+{% endif %}
+
+{% if h.cta.title %}
+<section class="sec sec--tight">
+  <div class="wrap"><div class="glass cta">
+    <h2>{{ h.cta.title }}{% if h.cta.accent %} <span class="gold-text">{{ h.cta.accent }}</span>{% endif %}</h2>
+    {% if h.cta.text %}<p class="lead">{{ h.cta.text }}</p>{% endif %}
+    {% if h.cta.buttons %}<div class="actions" style="justify-content:center">{{ ui.buttons(h.cta.buttons) }}</div>{% endif %}
+  </div></div>
+</section>
+{% endif %}
+{% endblock %}

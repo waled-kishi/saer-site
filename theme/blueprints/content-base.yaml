@@ -1,0 +1,33 @@
+title: Content base
+'@extends':
+  type: default
+  context: blueprints://pages
+
+form:
+  fields:
+    tabs:
+      fields:
+        content:
+          fields:
+            header.summary:
+              type: textarea
+              label: ملخص قصير
+              help: يظهر في البطاقات ووصف محركات البحث
+              rows: 2
+              ordering@: header.title
+            header.hook_question:
+              type: text
+              label: سؤال جاذب (اختياري)
+              help: يظهر في قسم "أسئلة تجيب عنها الحلقات" في الرئيسية
+              ordering@: header.summary
+        seo:
+          type: tab
+          title: SEO
+          fields:
+            header.seo.title:
+              type: text
+              label: عنوان الصفحة لمحركات البحث
+            header.seo.description:
+              type: textarea
+              label: وصف محركات البحث
+              rows: 2

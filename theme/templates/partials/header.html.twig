@@ -1,0 +1,34 @@
+{%- set tc = config.theme -%}
+{%- set logo = url('theme://images/logo.png') -%}
+{%- set menu = pages.children.visible -%}
+{%- set current_top = page.home ? '/' : '/' ~ (page.route|split('/')[1]) -%}
+{% macro links(menu, current_top) %}
+  {% for p in menu %}
+    {% set top = p.home ? '/' : p.route %}
+    <a href="{{ p.url }}"{% if top == current_top %} aria-current="page"{% endif %}>{{ p.menu }}</a>
+  {% endfor %}
+{% endmacro %}
+{% import _self as nav %}
+<div class="wrap site-head">
+  <header class="glass hd">
+    <a class="brand" href="{{ home_url }}" aria-label="{{ site.title }} — الصفحة الرئيسية">
+      {% if logo %}
+        <img src="{{ logo }}" alt="{{ site.title }}" width="160" height="40">
+      {% else %}
+        <span class="brand__text">{{ tc.logo_text ?: site.title }}</span>
+        {% if tc.tagline %}<span class="brand__tag">{{ tc.tagline }}</span>{% endif %}
+      {% endif %}
+    </a>
+    <nav aria-label="القائمة الرئيسية" class="nav-d">
+      {{ nav.links(menu, current_top) }}
+    </nav>
+    <details class="nav-m">
+      <summary class="mbtn" aria-label="فتح القائمة">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+      </summary>
+      <nav aria-label="قائمة الجوال" class="mpanel">
+        {{ nav.links(menu, current_top) }}
+      </nav>
+    </details>
+  </header>
+</div>

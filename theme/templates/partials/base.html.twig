@@ -1,0 +1,37 @@
+{%- set tc = config.theme -%}
+{%- set h = page.header -%}
+{%- set page_title = (h.seo.title ?? null) ?: (page.home ? site.title : page.title ~ ' | ' ~ site.title) -%}
+{%- set page_desc = (h.seo.description ?? null) ?: ((h.summary ?? null) ?: (page.summary(160)|striptags|trim ?: site.metadata.description)) -%}
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{{ page_title }}</title>
+  <meta name="description" content="{{ page_desc }}">
+  <link rel="canonical" href="{{ page.canonical(true) }}">
+  <meta property="og:type" content="{{ page.template == 'episode' or page.template == 'article' ? 'article' : 'website' }}">
+  <meta property="og:title" content="{{ page_title }}">
+  <meta property="og:description" content="{{ page_desc }}">
+  <meta property="og:url" content="{{ page.url(true) }}">
+  <meta property="og:locale" content="ar_AR">
+  {%- set og_img = (page.media.images|first) -%}
+  {% if og_img %}<meta property="og:image" content="{{ og_img.cropZoom(1200,630).url(true) }}">{% endif %}
+  <meta name="theme-color" content="#150826">
+  {% block stylesheets %}
+    {% do assets.addCss('theme://css/fonts.css', 100) %}
+    {% do assets.addCss('theme://css/theme.css', 99) %}
+  {% endblock %}
+  {{ assets.css()|raw }}
+  {% block head_extra %}{% endblock %}
+</head>
+<body class="tpl-{{ page.template }}">
+  <a class="skip" href="#main">تخطَّ إلى المحتوى</a>
+  {% include 'partials/header.html.twig' %}
+  <main id="main">
+    {% block content %}{% endblock %}
+  </main>
+  {% include 'partials/footer.html.twig' %}
+  {{ assets.js()|raw }}
+</body>
+</html>

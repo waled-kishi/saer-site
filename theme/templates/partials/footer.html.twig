@@ -1,0 +1,19 @@
+{%- set tc = config.theme -%}
+<footer class="wrap site-foot">
+  <div class="glass foot">
+    <a class="brand" href="{{ home_url }}" aria-label="الصفحة الرئيسية">
+      <span class="brand__text">{{ tc.logo_text ?: site.title }}</span>
+    </a>
+    <nav aria-label="روابط التذييل">
+      {% for p in pages.children.visible %}{% if not p.home %}<a href="{{ p.url }}">{{ p.menu }}</a>{% endif %}{% endfor %}
+      {% if tc.external.alsaer %}<a href="{{ tc.external.alsaer }}" rel="noopener">مراجعات في مسيرة داعية</a>{% endif %}
+    </nav>
+    <nav aria-label="حسابات التواصل">
+      {% if tc.social.youtube %}<a href="{{ tc.social.youtube }}" rel="noopener">يوتيوب</a>{% endif %}
+      {% if tc.social.facebook %}<a href="{{ tc.social.facebook }}" rel="noopener">فيسبوك</a>{% endif %}
+      {% if tc.social.instagram %}<a href="{{ tc.social.instagram }}" rel="noopener">إنستغرام</a>{% endif %}
+      {% if tc.social.telegram %}<a href="{{ tc.social.telegram }}" rel="noopener">تيليغرام</a>{% endif %}
+    </nav>
+    <p class="mut" style="font-size:15px">© {{ "now"|date("Y") }} {{ site.author.name ?: site.title }}</p>
+  </div>
+</footer>

@@ -1,0 +1,44 @@
+title: الرئيسية
+'@extends':
+  type: default
+  context: blueprints://pages
+
+form:
+  fields:
+    tabs:
+      fields:
+        home:
+          type: tab
+          title: محتوى الرئيسية
+          fields:
+            header.hero.chip: { type: text, label: شارة أعلى العنوان }
+            header.hero.title: { type: text, label: العنوان }
+            header.hero.title_accent: { type: text, label: سطر العنوان الذهبي }
+            header.hero.lead: { type: textarea, label: الفقرة التعريفية, rows: 3 }
+            header.hero.buttons:
+              type: list
+              label: أزرار الواجهة
+              fields:
+                .label: { type: text, label: النص }
+                .url: { type: text, label: الرابط }
+                .style: { type: select, label: النمط, options: { gold: ذهبي, ghost: شفاف } }
+            header.portrait: { type: text, label: اسم ملف الصورة الشخصية (من وسائط الصفحة) }
+            header.hero.float_quote: { type: text, label: اقتباس عائم }
+            header.hero.float_stat: { type: text, label: رقم عائم }
+            header.hero.float_stat_sub: { type: text, label: وصف الرقم العائم }
+            header.hero.float_pill: { type: text, label: عبارة عائمة }
+            header.stats:
+              type: list
+              label: شريط الأرقام
+              fields:
+                .n: { type: text, label: الرقم }
+                .label: { type: text, label: الوصف }
+            header.programs_title: { type: text, label: عنوان قسم البرامج }
+            header.programs_lead: { type: text, label: وصف قسم البرامج }
+            header.quote.text: { type: textarea, label: الاقتباس الكبير, rows: 2 }
+            header.quote.accent: { type: text, label: الجزء الذهبي من الاقتباس }
+            header.quote.caption: { type: text, label: مصدر الاقتباس }
+            header.quote.chips: { type: array, label: عبارات تحت الاقتباس, value_only: true }
+            header.cta.title: { type: text, label: عنوان الدعوة الختامية }
+            header.cta.accent: { type: text, label: الجزء الذهبي }
+            header.cta.text: { type: text, label: نص الدعوة }

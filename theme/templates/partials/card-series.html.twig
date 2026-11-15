@@ -1,0 +1,22 @@
+{# Card for a series/programme. Expects: item #}
+{%- set h = item.header -%}
+{%- set eps = item.children.visible -%}
+{%- set first = eps|first -%}
+<article class="glass card">
+  <div class="card__top">
+    {% if h.step_label %}<span class="card__step">{{ h.step_label }}</span>{% endif %}
+    {%- set subs = eps|filter(k => k.template == 'series') -%}
+    <span class="chip">{% if h.step_no %}الخطوة {{ h.step_no }} · {% endif %}{% if subs|length %}{{ subs|length }} سلاسل{% else %}{{ eps|length }} {{ eps|length > 10 or eps|length < 3 ? 'حلقة' : 'حلقات' }}{% endif %}</span>
+  </div>
+  <h3><a href="{{ item.url }}" style="color:inherit">{{ item.title }}</a></h3>
+  {% if h.summary %}<p style="font-size:17px">{{ h.summary }}</p>{% endif %}
+  {% if h.chips %}<div class="chips">{% for c in h.chips %}<span class="chip">{{ c }}</span>{% endfor %}</div>{% endif %}
+  <div class="card__actions">
+    <a href="{{ item.url }}" class="btn gold">اقرأ</a>
+    {% if h.youtube_playlist %}
+      <a href="https://www.youtube.com/playlist?list={{ h.youtube_playlist|yt_list }}" class="btn ghost" rel="noopener">شاهد</a>
+    {% elseif first %}
+      <a href="{{ first.url }}" class="btn ghost">شاهد</a>
+    {% endif %}
+  </div>
+</article>

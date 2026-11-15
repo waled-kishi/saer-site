@@ -1,0 +1,11 @@
+enabled: true
+tagline: "بنهضة الفكر والقلب"
+logo_text: "سائر"
+about_route: /about
+social:
+  youtube: https://www.youtube.com/channel/UCDFuruEz-JlglcgduqZnNmw
+  facebook: https://www.facebook.com/m.saer.alshbaan/
+  instagram: https://www.instagram.com/m.saer/
+  telegram: https://t.me/m_saer
+external:
+  alsaer: https://alsaer.rifd-dt.com

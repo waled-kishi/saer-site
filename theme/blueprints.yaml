@@ -1,0 +1,50 @@
+name: Saer
+slug: saer
+type: theme
+version: 0.1.0
+description: "قالب موقع الشيخ محمد سائر الشبعان (عربي، من اليمين لليسار)"
+icon: moon-o
+author:
+  name: Saer site team
+license: MIT
+compatibility:
+  grav:
+    - '2.0'
+dependencies:
+  - { name: grav, version: '>=2.0.0' }
+
+form:
+  validation: loose
+  fields:
+    brand:
+      type: section
+      title: الهوية
+      underline: true
+    tagline:
+      type: text
+      label: الشعار المختصر
+    logo_text:
+      type: text
+      label: نص الشعار (يظهر إن لم يُرفع شعار)
+    about_route:
+      type: text
+      label: مسار صفحة "عن الشيخ"
+    social:
+      type: section
+      title: روابط التواصل
+      underline: true
+    social.youtube:
+      type: text
+      label: يوتيوب
+    social.facebook:
+      type: text
+      label: فيسبوك
+    social.instagram:
+      type: text
+      label: إنستغرام
+    social.telegram:
+      type: text
+      label: تيليغرام
+    external.alsaer:
+      type: text
+      label: رابط موقع كتاب "مراجعات في مسيرة داعية"

@@ -1,0 +1,13 @@
+{% extends 'partials/base.html.twig' %}
+{% block content %}
+<section class="wrap error-page">
+  <span class="code">404</span>
+  <h1 style="font-size:clamp(28px,4vw,44px)">الصفحة غير موجودة</h1>
+  <p class="lead mut">ربما نُقلت الصفحة أو تغيّر رابطها. جرّب البحث أو ابدأ من الرئيسية.</p>
+  <div class="actions" style="justify-content:center">
+    <a href="{{ home_url }}" class="btn gold">الرئيسية</a>
+    {% set progs = pages.find('/programs') %}
+    {% if progs %}<a href="{{ progs.url }}" class="btn ghost">البرامج والسلاسل</a>{% endif %}
+  </div>
+</section>
+{% endblock %}

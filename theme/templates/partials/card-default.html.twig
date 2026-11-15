@@ -1,0 +1,9 @@
+{# Fallback card for any content type without its own card-<template> partial. Expects: item #}
+{%- set h = item.header -%}
+{%- set img = item.media.images|first -%}
+<article class="glass card">
+  {% if img %}<a href="{{ item.url }}" tabindex="-1" aria-hidden="true">{{ img.cropZoom(640,400).html('', item.title, 'card__img')|raw }}</a>{% endif %}
+  <h3><a href="{{ item.url }}" style="color:inherit">{{ item.title }}</a></h3>
+  <p class="mut" style="font-size:17px">{{ h.summary ?: item.summary(160)|striptags }}</p>
+  <div class="card__actions"><a href="{{ item.url }}" class="btn ghost">التفاصيل</a></div>
+</article>
