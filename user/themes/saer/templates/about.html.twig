@@ -1,0 +1,40 @@
+{% extends 'partials/base.html.twig' %}
+{#
+  About the Sheikh. Header fields:
+    chips: [] (values, shown in gold)
+    other_programs: [] (titles of other programmes on YouTube)
+  Uses the first image in the page media as the portrait.
+#}
+{%- set h = page.header -%}
+{%- set tc = config.theme -%}
+{%- set img = page.media.images|first -%}
+{% block content %}
+<section class="wrap" style="padding-top:64px">
+  {% include 'partials/breadcrumbs.html.twig' %}
+</section>
+<section class="wrap hero" style="padding-top:40px;padding-bottom:96px">
+  {% if img %}
+  <div style="flex:0 1 320px;margin:0 auto">
+    <div class="glass" style="padding:12px;border-radius:36px">
+      {{ img.cropZoom(640,800).html('', h.portrait_alt ?: page.title, 'about__img')|raw }}
+    </div>
+  </div>
+  {% endif %}
+  <div class="hero__text" style="flex:1 1 480px;gap:18px">
+    <p class="eye">عن المقدّم</p>
+    <h1 class="h2">{{ h.display_name ?: page.title }}</h1>
+    <div class="prose" style="max-width:none;flex:none">{{ page.content|raw }}</div>
+    {% if h.chips %}<div class="chips">{% for c in h.chips %}<span class="chip chip--gold">{{ c }}</span>{% endfor %}</div>{% endif %}
+    {% if h.other_programs %}
+      <p style="margin-top:8px;font-weight:700;color:#fff">من برامجه الأخرى على يوتيوب</p>
+      <div class="chips">{% for c in h.other_programs %}<span class="chip">{{ c }}</span>{% endfor %}</div>
+    {% endif %}
+    <div class="actions" style="margin-top:8px">
+      {% if tc.social.youtube %}<a href="{{ tc.social.youtube }}" class="btn ghost btn--sm" rel="noopener">قناة يوتيوب</a>{% endif %}
+      {% if tc.social.facebook %}<a href="{{ tc.social.facebook }}" class="btn ghost btn--sm" rel="noopener">فيسبوك</a>{% endif %}
+      {% if tc.social.instagram %}<a href="{{ tc.social.instagram }}" class="btn ghost btn--sm" rel="noopener">إنستغرام</a>{% endif %}
+      {% if tc.social.telegram %}<a href="{{ tc.social.telegram }}" class="btn ghost btn--sm" rel="noopener">تيليغرام</a>{% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

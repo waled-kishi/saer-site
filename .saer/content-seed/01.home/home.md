@@ -1,6 +1,8 @@
 ---
 title: الرئيسية
 menu: الرئيسية
+portrait: portrait.jpg
+portrait_alt: محمد سائر الشبعان
 hero:
   chip: سلاسل فكرية لمرحلة ما بعد الاستبداد
   title: أسقطنا النظام.

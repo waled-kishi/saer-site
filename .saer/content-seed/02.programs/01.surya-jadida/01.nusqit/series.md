@@ -5,4 +5,5 @@ step_label: نُسقِط
 step_no: 1
 summary: ثمانية أشياء لا تقوم معها نهضة، نسقطها من النفوس والرؤوس كما أسقطنا النظام البائد.
 chips: [التميّز الكاذب, التعصب, البرمجة السلبية, التخلف, الكِبر, الجدل العقيم, الإلغاء, التحجّر]
+youtube_playlist: https://www.youtube.com/playlist?list=PLgIzcOU7lAOesdBOrDYrjkD1PbVjhkMN8
 ---
