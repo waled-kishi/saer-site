@@ -1,10 +1,15 @@
 # Runtime data that lives only on the server. Hostinger's GitHub deployment
 # preserves every path matched here, so content, accounts and settings survive deploys.
-/user/pages/
-/user/accounts/
-/user/config/
-/user/data/
-/user/env/
+/user/pages/*
+!/user/pages/.gitkeep
+/user/accounts/*
+!/user/accounts/.gitkeep
+/user/config/*
+!/user/config/.gitkeep
+/user/data/*
+!/user/data/.gitkeep
+/user/env/*
+!/user/env/.gitkeep
 /cache/*
 /logs/*
 /tmp/*
