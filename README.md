@@ -1,15 +1,13 @@
 # saer-site
 
-Theme and custom plugin for the Sheikh Mohammed Saer Al-Shabaan website (Grav 2).
+Full Grav 2 site for the Sheikh Mohammed Saer Al-Shabaan website, deployed to Hostinger
+by hPanel's "Deployment from GitHub" (the repo root becomes `public_html`).
 
-- `theme/` → deployed to `user/themes/saer`
-- `plugin/` → deployed to `user/plugins/saer-core`
+- Grav core + Admin2 + plugins are committed as released (currently Grav 2.2.29). Upgrade by
+  committing a newer release (GPM updates inside Admin2 fail on this host).
+- `user/themes/saer/` — the site theme.
+- `.saer/` — content seed and API seeding script (blocked from the web in `.htaccess`).
+- Server-only data (pages, accounts, config, user/data, cache, logs…) is listed in `.gitignore`;
+  the deployment preserves those paths, so publishing never touches content.
 
-Content (`user/pages`) is not stored here.
-No passwords, keys, or tokens in this repository.
-
-## Layout
-- `theme/` — Grav theme `saer` (templates, CSS, local fonts, admin blueprints)
-- `content-seed/` — sample pages used to seed and test the site
-- `tools/sync.sh` — deploy step run by cron on the server
-- `tools/plugins.txt` — pinned third-party plugins installed by `sync.sh`
+No passwords, keys or tokens in this repository.

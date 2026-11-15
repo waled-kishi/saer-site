@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => 'getgrav/grav-plugin-form',
+        'pretty_version' => 'dev-develop',
+        'version' => 'dev-develop',
+        'reference' => 'c9f1dd6d084b005327e340ff76bef9f23763bce8',
+        'type' => 'grav-plugin',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => false,
+    ),
+    'versions' => array(
+        'getgrav/grav-plugin-form' => array(
+            'pretty_version' => 'dev-develop',
+            'version' => 'dev-develop',
+            'reference' => 'c9f1dd6d084b005327e340ff76bef9f23763bce8',
+            'type' => 'grav-plugin',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'google/recaptcha' => array(
+            'pretty_version' => '1.3.1',
+            'version' => '1.3.1.0',
+            'reference' => '56522c261d2e8c58ba416c90f81a4cd9f2ed89b9',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../google/recaptcha',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'trilbymedia/cap-php' => array(
+            'pretty_version' => '1.2.0',
+            'version' => '1.2.0.0',
+            'reference' => '2989e361192a74fd6dde3e9c6dedb23789723bf6',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../trilbymedia/cap-php',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

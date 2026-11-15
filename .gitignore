@@ -1,5 +1,23 @@
-.DS_Store
-node_modules/
-*.log
+# Runtime data that lives only on the server. Hostinger's GitHub deployment
+# preserves every path matched here, so content, accounts and settings survive deploys.
+/user/pages/
+/user/accounts/
+/user/config/
+/user/data/
+/user/env/
+/cache/*
+/logs/*
+/tmp/*
+/backup/*
+/images/*
+/assets/*
+!/cache/.gitkeep
+!/logs/.gitkeep
+!/tmp/.gitkeep
+!/backup/.gitkeep
+!/images/.gitkeep
+!/assets/.gitkeep
 .env
 *.sqlite
+.DS_Store
+node_modules/
