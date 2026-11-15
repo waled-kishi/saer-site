@@ -7,6 +7,30 @@ form:
   fields:
     tabs:
       fields:
+        sections:
+          type: tab
+          title: ترتيب الأقسام
+          fields:
+            header.sections:
+              type: list
+              label: أقسام الرئيسية بالترتيب
+              help: اسحب القسم لأعلى أو لأسفل لتغيير ترتيبه. احذف قسماً لإخفائه (نصوصه تبقى محفوظة)، وأضفه من جديد لإظهاره.
+              btnLabel: إضافة قسم
+              sort: true
+              collapsed: false
+              fields:
+                .type:
+                  type: select
+                  label: القسم
+                  options:
+                    hero: الواجهة (العنوان والصورة)
+                    stats: شريط الأرقام
+                    featured: البرنامج المميّز
+                    more: المزيد من البرامج
+                    questions: الأسئلة
+                    quote: الاقتباس
+                    content: نص حر (محتوى الصفحة)
+                    cta: الدعوة الختامية
         home:
           type: tab
           title: محتوى الرئيسية
@@ -39,6 +63,7 @@ form:
             header.more.title: { type: text, label: عنوان قسم المزيد من البرامج }
             header.more.text: { type: textarea, label: نص قسم المزيد من البرامج, rows: 3 }
             header.more.button: { type: text, label: نص زر صفحة البرامج }
+            header.questions_title: { type: text, label: عنوان قسم الأسئلة }
             header.quote.text: { type: textarea, label: الاقتباس الكبير, rows: 2 }
             header.quote.accent: { type: text, label: الجزء الذهبي من الاقتباس }
             header.quote.caption: { type: text, label: مصدر الاقتباس }

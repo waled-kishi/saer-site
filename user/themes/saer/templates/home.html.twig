@@ -1,123 +1,21 @@
 {% extends 'partials/base.html.twig' %}
 {#
-  Home page. Everything is driven by the page header so it can be edited from the admin:
-    hero: {chip, title, title_accent, lead, float_quote, float_stat, float_stat_sub, float_pill, buttons: [{label, url, style}]}
-    portrait: image file name in this page's media
-    stats: [{n, label}]
-    programs_route: /programs
-    quote: {text, accent, caption, chips: []}
-    cta: {title, accent, text, buttons: [{label, url, style}]}
+  Home page built from sections. Their order comes from header.sections, a list the admin
+  can drag to reorder; leaving a section out hides it (its texts stay saved).
+  Each section is partials/home/<type>.html.twig and reads its texts from the page header:
+    hero, stats, featured, more, questions, quote, content, cta
 #}
 {%- set h = page.header -%}
-{%- set hero = h.hero ?? {} -%}
-{%- set portrait = h.portrait ? page.media[h.portrait] : (page.media.images|first) -%}
-{%- set progs_page = pages.find(h.programs_route ?: '/programs') -%}
-{%- set programs = progs_page ? progs_page.children.visible : [] -%}
-{%- set all_items = progs_page ? page.collection({'items': {'@page.descendants': progs_page.route}, 'order': {'by': 'default'}}) : [] -%}
-{%- set questions = all_items|filter(p => p.header.hook_question)|slice(0, 6) -%}
-
-{% macro buttons(list) %}
-  {% for b in list %}
-    <a href="{{ b.url }}" class="btn {{ b.style ?: 'gold' }}">{{ b.label }}</a>
-  {% endfor %}
-{% endmacro %}
-{% import _self as ui %}
-
+{%- set default_sections = ['hero', 'stats', 'featured', 'more', 'questions', 'quote', 'content', 'cta'] -%}
+{%- set order = [] -%}
+{%- for s in (h.sections ?: []) -%}
+  {%- set t = s.type ?? s -%}
+  {%- if t in default_sections -%}{%- set order = order|merge([t]) -%}{%- endif -%}
+{%- endfor -%}
+{%- set order = order ?: default_sections -%}
 {% block content %}
-<section class="wrap hero">
-  <div class="hero__text">
-    {% if hero.chip %}<span class="chip chip--gold" style="align-self:flex-start">{{ hero.chip }}</span>{% endif %}
-    <h1>{{ hero.title ?: site.title }}{% if hero.title_accent %}<br><span class="gold-text">{{ hero.title_accent }}</span>{% endif %}</h1>
-    {% if hero.lead %}<p class="lead">{{ hero.lead }}</p>{% endif %}
-    {% if hero.buttons %}<div class="actions">{{ ui.buttons(hero.buttons) }}</div>{% endif %}
-  </div>
-  {% if portrait %}
-  <div class="hero__media">
-    <div class="glass portrait">{{ portrait.cropZoom(760,760).html('', h.portrait_alt ?: 'محمد سائر الشبعان')|raw }}</div>
-    {% if hero.float_quote %}<div class="glass fl k float float--a">«{{ hero.float_quote }}»</div>{% endif %}
-    {% if hero.float_stat %}<div class="glass fl2 float float--b"><strong class="k gold-text" style="font-size:22px;display:block">{{ hero.float_stat }}</strong><span>{{ hero.float_stat_sub }}</span></div>{% endif %}
-    {% if hero.float_pill %}<div class="glass fl float float--c">{{ hero.float_pill }}</div>{% endif %}
-  </div>
-  {% endif %}
-</section>
-
-{% if h.stats %}
-<div class="wrap"><div class="glass stats">
-  {% for s in h.stats %}<div><strong>{{ s.n }}</strong><span>{{ s.label }}</span></div>{% endfor %}
-</div></div>
-{% endif %}
-
-{%- set featured = h.featured_program ? pages.find(h.featured_program) : null -%}
-{%- set fseries = featured ? featured.children.visible|filter(k => k.template == 'series') : [] -%}
-{% if featured %}
-<section class="sec">
-  <div class="wrap">
-    <div class="sec-head">
-      <p class="eye">{{ h.featured_eye ?: featured.title }}</p>
-      <h2 class="h2">{{ h.featured_title ?: (featured.header.series_heading ?: featured.title) }}</h2>
-      {% if h.featured_lead ?: featured.header.summary %}<p class="mut" style="font-size:19px">{{ h.featured_lead ?: featured.header.summary }}</p>{% endif %}
-    </div>
-    {% if fseries|length %}
-      <div class="grid3">{% for item in fseries %}{% include 'partials/card.html.twig' with {item: item} %}{% endfor %}</div>
-    {% else %}
-      <div class="grid3">{% include 'partials/card.html.twig' with {item: featured} %}</div>
-    {% endif %}
-  </div>
-</section>
-{% endif %}
-
-{% if progs_page %}
-<section class="sec sec--tight">
-  <div class="wrap">
-    <div class="glass banner" style="padding:clamp(28px,4vw,48px)">
-      <div style="flex:1 1 420px;display:flex;flex-direction:column;gap:12px">
-        <p class="eye">{{ h.more.eye ?: 'المزيد من البرامج' }}</p>
-        <h2 class="h2" style="font-size:clamp(24px,3vw,36px)">{{ h.more.title ?: 'برامج وسلاسل أخرى' }}</h2>
-        {% if h.more.text %}<p class="mut" style="font-size:18px;max-width:40em">{{ h.more.text }}</p>{% endif %}
-      </div>
-      <a href="{{ progs_page.url }}" class="btn gold">{{ h.more.button ?: 'تصفّح كل البرامج' }} ({{ programs|length }})</a>
-    </div>
-  </div>
-</section>
-{% endif %}
-
-{% if questions|length %}
-<section class="sec sec--tight">
-  <div class="wrap">
-    <div class="sec-head"><p class="eye">أسئلة تجيب عنها الحلقات</p><h2 class="h2">{{ h.questions_title ?: 'أسئلة نتهامس بها ولا نجرؤ على طرحها' }}</h2></div>
-    <div class="grid3">
-      {% for q in questions %}
-        <a href="{{ q.url }}" class="glass teaser"><span class="teaser__q">{{ q.header.hook_question }}</span><span class="teaser__go">{{ q.title }} ←</span></a>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
-{% if h.quote.text %}
-<section class="sec sec--tight">
-  <div class="wrap">
-    <figure class="glass quote">
-      <span aria-hidden="true" class="k gold-text" style="font-size:64px;line-height:1">«»</span>
-      <blockquote>{{ h.quote.text }}{% if h.quote.accent %} <span class="gold-text">{{ h.quote.accent }}</span>{% endif %}</blockquote>
-      {% if h.quote.caption %}<figcaption class="mut" style="font-size:17px">{{ h.quote.caption }}</figcaption>{% endif %}
-      {% if h.quote.chips %}<div class="chips" style="justify-content:center;max-width:900px">{% for c in h.quote.chips %}<span class="chip">{{ c }}</span>{% endfor %}</div>{% endif %}
-    </figure>
-  </div>
-</section>
-{% endif %}
-
-{% if page.content|trim %}
-<section class="sec sec--tight"><div class="wrap wrap--narrow"><div class="prose" style="max-width:none">{{ page.content|raw }}</div></div></section>
-{% endif %}
-
-{% if h.cta.title %}
-<section class="sec sec--tight">
-  <div class="wrap"><div class="glass cta">
-    <h2>{{ h.cta.title }}{% if h.cta.accent %} <span class="gold-text">{{ h.cta.accent }}</span>{% endif %}</h2>
-    {% if h.cta.text %}<p class="lead">{{ h.cta.text }}</p>{% endif %}
-    {% if h.cta.buttons %}<div class="actions" style="justify-content:center">{{ ui.buttons(h.cta.buttons) }}</div>{% endif %}
-  </div></div>
-</section>
-{% endif %}
+  {% for t in order %}
+    {%- set out -%}{% include 'partials/home/' ~ t ~ '.html.twig' %}{%- endset -%}
+    {% if out|trim %}<section class="home-block home-block--{{ t }}">{{ out|raw }}</section>{% endif %}
+  {% endfor %}
 {% endblock %}

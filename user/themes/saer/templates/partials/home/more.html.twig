@@ -1,0 +1,13 @@
+{%- set progs_page = pages.find(h.programs_route ?: '/programs') -%}
+{% if progs_page %}
+<div class="wrap">
+  <div class="glass banner" style="padding:clamp(28px,4vw,48px)">
+    <div style="flex:1 1 420px;display:flex;flex-direction:column;gap:12px">
+      <p class="eye">{{ h.more.eye ?: 'المزيد من البرامج' }}</p>
+      <h2 class="h2" style="font-size:clamp(24px,3vw,36px)">{{ h.more.title ?: 'برامج وسلاسل أخرى' }}</h2>
+      {% if h.more.text %}<p class="mut" style="font-size:18px;max-width:40em">{{ h.more.text }}</p>{% endif %}
+    </div>
+    <a href="{{ progs_page.url }}" class="btn gold">{{ h.more.button ?: 'تصفّح كل البرامج' }} ({{ progs_page.children.visible|length }})</a>
+  </div>
+</div>
+{% endif %}

@@ -1,0 +1,8 @@
+{% import 'partials/home/macros.html.twig' as ui %}
+{% if h.cta.title %}
+<div class="wrap"><div class="glass cta">
+  <h2>{{ h.cta.title }}{% if h.cta.accent %} <span class="gold-text">{{ h.cta.accent }}</span>{% endif %}</h2>
+  {% if h.cta.text %}<p class="lead">{{ h.cta.text }}</p>{% endif %}
+  {% if h.cta.buttons %}<div class="actions" style="justify-content:center">{{ ui.buttons(h.cta.buttons) }}</div>{% endif %}
+</div></div>
+{% endif %}

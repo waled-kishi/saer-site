@@ -1,0 +1,19 @@
+{% import 'partials/home/macros.html.twig' as ui %}
+{%- set hero = h.hero ?? {} -%}
+{%- set portrait = h.portrait ? page.media[h.portrait] : (page.media.images|first) -%}
+<div class="wrap hero">
+  <div class="hero__text">
+    {% if hero.chip %}<span class="chip chip--gold" style="align-self:flex-start">{{ hero.chip }}</span>{% endif %}
+    <h1>{{ hero.title ?: site.title }}{% if hero.title_accent %}<br><span class="gold-text">{{ hero.title_accent }}</span>{% endif %}</h1>
+    {% if hero.lead %}<p class="lead">{{ hero.lead }}</p>{% endif %}
+    {% if hero.buttons %}<div class="actions">{{ ui.buttons(hero.buttons) }}</div>{% endif %}
+  </div>
+  {% if portrait %}
+  <div class="hero__media">
+    <div class="glass portrait">{{ portrait.cropZoom(760,760).html('', h.portrait_alt ?: 'محمد سائر الشبعان')|raw }}</div>
+    {% if hero.float_quote %}<div class="glass fl k float float--a">«{{ hero.float_quote }}»</div>{% endif %}
+    {% if hero.float_stat %}<div class="glass fl2 float float--b"><strong class="k gold-text" style="font-size:22px;display:block">{{ hero.float_stat }}</strong><span>{{ hero.float_stat_sub }}</span></div>{% endif %}
+    {% if hero.float_pill %}<div class="glass fl float float--c">{{ hero.float_pill }}</div>{% endif %}
+  </div>
+  {% endif %}
+</div>

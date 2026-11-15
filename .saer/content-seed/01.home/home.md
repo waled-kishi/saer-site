@@ -48,4 +48,13 @@ more:
   title: برامج وسلاسل أخرى
   text: 'للشيخ محمد سائر الشبعان برامج دعوية وتربوية متنوعة: برامج رمضانية، ووقفات مع أسرار القرآن، وحلقات قصيرة في الوعي والأسرة والنفس. كلها مجموعة هنا لتشاهدها بالترتيب.'
   button: تصفّح كل البرامج
+sections:
+- type: hero
+- type: stats
+- type: featured
+- type: more
+- type: questions
+- type: quote
+- type: content
+- type: cta
 ---

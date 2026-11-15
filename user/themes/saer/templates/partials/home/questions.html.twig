@@ -1,0 +1,13 @@
+{%- set progs_page = pages.find(h.programs_route ?: '/programs') -%}
+{%- set all_items = progs_page ? page.collection({'items': {'@page.descendants': progs_page.route}, 'order': {'by': 'default'}}) : [] -%}
+{%- set questions = all_items|filter(p => p.header.hook_question)|slice(0, 6) -%}
+{% if questions|length %}
+<div class="wrap">
+  <div class="sec-head"><p class="eye">{{ h.questions_eye ?: 'أسئلة تجيب عنها الحلقات' }}</p><h2 class="h2">{{ h.questions_title ?: 'أسئلة نتهامس بها ولا نجرؤ على طرحها' }}</h2></div>
+  <div class="grid3">
+    {% for q in questions %}
+      <a href="{{ q.url }}" class="glass teaser"><span class="teaser__q">{{ q.header.hook_question }}</span><span class="teaser__go">{{ q.title }} ←</span></a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}

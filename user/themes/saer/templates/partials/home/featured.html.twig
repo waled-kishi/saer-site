@@ -1,0 +1,15 @@
+{%- set featured = h.featured_program ? pages.find(h.featured_program) : null -%}
+{%- set fseries = featured ? featured.children.visible|filter(k => k.template == 'series') : [] -%}
+{% if featured %}
+<div class="wrap">
+  <div class="sec-head">
+    <p class="eye">{{ h.featured_eye ?: featured.title }}</p>
+    <h2 class="h2">{{ h.featured_title ?: (featured.header.series_heading ?: featured.title) }}</h2>
+    {% if h.featured_lead ?: featured.header.summary %}<p class="mut" style="font-size:19px">{{ h.featured_lead ?: featured.header.summary }}</p>{% endif %}
+  </div>
+  <div class="grid3">
+    {% if fseries|length %}{% for item in fseries %}{% include 'partials/card.html.twig' with {item: item} %}{% endfor %}
+    {% else %}{% include 'partials/card.html.twig' with {item: featured} %}{% endif %}
+  </div>
+</div>
+{% endif %}

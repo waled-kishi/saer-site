@@ -1,0 +1,3 @@
+{% macro buttons(list) %}
+  {% for b in list %}<a href="{{ b.url }}" class="btn {{ b.style ?: 'gold' }}">{{ b.label }}</a>{% endfor %}
+{% endmacro %}

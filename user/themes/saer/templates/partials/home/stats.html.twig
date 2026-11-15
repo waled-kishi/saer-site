@@ -1,0 +1,5 @@
+{% if h.stats %}
+<div class="wrap"><div class="glass stats">
+  {% for s in h.stats %}<div><strong>{{ s.n }}</strong><span>{{ s.label }}</span></div>{% endfor %}
+</div></div>
+{% endif %}

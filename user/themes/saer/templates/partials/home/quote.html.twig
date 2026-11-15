@@ -1,0 +1,10 @@
+{% if h.quote.text %}
+<div class="wrap">
+  <figure class="glass quote">
+    <span aria-hidden="true" class="k gold-text" style="font-size:64px;line-height:1">«»</span>
+    <blockquote>{{ h.quote.text }}{% if h.quote.accent %} <span class="gold-text">{{ h.quote.accent }}</span>{% endif %}</blockquote>
+    {% if h.quote.caption %}<figcaption class="mut" style="font-size:17px">{{ h.quote.caption }}</figcaption>{% endif %}
+    {% if h.quote.chips %}<div class="chips" style="justify-content:center;max-width:900px">{% for c in h.quote.chips %}<span class="chip">{{ c }}</span>{% endfor %}</div>{% endif %}
+  </figure>
+</div>
+{% endif %}

@@ -76,6 +76,11 @@ a.gold:hover,button.gold:hover{color:var(--on-gold);filter:brightness(1.05)}
 .stack{display:flex;flex-direction:column;gap:14px}
 @media (max-width:600px){.sec{padding:64px 0}}
 
+/* Home sections (order set in the admin) */
+.home-block + .home-block{margin-top:clamp(56px,8vw,96px)}
+.home-block:last-child{margin-bottom:clamp(64px,8vw,96px)}
+.home-block--hero .hero{padding-bottom:0}
+
 /* Hero */
 .hero{padding-top:72px;padding-bottom:56px;display:flex;flex-wrap:wrap;align-items:center;gap:56px}
 .hero__text{flex:1 1 500px;display:flex;flex-direction:column;gap:26px}
