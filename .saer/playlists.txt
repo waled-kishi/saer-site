@@ -1,0 +1,17 @@
+# One YouTube playlist id per line. The "youtube-playlists" workflow saves each
+# playlist's title and videos to .saer/youtube/<id>.json.
+PLgIzcOU7lAOesdBOrDYrjkD1PbVjhkMN8
+PLgIzcOU7lAOf80L107o4vmDdVBPj_ip2M
+PLgIzcOU7lAOf_-G_ES7YSCAAXnOqvXgjA
+PLgIzcOU7lAOdQDyJkt4HiYVOiK9pKw0mc
+PLgIzcOU7lAOdpKMGMORo0pA8A-S9sFGIG
+PLgIzcOU7lAOdf4YXEFL8mvILjSSLj0GZ2
+PLgIzcOU7lAOeVY2aj-E7leAds2a1C3RZ3
+PLgIzcOU7lAOfdOKP_bD0tAa9FtnDOHN36
+PLgIzcOU7lAOeF7WkTx6ujfBRLsYznSx9A
+PLgIzcOU7lAOeufnC8kvG0sh_5BMBan-QC
+PLgIzcOU7lAOdGHdDqQHq-RAGBhYgcuZyR
+PLgIzcOU7lAOde6NNuWByNcdRvPVd__NYr
+PLgIzcOU7lAOd3Txvuci_lYHygyXHn1eVC
+PLgIzcOU7lAOezL7BQp8S9RovIrBcR-VLj
+PLgIzcOU7lAOdnerNZUzjo-A9jWQic0_0I
