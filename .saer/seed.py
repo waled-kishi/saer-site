@@ -19,16 +19,36 @@ except ImportError:
     sys.exit("PyYAML is required: pip install pyyaml")
 
 
-def call(method, path, body=None):
+def call(method, path, body=None, tries=4):
+    import time
+    for i in range(tries):
+        st, res = _call(method, path, body)
+        if st != -1:
+            return st, res
+        time.sleep(5 * (i + 1))
+    return st, res
+
+
+def _call(method, path, body=None):
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(API + path, data=data, method=method,
                                  headers={"X-API-Key": KEY, "Content-Type": "application/json",
                                           "Accept": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=60) as r:
-            return r.status, json.loads(r.read() or b"{}")
+            raw = r.read()
+            try:
+                return r.status, json.loads(raw or b"{}")
+            except ValueError:
+                return -1, {"error": "non-JSON response", "body": raw[:200].decode("utf-8", "replace")}
     except urllib.error.HTTPError as e:
-        return e.code, json.loads(e.read() or b"{}")
+        raw = e.read()
+        try:
+            return e.code, json.loads(raw or b"{}")
+        except ValueError:
+            return -1 if e.code >= 500 else e.code, {"error": "non-JSON response", "status": e.code}
+    except (urllib.error.URLError, TimeoutError) as e:
+        return -1, {"error": str(e)}
 
 
 def parse(md_path):
