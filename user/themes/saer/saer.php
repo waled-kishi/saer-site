@@ -23,6 +23,7 @@ class Saer extends Theme
         $twig->addFilter(new TwigFilter('yt_id', [$this, 'youtubeId']));
         $twig->addFilter(new TwigFilter('yt_list', [$this, 'youtubeList']));
         $twig->addFilter(new TwigFilter('ar_digits', [$this, 'arabicDigits']));
+        $twig->addFilter(new TwigFilter('asset_v', [$this, 'assetVersion']));
     }
 
     /** Extract a YouTube video id from a URL or return the input if it already is an id. */
@@ -46,6 +47,14 @@ class Saer extends Theme
             return $m[1];
         }
         return preg_match('~^[A-Za-z0-9_-]{10,}$~', $value) ? $value : '';
+    }
+
+    /** Append ?v=<file modification time> to a theme asset so browsers fetch new versions after a deploy. */
+    public function assetVersion(string $stream): string
+    {
+        $locator = $this->grav['locator'];
+        $file = $locator->findResource($stream, true);
+        return $stream . ($file && is_file($file) ? '?v=' . filemtime($file) : '');
     }
 
     /** Pad a number to two digits (01, 02 …) for episode numbering. */

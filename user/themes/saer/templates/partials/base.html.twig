@@ -19,19 +19,24 @@
   {% if og_img %}<meta property="og:image" content="{{ og_img.cropZoom(1200,630).url(true) }}">{% endif %}
   <meta name="theme-color" content="#150826">
   {% block stylesheets %}
-    {% do assets.addCss('theme://css/fonts.css', 100) %}
-    {% do assets.addCss('theme://css/theme.css', 99) %}
+    {% do assets.addCss('theme://css/fonts.css'|asset_v, 100) %}
+    {% do assets.addCss('theme://css/theme.css'|asset_v, 99) %}
   {% endblock %}
   {{ assets.css()|raw }}
   {% block head_extra %}{% endblock %}
 </head>
-<body class="tpl-{{ page.template }}">
+<body class="tpl-{{ page.template }}" id="top">
   <a class="skip" href="#main">تخطَّ إلى المحتوى</a>
   {% include 'partials/header.html.twig' %}
   <main id="main">
     {% block content %}{% endblock %}
   </main>
   {% include 'partials/footer.html.twig' %}
+  <a href="#top" class="to-top" id="to-top" aria-label="العودة إلى أعلى الصفحة" hidden>
+    <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+  </a>
+  {% do assets.addJs('theme://js/site.js'|asset_v, {group: 'bottom', loading: 'defer'}) %}
   {{ assets.js()|raw }}
+  {{ assets.js('bottom')|raw }}
 </body>
 </html>

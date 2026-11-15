@@ -77,8 +77,9 @@ a.gold:hover,button.gold:hover{color:var(--on-gold);filter:brightness(1.05)}
 @media (max-width:600px){.sec{padding:64px 0}}
 
 /* Home sections (order set in the admin) */
-.home-block + .home-block{margin-top:clamp(56px,8vw,96px)}
-.home-block:last-child{margin-bottom:clamp(64px,8vw,96px)}
+.home-block + .home-block{margin-top:clamp(80px,10vw,136px)}
+.home-block:last-child{margin-bottom:clamp(80px,10vw,128px)}
+.home-block--stats{margin-top:clamp(40px,5vw,64px)!important}
 .home-block--hero .hero{padding-bottom:0}
 
 /* Hero */
@@ -169,11 +170,19 @@ a.teaser:hover{color:var(--ink-strong);border-color:rgba(235,211,160,.5)}
 .cta{padding:clamp(36px,6vw,80px) 24px;display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center}
 .cta h2{font-weight:800;font-size:clamp(28px,4.4vw,54px)}
 
+/* Back-to-top button (shown after scrolling down) */
+.to-top{position:fixed;inset-inline-end:clamp(14px,3vw,28px);bottom:clamp(14px,3vw,28px);z-index:50;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--gold),var(--gold-deep));color:var(--on-gold);box-shadow:0 10px 30px rgba(8,2,20,.5);opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s;pointer-events:none}
+.to-top.is-on{opacity:1;transform:none;pointer-events:auto}
+.to-top:hover{color:var(--on-gold);filter:brightness(1.06)}
+@media (prefers-reduced-motion:reduce){.to-top{transition:none}}
+@media print{.to-top{display:none}}
+
 /* Footer */
 .site-foot{padding-top:24px;padding-bottom:28px}
 .foot{padding:22px 30px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px}
 .foot nav{display:flex;flex-wrap:wrap;gap:22px;font-size:16px}
 .foot nav a{min-height:44px;display:flex;align-items:center}
+@media (max-width:600px){.foot{flex-direction:column;align-items:flex-start;gap:8px;padding:22px 24px}.foot nav{gap:0 18px}}
 
 /* Error page */
 .error-page{padding:120px 0;text-align:center;display:flex;flex-direction:column;gap:20px;align-items:center}
