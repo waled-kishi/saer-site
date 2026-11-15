@@ -8,15 +8,16 @@
     {%- set subs = eps|filter(k => k.template == 'series') -%}
     <span class="chip">{% if h.step_no %}الخطوة {{ h.step_no }} · {% endif %}{% if subs|length %}{{ subs|length }} سلاسل{% else %}{{ eps|length }} {{ eps|length > 10 or eps|length < 3 ? 'حلقة' : 'حلقات' }}{% endif %}</span>
   </div>
-  <h3><a href="{{ item.url }}" style="color:inherit">{{ item.title }}</a></h3>
+  {%- set target = (subs|length == 0 and first) ? first.url : item.url -%}
+  <h3><a href="{{ target }}" style="color:inherit">{{ item.title }}</a></h3>
   {% if h.summary %}<p style="font-size:17px">{{ h.summary }}</p>{% endif %}
   {% if h.chips %}<div class="chips">{% for c in h.chips %}<span class="chip">{{ c }}</span>{% endfor %}</div>{% endif %}
   <div class="card__actions">
-    <a href="{{ item.url }}" class="btn gold">اقرأ</a>
-    {% if h.youtube_playlist %}
-      <a href="https://www.youtube.com/playlist?list={{ h.youtube_playlist|yt_list }}" class="btn ghost" rel="noopener">شاهد</a>
-    {% elseif first %}
-      <a href="{{ first.url }}" class="btn ghost">شاهد</a>
+    {% if subs|length %}
+      <a href="{{ item.url }}" class="btn gold">تصفّح البرنامج</a>
+    {% else %}
+      {% if first %}<a href="{{ first.url }}" class="btn gold">شاهد</a>{% endif %}
+      <a href="{{ item.url }}" class="btn ghost">كل الحلقات</a>
     {% endif %}
   </div>
 </article>

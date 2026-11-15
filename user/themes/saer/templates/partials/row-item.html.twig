@@ -9,6 +9,6 @@
   {% if h.duration %}<span class="chip">{{ h.duration }}</span>{% endif %}
   <div class="row__actions">
     {% if item.content|trim %}<a href="{{ item.url }}" class="btn gold btn--sm">اقرأ</a>{% endif %}
-    {% if h.youtube %}<a href="{{ item.url }}#video" class="btn ghost btn--sm">شاهد</a>{% endif %}
+    {% if h.youtube %}<a href="{{ item.url }}#video" class="btn {{ item.content|trim ? 'ghost' : 'gold' }} btn--sm">شاهد</a>{% endif %}
   </div>
 </li>

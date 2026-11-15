@@ -30,6 +30,7 @@
     {% if h.youtube_playlist %}<a href="https://www.youtube.com/playlist?list={{ h.youtube_playlist|yt_list }}" class="btn ghost" rel="noopener">قائمة التشغيل على يوتيوب</a>{% endif %}
   </div>
   {% if page.content|trim %}<div class="prose" style="margin-top:12px">{{ page.content|raw }}</div>{% endif %}
+  {% if h.trailer %}<div style="max-width:760px;width:100%;margin-top:12px">{% include 'partials/youtube.html.twig' with {yt: h.trailer, title: 'تشويقة ' ~ page.title} %}</div>{% endif %}
 </section>
 
 {% if sub_series|length %}

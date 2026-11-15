@@ -35,11 +35,7 @@
 
 <section class="wrap layout">
   <article class="prose">
-    {% if page.content|trim %}
-      {{ page.content|raw }}
-    {% else %}
-      <p class="mut">النص المكتوب لهذه الحلقة غير متوفر بعد؛ يمكنك مشاهدتها في الأعلى.</p>
-    {% endif %}
+    {% if page.content|trim %}{{ page.content|raw }}{% elseif h.summary %}<p>{{ h.summary }}</p>{% endif %}
     <nav class="pager" aria-label="التنقل بين الحلقات">
       {% if series %}<a href="{{ series.url }}" class="btn ghost" style="min-height:50px">كل حلقات السلسلة</a>{% endif %}
       {% if prev %}<a href="{{ prev.url }}" class="btn ghost" style="min-height:50px">→ السابق: {{ prev.title }}</a>{% endif %}
