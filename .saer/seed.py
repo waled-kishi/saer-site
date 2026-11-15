@@ -77,9 +77,14 @@ def walk(folder, parent_route=""):
 
 def main():
     existing = {}
-    st, res = call("GET", "/pages?limit=500")
-    for p in res.get("data", []):
-        existing[p["raw_route"]] = p
+    page = 1
+    while True:
+        st, res = call("GET", f"/pages?per_page=100&page={page}")
+        for p in res.get("data", []):
+            existing[p["raw_route"]] = p
+        if page >= res.get("meta", {}).get("pagination", {}).get("total_pages", 1):
+            break
+        page += 1
     for route, order, template, header, content in walk(ROOT):
         title = header.get("title", route.rsplit("/", 1)[-1])
         api_route = "/home" if route == "/home" else route
