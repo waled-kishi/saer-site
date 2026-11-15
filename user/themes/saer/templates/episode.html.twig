@@ -21,10 +21,11 @@
 
 {% block content %}
 <section class="wrap wrap--narrow page-head" style="padding-top:56px;padding-bottom:56px;gap:20px">
-  {% include 'partials/breadcrumbs.html.twig' with {label: 'الحلقة ' ~ (h.number ?: idx)} %}
+  {% set ep_label = h.number ? 'الحلقة ' ~ h.number : (h.label ?: 'الحلقة ' ~ idx) %}
+  {% include 'partials/breadcrumbs.html.twig' with {label: ep_label} %}
   <span class="chip chip--gold" style="align-self:flex-start;margin-top:10px">
     {%- if series.header.step_label %}{{ series.header.step_label }} · {% endif -%}
-    الحلقة {{ h.number ?: idx }}{% if sibs|length > 1 %} من {{ sibs|length }}{% endif %}
+    {{ ep_label }}{% if h.number and sibs|length > 1 %} من {{ sibs|length }}{% endif %}
     {%- if h.duration %} · {{ h.duration }}{% endif -%}
   </span>
   <h1 style="font-size:clamp(36px,5.4vw,66px)">{{ page.title }}</h1>
@@ -52,7 +53,7 @@
       <h2 class="k">حلقات السلسلة</h2>
       <ol class="toc">
         {% for s in sibs %}
-          <li><a href="{{ s.url }}"{% if s.route == page.route %} aria-current="page"{% endif %}><span>{{ s.header.number ?: loop.index }}</span>{{ s.title }}</a></li>
+          <li><a href="{{ s.url }}"{% if s.route == page.route %} aria-current="page"{% endif %}><span>{{ s.header.number ?: '+' }}</span>{{ s.title }}</a></li>
         {% endfor %}
       </ol>
     </div>

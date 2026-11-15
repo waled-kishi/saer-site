@@ -1,7 +1,7 @@
 {# One row in a numbered list (episodes, lessons…). Expects: item, n #}
 {%- set h = item.header -%}
 <li class="glass row">
-  <span class="row__num">{{ n|ar_digits }}</span>
+  <span class="row__num">{% if h.label and not h.number %}<span style="font-size:18px">{{ h.label }}</span>{% else %}{{ n|ar_digits }}{% endif %}</span>
   <div class="row__body">
     <h3><a href="{{ item.url }}">{{ item.title }}</a></h3>
     {% if h.summary %}<p class="mut" style="font-size:16px">{{ h.summary }}</p>{% endif %}
