@@ -1,0 +1,4 @@
+# Third-party Grav plugins installed by tools/sync.sh (GPM inside Admin2 fails on this host).
+# Format: <folder-name> <version-tag> <zip-url>
+# The zip is extracted and its single top-level folder becomes user/plugins/<folder-name>.
+# Change the version tag to upgrade; sync.sh reinstalls when the tag differs from the installed one.
