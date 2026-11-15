@@ -37,6 +37,18 @@ form:
               type: text
               label: رابط قائمة تشغيل يوتيوب
               ordering@: header.chips
+            header.youtube_sync:
+              type: toggle
+              label: مزامنة مع يوتيوب
+              help: عند التفعيل تُضاف كل حلقة جديدة في قائمة التشغيل إلى البرنامج تلقائياً خلال ساعة. لا تُعدَّل الحلقات الموجودة.
+              highlight: 1
+              default: 0
+              options:
+                1: مفعّلة
+                0: متوقفة
+              validate:
+                type: bool
+              ordering@: header.youtube_playlist
             header.book:
               type: pages
               label: الكتيّب المرتبط

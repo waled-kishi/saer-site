@@ -1,0 +1,29 @@
+name: youtube-sync
+# Adds new YouTube videos to programmes that have "مزامنة مع يوتيوب" switched on in the admin.
+# Needs the repository secret GRAV_API_KEY (an API key of the claude-ai user).
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only show what would be added'
+        type: boolean
+        default: false
+concurrency: youtube-sync
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yt-dlp
+        run: pip install -U yt-dlp
+      - name: Sync
+        env:
+          GRAV_API_URL: ${{ vars.GRAV_API_URL || 'https://saer1.rifd-dt.com/api/v1' }}
+          GRAV_API_KEY: ${{ secrets.GRAV_API_KEY }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+        run: |
+          if [ -z "$GRAV_API_KEY" ]; then echo "GRAV_API_KEY secret is not set"; exit 1; fi
+          python3 .saer/youtube-sync.py
