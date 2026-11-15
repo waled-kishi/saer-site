@@ -1,0 +1,4 @@
+# Settings for the test domain saer1.rifd-dt.com, deployed from the repo.
+# Grav merges this over user/config/system.yaml.
+pages:
+  theme: saer

@@ -10,6 +10,8 @@
 !/user/data/.gitkeep
 /user/env/*
 !/user/env/.gitkeep
+# Per-domain settings that belong to the code (theme choice), tracked on purpose:
+!/user/env/saer1.rifd-dt.com/
 /cache/*
 /logs/*
 /tmp/*
