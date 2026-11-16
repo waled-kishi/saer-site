@@ -1,11 +1,12 @@
 {% extends 'partials/base.html.twig' %}
 {#
-  A single book. Cover = first image in page media; download = first PDF.
+  A single book. Cover and downloads are chosen explicitly in the admin.
   Header: subtitle, author, status (available|soon|print), year, pages, publisher,
-          read_url, toc[], related (route of a programme/series)
+          cover (media), files [{label, file (media)}], read_url, toc[], related (route or '')
 #}
 {%- set h = page.header -%}
-{%- set pdf = page.media.files|filter(f => f.extension == 'pdf')|first -%}
+{%- set files = book_files(page) -%}
+{%- set cover = book_cover(page) -%}
 {%- set related = h.related ? pages.find(h.related) : null -%}
 {%- set author = h.author ?: 'محمد سائر الشبعان' -%}
 {%- set others = page.parent ? page.parent.children.visible|filter(b => b.route != page.route)|slice(0, 3) : [] -%}
@@ -17,7 +18,7 @@
  {% if h.year %}"datePublished":"{{ h.year|e('js') }}",{% endif %}
  {% if h.pages %}"numberOfPages":{{ h.pages|number_format(0, '', '') }},{% endif %}
  {% if h.publisher %}"publisher":{"@type":"Organization","name":"{{ h.publisher|e('js') }}"},{% endif %}
- {% if page.media.images|first %}"image":"{{ (page.media.images|first).url(true)|e('js') }}",{% endif %}
+ {% if cover %}"image":"{{ (cover.medium ? cover.medium.url(true) : cover.url)|e('js') }}",{% endif %}
  "description":"{{ (h.summary ?: page.summary(160)|striptags)|e('js') }}","url":"{{ page.url(true)|e('js') }}"}
 </script>
 {% endblock %}
@@ -41,7 +42,6 @@
     {% if h.year %}{% set facts = facts|merge(['سنة النشر: ' ~ h.year]) %}{% endif %}
     {% if h.pages %}{% set facts = facts|merge([h.pages ~ ' صفحة']) %}{% endif %}
     {% if h.publisher %}{% set facts = facts|merge(['الناشر: ' ~ h.publisher]) %}{% endif %}
-    {% if pdf %}{% set facts = facts|merge(['PDF · ' ~ (pdf.size / 1048576)|round(1) ~ ' م.ب']) %}{% endif %}
     {% if facts|length %}<div class="chips">{% for f in facts %}<span class="chip">{{ f }}</span>{% endfor %}</div>{% endif %}
 
     <div class="actions" style="margin-top:8px">
@@ -49,14 +49,28 @@
         <span class="chip chip--gold">قريباً بإذن الله</span>
       {% elseif h.status == 'print' %}
         <span class="chip chip--gold">متوفر ورقياً</span>
-      {% elseif pdf %}
-        <a href="{{ pdf.url }}" class="btn gold" download>
+      {% elseif files|length == 1 %}
+        <a href="{{ files[0].url }}" class="btn gold" download>
           <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
-          تحميل الكتاب PDF</a>
+          {{ files[0].label }}{% if files[0].ext %} · {{ files[0].ext|upper }}{% endif %}{% if files[0].size %} · {{ (files[0].size / 1048576)|round(1) }} م.ب{% endif %}</a>
       {% endif %}
       {% if h.read_url %}<a href="{{ h.read_url }}" class="btn ghost" rel="noopener">اقرأ على الموقع</a>{% endif %}
       {% if related %}<a href="{{ related.url }}" class="btn ghost">شاهد: {{ related.title }}</a>{% endif %}
     </div>
+    {% if files|length > 1 and h.status not in ['soon', 'print'] %}
+    <div class="glass box dl-list" id="downloads">
+      <h2 class="k">ملفات الكتاب</h2>
+      <ul>
+        {% for f in files %}
+        <li>
+          <span class="dl-list__name">{{ f.label }}</span>
+          <span class="mut dl-list__meta">{{ f.ext|upper }}{% if f.size %} · {{ (f.size / 1048576)|round(1) }} م.ب{% endif %}</span>
+          <a href="{{ f.url }}" class="btn gold btn--sm" download>تحميل</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
   </div>
 </section>
 

@@ -168,14 +168,19 @@ a.teaser:hover{color:var(--ink-strong);border-color:rgba(235,211,160,.5)}
 .book-cover{display:block;aspect-ratio:1/1.414;border-radius:14px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.35);transition:transform .25s}
 a.book-cover:hover{transform:translateY(-4px)}
 .book-cover__img{display:block;width:100%;height:100%;object-fit:cover}
-.book-cover__ph{height:100%;display:flex;flex-direction:column;justify-content:space-between;align-items:center;text-align:center;gap:12px;padding:12% 10%;background:linear-gradient(160deg,#3A1D63,#1B0C30);border:1px solid rgba(235,211,160,.5);border-radius:14px}
-.book-cover__by{font-size:14px;color:var(--muted)}
+.book-cover__ph{height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;padding:12% 10%;background:linear-gradient(160deg,#3A1D63,#1B0C30);border:1px solid rgba(235,211,160,.5);border-radius:14px}
 .book-cover__t{font-family:var(--font-head);font-weight:800;font-size:clamp(20px,2.2vw,28px);line-height:1.6;color:var(--gold)}
-.book-cover__mark{font-family:var(--font-head);font-size:14px;color:var(--gold-line);border-top:1px solid rgba(235,211,160,.4);padding-top:8px;min-width:40%}
+.book-cover__mark{margin-top:18px;font-family:var(--font-head);font-size:14px;color:var(--gold-line);border-top:1px solid rgba(235,211,160,.4);padding-top:8px;min-width:40%}
 .book-hero{padding-top:32px;padding-bottom:72px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:56px}
 .book-hero__cover{flex:0 1 340px;margin:0 auto}
 .book-hero__text{flex:1 1 460px;display:flex;flex-direction:column;gap:20px}
 .book-hero h1{font-weight:800;font-size:clamp(32px,4.6vw,58px);line-height:1.45}
+.dl-list{padding:22px;margin-top:8px}
+.dl-list ul{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+.dl-list li{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--glass-line)}
+.dl-list li:first-child{border-top:0}
+.dl-list__name{font-weight:700;color:var(--ink-strong);flex:1 1 160px}
+.dl-list__meta{font-size:14px}
 .toc--plain li{min-height:42px;display:flex;align-items:center;gap:12px;padding:0 14px}
 .toc--plain li span{color:var(--gold);font-weight:700}
 

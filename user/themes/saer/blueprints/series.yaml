@@ -50,8 +50,9 @@ form:
                 type: bool
               ordering@: header.youtube_playlist
             header.book:
-              type: pages
+              type: select
               label: الكتيّب المرتبط
-              show_root: false
-              show_all: true
+              help: اختر "بدون ربط" لإلغاء الربط.
+              default: ''
+              data-options@: '\Grav\Theme\Saer::bookOptions'
               ordering@: header.youtube_playlist

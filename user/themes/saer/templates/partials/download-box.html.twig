@@ -1,12 +1,14 @@
 {# Download box for the booklet linked to a series. Expects: book (page) #}
-{%- set pdf = book ? (book.media.files|filter(f => f.extension == 'pdf')|first) : null -%}
-{% if pdf %}
+{%- set bfiles = book ? book_files(book) : [] -%}
+{% if bfiles|length and book.header.status not in ['soon', 'print'] %}
 <div class="glass box">
   <h2 class="k">{{ heading ?? 'السلسلة في كتيّب واحد' }}</h2>
-  <p style="font-size:16px">{{ book.header.summary ?: book.title }}</p>
-  <a href="{{ pdf.url }}" class="btn gold btn--sm" download>
+  <p style="font-size:16px"><a href="{{ book.url }}" style="color:inherit">{{ book.header.summary ?: book.title }}</a></p>
+  {% for f in bfiles %}
+  <a href="{{ f.url }}" class="btn gold btn--sm" download>
     <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
-    تحميل PDF
+    {{ f.label }}
   </a>
+  {% endfor %}
 </div>
 {% endif %}

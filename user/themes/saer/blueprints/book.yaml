@@ -24,9 +24,29 @@ form:
           fields:
             book_help:
               type: display
-              label: الغلاف وملف PDF
+              label: طريقة الاستخدام
               markdown: true
-              content: "ارفع **صورة الغلاف** و**ملف PDF** من قسم الوسائط في تبويب المحتوى. أول صورة تصير الغلاف، وأول ملف PDF يصير زر التحميل."
+              content: "1. ارفع الغلاف وملفات الكتاب من **وسائط الصفحة** (تبويب المحتوى).\n2. اختر الغلاف من حقل **صورة الغلاف**.\n3. أضف كل ملف بسطر تحت **ملفات التحميل**، ولكل ملف اسم مثل \"الجزء الأول\". الملفات المرفوعة وغير المختارة هنا ما بتظهر للزوار."
+            header.cover:
+              type: media
+              label: صورة الغلاف
+              sources: [page]
+              accept: ['image/*']
+            header.files:
+              type: list
+              label: ملفات التحميل
+              btnLabel: إضافة ملف
+              collapsed: false
+              fields:
+                .label:
+                  type: text
+                  label: اسم الزر
+                  placeholder: "مثلاً: الجزء الأول، أو اتركه فارغاً لـ \"تحميل الكتاب\""
+                .file:
+                  type: media
+                  label: الملف
+                  sources: [page]
+                  accept: ['application/pdf', 'application/epub+zip', 'application/zip']
             header.status:
               type: select
               label: حالة الكتاب
@@ -55,7 +75,8 @@ form:
               label: فهرس الفصول (اختياري)
               value_only: true
             header.related:
-              type: pages
-              label: برنامج أو سلسلة مرتبطة (اختياري)
-              show_root: false
-              show_all: true
+              type: select
+              label: برنامج أو سلسلة مرتبطة
+              help: اختر "بدون ربط" لإلغاء الربط.
+              default: ''
+              data-options@: '\Grav\Theme\Saer::seriesOptions'

@@ -22,8 +22,9 @@
   <div class="byline"><span>تقديم: أ. سائر</span></div>
   {% if h.summary %}<p class="lead">{{ h.summary }}</p>{% endif %}
   <div class="actions" style="margin-top:8px">
-    {% set pdf = book ? (book.media.files|filter(f => f.extension == 'pdf')|first) : null %}
-    {% if pdf %}<a href="{{ pdf.url }}" class="btn gold" download>تحميل الكتيّب PDF</a>{% endif %}
+    {% set bfiles = book ? book_files(book) : [] %}
+    {% if bfiles|length == 1 %}<a href="{{ bfiles[0].url }}" class="btn gold" download>تحميل الكتيّب</a>
+    {% elseif bfiles|length > 1 %}<a href="{{ book.url }}#downloads" class="btn gold">ملفات الكتيّب</a>{% endif %}
     {% if first_ep %}<a href="{{ first_ep.url }}" class="btn ghost">
       <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       ابدأ من الحلقة الأولى</a>{% endif %}

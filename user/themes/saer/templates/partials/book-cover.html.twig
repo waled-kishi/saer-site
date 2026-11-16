@@ -1,11 +1,12 @@
-{# Book cover: first image in the page media, or a typographic placeholder. Expects: item, w (px) #}
-{%- set img = item.media.images|first -%}
+{# Book cover: the image chosen in header.cover, or a typographic placeholder. Expects: item, w (px) #}
+{%- set c = book_cover(item) -%}
 {%- set w = w ?? 480 -%}
-{% if img %}
-  {{ img.cropZoom(w, (w * 1.414)|round).html('', 'غلاف كتاب ' ~ item.title, 'book-cover__img')|raw }}
+{% if c and c.medium %}
+  {{ c.medium.cropZoom(w, (w * 1.414)|round).html('', 'غلاف كتاب ' ~ item.title, 'book-cover__img')|raw }}
+{% elseif c %}
+  <img src="{{ c.url }}" alt="غلاف كتاب {{ item.title }}" class="book-cover__img" loading="lazy">
 {% else %}
   <div class="book-cover__ph" aria-hidden="true">
-    <span class="book-cover__by">{{ item.header.author ?: 'محمد سائر الشبعان' }}</span>
     <span class="book-cover__t">{{ item.title }}</span>
     <span class="book-cover__mark">سائر</span>
   </div>
