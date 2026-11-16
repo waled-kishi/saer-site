@@ -1,0 +1,5 @@
+title: قائمة دورات
+'@extends':
+  type: content-base
+  context: theme://blueprints
+child_type: course

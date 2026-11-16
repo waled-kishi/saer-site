@@ -2,11 +2,12 @@
 {%- set h = item.header -%}
 {%- set eps = item.children.visible -%}
 {%- set first = eps|first -%}
+{%- set w = item_words(item, eps|length) -%}
 <article class="glass card">
   <div class="card__top">
     {% if h.step_label %}<span class="card__step">{{ h.step_label }}</span>{% endif %}
     {%- set subs = eps|filter(k => k.template == 'series') -%}
-    <span class="chip">{% if h.step_no %}الخطوة {{ h.step_no }} · {% endif %}{% if subs|length %}{{ subs|length }} سلاسل{% else %}{{ eps|length }} {{ eps|length > 10 or eps|length < 3 ? 'حلقة' : 'حلقات' }}{% endif %}</span>
+    <span class="chip">{% if h.step_no %}الخطوة {{ h.step_no }} · {% endif %}{% if subs|length %}{{ subs|length }} {{ subs|length > 10 or subs|length < 3 ? 'سلسلة' : 'سلاسل' }}{% else %}{{ w.count }}{% endif %}</span>
   </div>
   {%- set target = (subs|length == 0 and first) ? first.url : item.url -%}
   <h3><a href="{{ target }}" style="color:inherit">{{ item.title }}</a></h3>
@@ -14,10 +15,10 @@
   {% if h.chips %}<div class="chips">{% for c in h.chips %}<span class="chip">{{ c }}</span>{% endfor %}</div>{% endif %}
   <div class="card__actions">
     {% if subs|length %}
-      <a href="{{ item.url }}" class="btn gold">تصفّح البرنامج</a>
+      <a href="{{ item.url }}" class="btn gold">تصفّح</a>
     {% else %}
       {% if first %}<a href="{{ first.url }}" class="btn gold">شاهد</a>{% endif %}
-      <a href="{{ item.url }}" class="btn ghost">كل الحلقات</a>
+      <a href="{{ item.url }}" class="btn ghost">كل {{ w.all }}</a>
     {% endif %}
   </div>
 </article>

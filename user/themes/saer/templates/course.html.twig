@@ -1,0 +1,55 @@
+{% extends 'partials/base.html.twig' %}
+{#
+  A training course landing page. Registration arrives with saer-core (phase 7);
+  until then the button only shows the status.
+  Header: image (media), status (soon|open|closed|done), start_date, duration, format,
+          price, trailer (YouTube), audience, goals[], outline[]
+#}
+{%- set h = page.header -%}
+{%- set img = media_pick(page, h.image)|first -%}
+{%- set st = {soon: 'التسجيل قريباً', open: 'التسجيل مفتوح', closed: 'التسجيل مغلق', done: 'انتهت الدورة'} -%}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Course","name":"{{ page.title|e('js') }}","inLanguage":"ar",
+ "description":"{{ (h.summary ?: page.summary(160)|striptags)|e('js') }}",
+ "provider":{"@type":"Person","name":"محمد سائر الشبعان"},"url":"{{ page.url(true)|e('js') }}"}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="wrap page-head" style="gap:20px">
+  {% include 'partials/breadcrumbs.html.twig' %}
+  <span class="chip chip--gold" style="align-self:flex-start;margin-top:10px">دورة تدريبية · {{ st[h.status ?: 'soon'] }}</span>
+  <h1>{{ page.title }}</h1>
+  <div class="byline"><span>يقدّمها: الشيخ محمد سائر الشبعان</span></div>
+  {% if h.summary %}<p class="lead">{{ h.summary }}</p>{% endif %}
+  {% set facts = [] %}
+  {% if h.start_date %}{% set facts = facts|merge(['البدء: ' ~ h.start_date]) %}{% endif %}
+  {% if h.duration %}{% set facts = facts|merge(['المدة: ' ~ h.duration]) %}{% endif %}
+  {% if h.format %}{% set facts = facts|merge([h.format]) %}{% endif %}
+  {% if h.price %}{% set facts = facts|merge(['الرسوم: ' ~ h.price]) %}{% endif %}
+  {% if facts|length %}<div class="chips">{% for f in facts %}<span class="chip">{{ f }}</span>{% endfor %}</div>{% endif %}
+  <div class="actions" style="margin-top:6px">
+    <span class="btn {{ h.status == 'open' ? 'gold' : 'ghost' }}" aria-disabled="true">{{ st[h.status ?: 'soon'] }}</span>
+  </div>
+  {% if h.trailer %}<div style="max-width:760px;width:100%;margin-top:12px">{% include 'partials/youtube.html.twig' with {yt: h.trailer, title: 'تعريف بدورة ' ~ page.title} %}</div>
+  {% elseif img and img.medium %}<div class="article__img" style="max-width:760px">{{ img.medium.cropZoom(1200, 675).html('', page.title)|raw }}</div>{% endif %}
+</section>
+
+<section class="wrap layout">
+  <article class="prose">
+    {% if page.content|trim %}<h2>عن الدورة</h2>{{ page.content|raw }}{% endif %}
+    {% if h.goals %}<h2>ماذا ستتعلم</h2><ul>{% for g in h.goals %}<li>{{ g }}</li>{% endfor %}</ul>{% endif %}
+    {% if h.audience %}<h2>لمن هذه الدورة؟</h2><p>{{ h.audience|nl2br }}</p>{% endif %}
+  </article>
+  {% if h.outline %}
+  <aside class="aside">
+    <div class="glass box">
+      <h2 class="k">محاور الدورة</h2>
+      <ol class="toc toc--plain">{% for c in h.outline %}<li><span>{{ loop.index }}</span>{{ c }}</li>{% endfor %}</ol>
+    </div>
+  </aside>
+  {% endif %}
+</section>
+{% endblock %}

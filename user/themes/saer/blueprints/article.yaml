@@ -1,0 +1,28 @@
+title: مقال
+'@extends':
+  type: content-base
+  context: theme://blueprints
+
+form:
+  fields:
+    tabs:
+      fields:
+        content:
+          fields:
+            header.image:
+              type: media
+              label: الصورة الرئيسية (اختياري)
+              sources: [page]
+              accept: ['image/*']
+              ordering@: header.summary
+            header.author:
+              type: text
+              label: الكاتب
+              default: محمد سائر الشبعان
+              ordering@: header.image
+            header.related:
+              type: select
+              label: برنامج أو سلسلة مرتبطة (اختياري)
+              default: ''
+              data-options@: '\Grav\Theme\Saer::seriesOptions'
+              ordering@: header.author

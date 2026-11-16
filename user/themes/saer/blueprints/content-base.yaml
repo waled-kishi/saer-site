@@ -20,6 +20,18 @@ form:
               label: سؤال جاذب (اختياري)
               help: يظهر في قسم "أسئلة تجيب عنها الحلقات" في الرئيسية
               ordering@: header.summary
+            header.coming_soon:
+              type: toggle
+              label: قريباً
+              help: عند التفعيل تظهر الصفحة للزوار كـ "قريباً" بدل محتواها، وتبقى في القائمة.
+              highlight: 0
+              default: 0
+              options:
+                1: مفعّل
+                0: متوقف
+              validate:
+                type: bool
+              ordering@: header.hook_question
         seo:
           type: tab
           title: SEO

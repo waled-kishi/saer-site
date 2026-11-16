@@ -20,6 +20,18 @@ form:
                 program: برنامج (يضم سلاسل)
                 course: دورة
               ordering@: header.title
+            header.item_word:
+              type: select
+              label: اسم المحتوى داخلها
+              help: يظهر في العدّاد والأزرار، مثل "12 خطبة" و"ابدأ من الدرس الأول". إذا تُرك فارغاً يُؤخذ من الصفحة الأعلى.
+              default: ''
+              options:
+                '': تلقائي (من الصفحة الأعلى)
+                episode: حلقة / حلقات
+                lesson: درس / دروس
+                khutba: خطبة / خطب
+                lecture: محاضرة / محاضرات
+              ordering@: header.kind
             header.step_label:
               type: text
               label: اسم الخطوة (مثل نُسقِط)

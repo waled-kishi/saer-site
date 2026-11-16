@@ -30,6 +30,7 @@ class Saer extends Theme
         $twig->addFunction(new TwigFunction('media_pick', [$this, 'mediaPick']));
         $twig->addFunction(new TwigFunction('book_files', [$this, 'bookFiles']));
         $twig->addFunction(new TwigFunction('book_cover', [$this, 'bookCover']));
+        $twig->addFunction(new TwigFunction('item_words', [$this, 'itemWords']));
     }
 
     /** Extract a YouTube video id from a URL or return the input if it already is an id. */
@@ -107,6 +108,41 @@ class Saer extends Theme
         } elseif (preg_match('~^(https?://|/)~i', $value)) {
             $out[] = ['medium' => null, 'url' => $value, 'name' => $base,
                       'ext' => strtolower(pathinfo($base, PATHINFO_EXTENSION)), 'size' => 0];
+        }
+        return $out;
+    }
+
+    /**
+     * Words for the items of a series: episode (حلقة), lesson (درس), khutba (خطبة), lecture (محاضرة).
+     * Taken from header.item_word on the page or its nearest ancestor; pages under /lectures
+     * default to lesson, everything else to episode.
+     */
+    public function itemWords($page, $n = null): array
+    {
+        $words = [
+            'episode' => ['حلقة', 'حلقات', 'الحلقة', 'الحلقة الأولى', 'تقديم: أ. سائر'],
+            'lesson'  => ['درس', 'دروس', 'الدرس', 'الدرس الأول', 'الشيخ محمد سائر الشبعان'],
+            'khutba'  => ['خطبة', 'خطب', 'الخطبة', 'الخطبة الأولى', 'الشيخ محمد سائر الشبعان'],
+            'lecture' => ['محاضرة', 'محاضرات', 'المحاضرة', 'المحاضرة الأولى', 'الشيخ محمد سائر الشبعان'],
+        ];
+        $key = null;
+        for ($p = $page; $p && !$key; $p = $p->parent()) {
+            $w = $p->header()->item_word ?? null;
+            if (is_string($w) && isset($words[$w])) {
+                $key = $w;
+            }
+            if ($p->root() ?? false) {
+                break;
+            }
+        }
+        if (!$key) {
+            $key = ($page && str_starts_with((string) $page->route(), '/lectures')) ? 'lesson' : 'episode';
+        }
+        [$one, $many, $the, $first, $by] = $words[$key];
+        $out = ['key' => $key, 'one' => $one, 'many' => $many, 'the' => $the, 'first' => $first, 'by' => $by, 'all' => 'ال' . $many];
+        if ($n !== null) {
+            $n = (int) $n;
+            $out['count'] = $n . ' ' . (($n >= 3 && $n <= 10) ? $many : $one);
         }
         return $out;
     }

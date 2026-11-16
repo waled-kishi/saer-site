@@ -1,0 +1,5 @@
+{% extends 'partials/base.html.twig' %}
+{# Listing of training courses (/courses). #}
+{% block content %}
+  {% include 'partials/list-page.html.twig' with {empty_msg: 'لا توجد دورات معلنة حالياً. قريباً بإذن الله.'} %}
+{% endblock %}

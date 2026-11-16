@@ -9,6 +9,7 @@
 {%- set episodes = kids|filter(k => k.template != 'series') -%}
 {%- set book = h.book ? pages.find(h.book) : null -%}
 {%- set first_ep = episodes|first -%}
+{%- set w = item_words(page, episodes|length) -%}
 
 {% block content %}
 <section class="wrap page-head">
@@ -16,10 +17,10 @@
   <span class="chip chip--gold" style="align-self:flex-start;margin-top:10px">
     {%- if h.step_no %}الخطوة {{ h.step_no }} · {% endif -%}
     {%- if h.step_label %}{{ h.step_label }} · {% endif -%}
-    {%- if sub_series|length %}{{ sub_series|length }} سلاسل{% else %}{{ episodes|length }} حلقات{% endif -%}
+    {%- if sub_series|length %}{{ sub_series|length }} {{ sub_series|length > 10 or sub_series|length < 3 ? 'سلسلة' : 'سلاسل' }}{% else %}{{ w.count }}{% endif -%}
   </span>
   <h1>{{ page.title }}</h1>
-  <div class="byline"><span>تقديم: أ. سائر</span></div>
+  <div class="byline"><span>{{ w.by }}</span></div>
   {% if h.summary %}<p class="lead">{{ h.summary }}</p>{% endif %}
   <div class="actions" style="margin-top:8px">
     {% set bfiles = book ? book_files(book) : [] %}
@@ -27,7 +28,7 @@
     {% elseif bfiles|length > 1 %}<a href="{{ book.url }}#downloads" class="btn gold">ملفات الكتيّب</a>{% endif %}
     {% if first_ep %}<a href="{{ first_ep.url }}" class="btn ghost">
       <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-      ابدأ من الحلقة الأولى</a>{% endif %}
+      ابدأ من {{ w.first }}</a>{% endif %}
     {% if h.youtube_playlist %}<a href="https://www.youtube.com/playlist?list={{ h.youtube_playlist|yt_list }}" class="btn ghost" rel="noopener">قائمة التشغيل على يوتيوب</a>{% endif %}
   </div>
   {% if page.content|trim %}<div class="prose" style="margin-top:12px">{{ page.content|raw }}</div>{% endif %}
@@ -45,7 +46,7 @@
 
 {% if episodes|length %}
 <section class="wrap" style="padding-bottom:96px">
-  <h2 class="h2" style="margin-bottom:28px">الحلقات</h2>
+  <h2 class="h2" style="margin-bottom:28px">{{ h.items_heading ?: w.all }}</h2>
   <ol class="rows">
     {% for ep in episodes %}
       {% include 'partials/row-item.html.twig' with {item: ep, n: ep.header.number ?: loop.index} %}
@@ -55,7 +56,7 @@
 </section>
 {% elseif not sub_series|length %}
 <section class="wrap" style="padding-bottom:96px">
-  {% include 'partials/empty.html.twig' with {msg: 'لم تُنشر حلقات هذه السلسلة بعد.'} %}
+  {% include 'partials/empty.html.twig' with {msg: 'لم يُنشر محتوى هنا بعد. قريباً بإذن الله.'} %}
 </section>
 {% endif %}
 {% endblock %}

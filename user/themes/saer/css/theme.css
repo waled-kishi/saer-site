@@ -180,6 +180,10 @@ a.book-cover:hover{transform:translateY(-4px)}
 .dl-list li:first-child{border-top:0}
 .dl-list__name{font-weight:700;color:var(--ink-strong);flex:1 1 160px}
 .dl-list__meta{font-size:14px}
+.soon{padding:clamp(32px,6vw,72px) 24px;margin-top:24px;display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center}
+.soon h1{font-size:clamp(32px,5vw,58px)}
+.article__img img{display:block;width:100%;height:auto;border-radius:22px}
+.card__img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:18px}
 .toc--plain li{min-height:42px;display:flex;align-items:center;gap:12px;padding:0 14px}
 .toc--plain li span{color:var(--gold);font-weight:700}
 

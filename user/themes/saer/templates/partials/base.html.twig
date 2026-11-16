@@ -1,5 +1,6 @@
 {%- set tc = config.theme -%}
 {%- set h = page.header -%}
+{%- set soon = (h.coming_soon ?? false) or (page.parent and (page.parent.header.coming_soon ?? false)) -%}
 {%- set page_title = (h.seo.title ?? null) ?: (page.home ? site.title : page.title ~ ' | ' ~ site.title) -%}
 {%- set page_desc = (h.seo.description ?? null) ?: ((h.summary ?? null) ?: (page.summary(160)|striptags|trim ?: site.metadata.description)) -%}
 <!doctype html>
@@ -9,6 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{{ page_title }}</title>
   <meta name="description" content="{{ page_desc }}">
+  {% if soon %}<meta name="robots" content="noindex">{% endif %}
   <link rel="canonical" href="{{ page.canonical(true) }}">
   <meta property="og:type" content="{{ page.template == 'episode' or page.template == 'article' ? 'article' : 'website' }}">
   <meta property="og:title" content="{{ page_title }}">
@@ -29,7 +31,7 @@
   <a class="skip" href="#main">تخطَّ إلى المحتوى</a>
   {% include 'partials/header.html.twig' %}
   <main id="main">
-    {% block content %}{% endblock %}
+    {% if soon %}{% include 'partials/coming-soon.html.twig' %}{% else %}{% block content %}{% endblock %}{% endif %}
   </main>
   {% include 'partials/footer.html.twig' %}
   <a href="#top" class="to-top" id="to-top" aria-label="العودة إلى أعلى الصفحة" hidden>

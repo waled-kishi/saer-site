@@ -1,0 +1,38 @@
+{% extends 'partials/base.html.twig' %}
+{# A single article. Header: image (media), author, related (route or '') #}
+{%- set h = page.header -%}
+{%- set img = media_pick(page, h.image)|first -%}
+{%- set author = h.author ?: 'محمد سائر الشبعان' -%}
+{%- set related = h.related ? pages.find(h.related) : null -%}
+{%- set mins = max(1, ((page.content|striptags|split(' ')|length) / 200)|round(0, 'ceil')) -%}
+{%- set others = page.parent ? page.parent.children.visible.order('date', 'desc')|filter(a => a.route != page.route)|slice(0, 3) : [] -%}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"{{ page.title|e('js') }}",
+ "author":{"@type":"Person","name":"{{ author|e('js') }}"},"inLanguage":"ar","datePublished":"{{ page.date|date('c') }}",
+ {% if img %}"image":"{{ (img.medium ? img.medium.url(true) : img.url)|e('js') }}",{% endif %}
+ "description":"{{ (h.summary ?: page.summary(160)|striptags)|e('js') }}","url":"{{ page.url(true)|e('js') }}"}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="wrap wrap--narrow page-head" style="gap:18px">
+  {% include 'partials/breadcrumbs.html.twig' %}
+  <span class="chip chip--gold" style="align-self:flex-start;margin-top:10px">مقال · {{ mins }} دقائق قراءة</span>
+  <h1 style="font-size:clamp(32px,4.8vw,58px)">{{ page.title }}</h1>
+  <div class="byline"><span>{{ author }}</span><span class="mut">· {{ page.date|date('Y/m/d') }}</span></div>
+  {% if h.summary %}<p class="lead">{{ h.summary }}</p>{% endif %}
+  {% if img %}<div class="article__img">{% if img.medium %}{{ img.medium.cropResize(1200, 800).html('', page.title)|raw }}{% else %}<img src="{{ img.url }}" alt="{{ page.title }}">{% endif %}</div>{% endif %}
+</section>
+<section class="wrap wrap--narrow" style="padding-bottom:64px">
+  <article class="prose" style="max-width:none">{{ page.content|raw }}</article>
+  {% if related %}<p style="margin-top:32px"><a href="{{ related.url }}" class="btn ghost">شاهد: {{ related.title }}</a></p>{% endif %}
+</section>
+{% if others|length %}
+<section class="wrap" style="padding-bottom:96px">
+  <div class="sec-head"><p class="eye">المقالات</p><h2 class="h2">اقرأ أيضاً</h2></div>
+  <div class="grid3">{% for item in others %}{% include 'partials/card.html.twig' with {item: item} %}{% endfor %}</div>
+</section>
+{% endif %}
+{% endblock %}

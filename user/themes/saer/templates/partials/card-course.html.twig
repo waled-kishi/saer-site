@@ -1,0 +1,13 @@
+{# Card for a training course. Expects: item #}
+{%- set h = item.header -%}
+{%- set img = media_pick(item, h.image)|first -%}
+{%- set st = {soon: 'قريباً', open: 'التسجيل مفتوح', closed: 'التسجيل مغلق', done: 'انتهت'} -%}
+<article class="glass card">
+  {% if img and img.medium %}<a href="{{ item.url }}" tabindex="-1" aria-hidden="true">{{ img.medium.cropZoom(640,400).html('', item.title, 'card__img')|raw }}</a>{% endif %}
+  <div class="card__top"><span class="chip{{ h.status == 'open' ? ' chip--gold' }}">{{ st[h.status ?: 'soon'] }}</span></div>
+  <h3><a href="{{ item.url }}" style="color:inherit">{{ item.title }}</a></h3>
+  {% if h.summary %}<p class="mut" style="font-size:17px">{{ h.summary }}</p>{% endif %}
+  {% set facts = [h.start_date, h.duration, h.format]|filter(f => f) %}
+  {% if facts|length %}<div class="chips">{% for f in facts %}<span class="chip">{{ f }}</span>{% endfor %}</div>{% endif %}
+  <div class="card__actions"><a href="{{ item.url }}" class="btn {{ h.status == 'open' ? 'gold' : 'ghost' }}">تفاصيل الدورة</a></div>
+</article>

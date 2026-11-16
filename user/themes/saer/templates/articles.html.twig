@@ -1,0 +1,5 @@
+{% extends 'partials/base.html.twig' %}
+{# Listing of articles (/articles), newest first. #}
+{% block content %}
+  {% include 'partials/list-page.html.twig' with {items: page.children.visible.order('date', 'desc'), empty_msg: 'لا توجد مقالات منشورة بعد. قريباً بإذن الله.'} %}
+{% endblock %}

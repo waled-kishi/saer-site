@@ -1,0 +1,5 @@
+title: قائمة مقالات
+'@extends':
+  type: content-base
+  context: theme://blueprints
+child_type: article

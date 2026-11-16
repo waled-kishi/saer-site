@@ -6,6 +6,7 @@
 {%- for s in sibs -%}{%- if s.route == page.route -%}{%- set idx = loop.index -%}{%- endif -%}{%- endfor -%}
 {%- set prev = idx > 1 ? sibs|slice(idx - 2, 1)|first : null -%}
 {%- set next = idx and idx < sibs|length ? sibs|slice(idx, 1)|first : null -%}
+{%- set w = item_words(page) -%}
 {%- set book = series and series.header.book ? pages.find(series.header.book) : null -%}
 
 {% block head_extra %}
@@ -21,7 +22,7 @@
 
 {% block content %}
 <section class="wrap wrap--narrow page-head" style="padding-top:56px;padding-bottom:56px;gap:20px">
-  {% set ep_label = h.number ? 'الحلقة ' ~ h.number : (h.label ?: 'الحلقة ' ~ idx) %}
+  {% set ep_label = h.number ? w.the ~ ' ' ~ h.number : (h.label ?: w.the ~ ' ' ~ idx) %}
   {% include 'partials/breadcrumbs.html.twig' with {label: ep_label} %}
   <span class="chip chip--gold" style="align-self:flex-start;margin-top:10px">
     {%- if series.header.step_label %}{{ series.header.step_label }} · {% endif -%}
@@ -29,15 +30,15 @@
     {%- if h.duration %} · {{ h.duration }}{% endif -%}
   </span>
   <h1 style="font-size:clamp(36px,5.4vw,66px)">{{ page.title }}</h1>
-  <div class="byline"><span>تقديم: أ. سائر</span></div>
+  <div class="byline"><span>{{ w.by }}</span></div>
   <div id="video">{% include 'partials/youtube.html.twig' with {yt: h.youtube, title: page.title} %}</div>
 </section>
 
 <section class="wrap layout">
   <article class="prose">
     {% if page.content|trim %}{{ page.content|raw }}{% elseif h.summary %}<p>{{ h.summary }}</p>{% endif %}
-    <nav class="pager" aria-label="التنقل بين الحلقات">
-      {% if series %}<a href="{{ series.url }}" class="btn ghost" style="min-height:50px">كل حلقات السلسلة</a>{% endif %}
+    <nav class="pager" aria-label="التنقل بين {{ w.all }}">
+      {% if series %}<a href="{{ series.url }}" class="btn ghost" style="min-height:50px">كل {{ w.all }}</a>{% endif %}
       {% if prev %}<a href="{{ prev.url }}" class="btn ghost" style="min-height:50px">→ السابق: {{ prev.title }}</a>{% endif %}
       {% if next %}<a href="{{ next.url }}" class="btn gold" style="min-height:50px">التالي: {{ next.title }} ←</a>{% endif %}
     </nav>
@@ -46,7 +47,7 @@
   <aside class="aside">
     {% if sibs|length > 1 %}
     <div class="glass box">
-      <h2 class="k">حلقات السلسلة</h2>
+      <h2 class="k">{{ w.all }}</h2>
       <ol class="toc">
         {% for s in sibs %}
           <li><a href="{{ s.url }}"{% if s.route == page.route %} aria-current="page"{% endif %}><span>{{ s.header.number ?: '+' }}</span>{{ s.title }}</a></li>

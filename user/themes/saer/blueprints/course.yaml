@@ -1,0 +1,58 @@
+title: دورة
+'@extends':
+  type: content-base
+  context: theme://blueprints
+
+form:
+  fields:
+    tabs:
+      fields:
+        course:
+          type: tab
+          title: بيانات الدورة
+          fields:
+            header.image:
+              type: media
+              label: صورة الدورة
+              sources: [page]
+              accept: ['image/*']
+            header.status:
+              type: select
+              label: حالة التسجيل
+              default: soon
+              options:
+                soon: قريباً
+                open: التسجيل مفتوح
+                closed: التسجيل مغلق
+                done: انتهت الدورة
+            header.start_date:
+              type: text
+              label: موعد البدء
+              placeholder: "مثلاً: السبت 5 كانون الأول 2026"
+            header.duration:
+              type: text
+              label: المدة
+              placeholder: "مثلاً: 6 أسابيع، لقاء أسبوعي"
+            header.format:
+              type: text
+              label: طريقة الحضور
+              placeholder: "أونلاين / حضوري"
+            header.price:
+              type: text
+              label: الرسوم
+              placeholder: مجانية
+            header.trailer:
+              type: text
+              label: فيديو تعريفي على يوتيوب (اختياري)
+            header.audience:
+              type: textarea
+              label: لمن هذه الدورة؟
+              rows: 3
+            header.goals:
+              type: array
+              label: ماذا ستتعلم (نقاط)
+              value_only: true
+            header.outline:
+              type: array
+              label: محاور الدورة بالترتيب
+              value_only: true
