@@ -130,7 +130,10 @@ def main():
             target = next((r for rx, r in routers if rx.search(v.get("title") or "")), prog)
             ttitle = (target.get("header") or {}).get("title") or target.get("title") or title
             n, t = split_title(v.get("title") or "", ttitle)
-            new.append({"id": v["id"], "n": n, "t": t, "dur": dur(v.get("duration")), "target": target,
+            parts = [x for x in t.split(" — ") if x]
+            place = [x for x in parts if re.match(r"^(?:الخطبة في\s+)?(?:جامع|حي)\s", x)]
+            t = " — ".join(x for x in parts if x not in place)
+            new.append({"id": v["id"], "n": n, "t": t, "place": " — ".join(re.sub(r"^الخطبة في\s+", "", x) for x in place), "dur": dur(v.get("duration")), "target": target,
                         "date": khutba_date(v.get("title") or "")})
         # YouTube lists may run newest-first; add the oldest first so numbers follow time.
         if all(e["n"] for e in new):
@@ -150,6 +153,8 @@ def main():
                 header["duration"] = e["dur"]
             if e["date"]:
                 header["date"] = e["date"] + " 12:00"
+            if e["place"]:
+                header["location"] = e["place"]
             body = {"route": f"{route}/ep-{order:02d}", "title": header["title"], "template": "episode",
                     "header": header, "content": "", "order": order}
             if DRY:

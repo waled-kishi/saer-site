@@ -23,7 +23,7 @@ def seg_number(seg):
 def split_title(raw, prog):
     t=raw.translate(AR_DIG)
     t=NOISE.sub('',t)
-    segs=[x.strip(' "«»') for x in re.split(r'\s+[|]\s+|\s*\|\s*|\s+-\s+',t) if x.strip(' "«»')]
+    segs=[x.strip(' "«»') for x in re.split(r'\s+[|]\s+|\s*\|\s*|\s+-\s+|\s+/(?:\s*/)*\s+',t) if x.strip(' "«»')]
     pn={prog, prog.rstrip('؟?'), 'برنامج '+prog, 'برنامج '+prog.rstrip('؟?'), prog.replace('برنامج ','')}
     pn|={p.split('...')[0] for p in list(pn)}
     num=None; keep=[]
