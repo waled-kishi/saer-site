@@ -29,6 +29,9 @@ def split_title(raw, prog):
     num=None; keep=[]
     for x in segs:
         if x in pn: continue
+        x=re.sub(r'(خطبة\s+(ال)?جمعة|خطبة العيد)?\s*\d{1,2}\s*/\s*\d{1,2}\s*/\s*\d{2,4}','',x).strip(' |-')
+        if not x or re.fullmatch(r'خطبة\s+(ال)?جمعة|خطبة العيد', x): continue
+        if re.fullmatch(r'\d{1,2}\s*/\s*\d{1,2}\s*/\s*\d{2,4}', x): continue
         if is_ep_seg(x):
             num=num or seg_number(x)
             rest=re.sub(r'^الحلقة\s*\(?\s*\d+\s*\)?\s*(والأخيرة)?','',x).strip()
@@ -47,6 +50,13 @@ def split_title(raw, prog):
         m=re.search(r'(\d{1,3})\s*$',raw.translate(AR_DIG))
         if m and '#' in raw: num=int(m.group(1))
     return num, title
+def khutba_date(raw):
+    """dd/mm/yyyy in a title -> 'yyyy-mm-dd', else ''."""
+    m=re.search(r'(\d{1,2})\s*/\s*(\d{1,2})\s*/\s*(\d{4}|\d{2})\b', raw.translate(AR_DIG))
+    if not m: return ''
+    d,mo,y=int(m.group(1)),int(m.group(2)),int(m.group(3))
+    y=y+2000 if y<100 else y
+    return f'{y:04d}-{mo:02d}-{d:02d}' if 1<=d<=31 and 1<=mo<=12 and 2000<y<2100 else ''
 def dur(s):
     if not s: return ''
     s=int(s); return f'{s//3600}:{s%3600//60:02d}:{s%60:02d}' if s>=3600 else f'{s//60}:{s%60:02d}'

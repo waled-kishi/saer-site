@@ -30,7 +30,7 @@
     {%- if h.duration %} · {{ h.duration }}{% endif -%}
   </span>
   <h1 style="font-size:clamp(36px,5.4vw,66px)">{{ page.title }}</h1>
-  <div class="byline"><span>{{ w.by }}</span></div>
+  <div class="byline"><span>{{ w.by }}</span>{% if h.location %}<span class="mut">· {{ h.location }}</span>{% endif %}{% if h.date and w.key == 'khutba' %}<span class="mut">· {{ h.date|date('Y/m/d') }}</span>{% endif %}</div>
   <div id="video">{% include 'partials/youtube.html.twig' with {yt: h.youtube, title: page.title} %}</div>
 </section>
 
