@@ -82,6 +82,13 @@
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     }
 
+    async del(id) {
+      if (!confirm('حذف بيانات هذا الشخص وكل تحميلاته من الإحصائيات؟ لا يمكن التراجع.')) return;
+      const r = await fetch(api(`/saer-core/profiles/${id}`), { method: 'DELETE', headers: headers(), credentials: 'same-origin' });
+      if (!r.ok) { alert('تعذّر الحذف'); return; }
+      this.load();
+    }
+
     render(body) {
       const ranges = RANGES.map(([d, l]) => `<button type="button" data-days="${d}" aria-pressed="${d === this.days}">${l}</button>`).join('');
       this.root.innerHTML = `<style>${CSS}</style><div class="wrap">
@@ -92,6 +99,7 @@
         ${body}</div>`;
       this.root.querySelectorAll('[data-days]').forEach((b) => b.addEventListener('click', () => { this.days = +b.dataset.days; this.load(); }));
       this.root.querySelectorAll('[data-export]').forEach((b) => b.addEventListener('click', () => this.exportCsv(b.dataset.export)));
+      this.root.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', () => this.del(+b.dataset.del)));
     }
 
     bars(rows, key = 'n', label = 'label', gold = false) {
@@ -135,9 +143,10 @@
             <div><h4>الجنس</h4>${this.bars(f.genders, 'n', 'label', true)}</div>
             <div><h4>البلد</h4>${this.bars(f.countries.slice(0, 8), 'n', 'label', true)}</div></div></div>`).join('')
         : '<p class="muted">لا تحميلات في هذه المدة بعد.</p>';
-      const recent = d.people.recent.length ? `<div class="scroll"><table><thead><tr><th>الوقت</th><th>الاسم</th><th>العمر</th><th>البلد</th><th>الجنس</th><th>الكتاب</th></tr></thead><tbody>
+      const recent = d.people.recent.length ? `<div class="scroll"><table><thead><tr><th>الوقت</th><th>الاسم</th><th>العمر</th><th>البلد</th><th>الجنس</th><th>الكتاب</th><th></th></tr></thead><tbody>
         ${d.people.recent.map((r) => `<tr><td class="num">${esc(r.when)}</td><td>${esc(r.name)}</td><td>${esc(r.age)}</td><td>${esc(r.country)}</td><td>${esc(r.gender)}</td>
-        <td>${esc(r.book)}${r.label && r.label !== 'تحميل الكتاب' ? ` · ${esc(r.label)}` : ''}</td></tr>`).join('')}</tbody></table></div>`
+        <td>${esc(r.book)}${r.label && r.label !== 'تحميل الكتاب' ? ` · ${esc(r.label)}` : ''}</td>
+        <td><button type="button" data-del="${+r.profile_id}" title="حذف هذا الشخص وتحميلاته">حذف</button></td></tr>`).join('')}</tbody></table></div>`
         : '<p class="muted">لم يعبّئ أحد النموذج في هذه المدة بعد.</p>';
       return `
         <div class="kpis">${kpi('الزوار', t.visitors, 'كل زائر مرة واحدة في اليوم')}${kpi('الزيارات', t.views, 'كل فتح لصفحة')}

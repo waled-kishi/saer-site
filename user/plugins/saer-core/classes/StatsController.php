@@ -187,7 +187,7 @@ class StatsController extends AbstractApiController
 
     private function recentPeople(string $since, int $limit): array
     {
-        $rows = $this->all('SELECT d.ts, d.route, d.filename, f.label, p.name, p.age, p.country, p.gender
+        $rows = $this->all('SELECT p.id AS profile_id, d.ts, d.route, d.filename, f.label, p.name, p.age, p.country, p.gender
             FROM downloads d JOIN profiles p ON p.id = d.profile_id LEFT JOIN files f ON f.id = d.file_id
             WHERE d.day >= ? ORDER BY d.ts DESC LIMIT ' . (int) $limit, [$since]);
         $titles = [];
@@ -223,6 +223,18 @@ class StatsController extends AbstractApiController
             $out[] = $row;
         }
         return $out;
+    }
+
+    /** DELETE /saer-core/profiles/{id}: remove one person's form answers and their downloads (spam, tests). */
+    public function deleteProfile(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.system.write');
+        $id = (int) $this->getRouteParam($request, 'id');
+        $pdo = $this->pdo();
+        $pdo->prepare('DELETE FROM downloads WHERE profile_id = ?')->execute([$id]);
+        $st = $pdo->prepare('DELETE FROM profiles WHERE id = ?');
+        $st->execute([$id]);
+        return ApiResponse::create(['deleted' => $st->rowCount()]);
     }
 
     public function export(ServerRequestInterface $request): ResponseInterface
