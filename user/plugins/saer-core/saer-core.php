@@ -209,7 +209,6 @@ class SaerCorePlugin extends Plugin
         $routes->get('/saer-core/stats', [StatsController::class, 'stats']);
         $routes->get('/saer-core/summary', [StatsController::class, 'summary']);
         $routes->get('/saer-core/export', [StatsController::class, 'export']);
-        $routes->get('/saer-core/diag', [StatsController::class, 'diag']);
     }
 
     public function onApiSidebarItems(Event $event): void

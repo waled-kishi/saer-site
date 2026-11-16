@@ -69,21 +69,6 @@ class StatsController extends AbstractApiController
         return array_map('intval', $v + $d + $p);
     }
 
-    /** Temporary check of which proxy headers reach PHP (no values except the chosen country). */
-    public function diag(ServerRequestInterface $request): ResponseInterface
-    {
-        $this->requirePermission($request, 'api.system.read');
-        $names = array_values(array_filter(array_keys($_SERVER), fn($k) => str_starts_with($k, 'HTTP_') || $k === 'REMOTE_ADDR'));
-        $mask = fn($ip) => preg_replace('/(\.\d+){2}$|(:[0-9a-f]*){3}$/i', '.x.x', (string) $ip);
-        $info = [];
-        foreach (['REMOTE_ADDR', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'HTTP_CF_CONNECTING_IP', 'HTTP_TRUE_CLIENT_IP', 'HTTP_X_CLIENT_IP'] as $h) {
-            if (isset($_SERVER[$h])) {
-                $info[$h] = implode(', ', array_map($mask, explode(',', $_SERVER[$h])));
-            }
-        }
-        return ApiResponse::create(['headers' => $names, 'ips' => $info, 'chosen' => $mask($this->core()->ip()), 'geo' => $this->core()->geo()]);
-    }
-
     public function summary(ServerRequestInterface $request): ResponseInterface
     {
         $this->requirePermission($request, 'api.system.read');
