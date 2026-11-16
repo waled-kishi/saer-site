@@ -1,0 +1,61 @@
+title: كتاب
+'@extends':
+  type: content-base
+  context: theme://blueprints
+
+form:
+  fields:
+    tabs:
+      fields:
+        content:
+          fields:
+            header.subtitle:
+              type: text
+              label: العنوان الفرعي (اختياري)
+              ordering@: header.title
+            header.author:
+              type: text
+              label: المؤلف
+              default: محمد سائر الشبعان
+              ordering@: header.subtitle
+        book:
+          type: tab
+          title: بيانات الكتاب
+          fields:
+            book_help:
+              type: display
+              label: الغلاف وملف PDF
+              markdown: true
+              content: "ارفع **صورة الغلاف** و**ملف PDF** من قسم الوسائط في تبويب المحتوى. أول صورة تصير الغلاف، وأول ملف PDF يصير زر التحميل."
+            header.status:
+              type: select
+              label: حالة الكتاب
+              default: available
+              options:
+                available: متاح للتحميل
+                soon: قريباً
+                print: ورقي فقط
+            header.year:
+              type: text
+              label: سنة النشر
+            header.pages:
+              type: number
+              label: عدد الصفحات
+              validate:
+                min: 0
+            header.publisher:
+              type: text
+              label: الناشر
+            header.read_url:
+              type: text
+              label: رابط قراءة خارجي (اختياري)
+              help: مثل موقع الكتاب المستقل. يظهر زر "اقرأ على الموقع".
+            header.toc:
+              type: array
+              label: فهرس الفصول (اختياري)
+              value_only: true
+            header.related:
+              type: pages
+              label: برنامج أو سلسلة مرتبطة (اختياري)
+              show_root: false
+              show_all: true

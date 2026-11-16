@@ -1,0 +1,89 @@
+{% extends 'partials/base.html.twig' %}
+{#
+  A single book. Cover = first image in page media; download = first PDF.
+  Header: subtitle, author, status (available|soon|print), year, pages, publisher,
+          read_url, toc[], related (route of a programme/series)
+#}
+{%- set h = page.header -%}
+{%- set pdf = page.media.files|filter(f => f.extension == 'pdf')|first -%}
+{%- set related = h.related ? pages.find(h.related) : null -%}
+{%- set author = h.author ?: 'محمد سائر الشبعان' -%}
+{%- set others = page.parent ? page.parent.children.visible|filter(b => b.route != page.route)|slice(0, 3) : [] -%}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Book","name":"{{ page.title|e('js') }}",
+ "author":{"@type":"Person","name":"{{ author|e('js') }}"},"inLanguage":"ar",
+ {% if h.year %}"datePublished":"{{ h.year|e('js') }}",{% endif %}
+ {% if h.pages %}"numberOfPages":{{ h.pages|number_format(0, '', '') }},{% endif %}
+ {% if h.publisher %}"publisher":{"@type":"Organization","name":"{{ h.publisher|e('js') }}"},{% endif %}
+ {% if page.media.images|first %}"image":"{{ (page.media.images|first).url(true)|e('js') }}",{% endif %}
+ "description":"{{ (h.summary ?: page.summary(160)|striptags)|e('js') }}","url":"{{ page.url(true)|e('js') }}"}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="wrap" style="padding-top:64px">
+  {% include 'partials/breadcrumbs.html.twig' %}
+</section>
+<section class="wrap book-hero">
+  <div class="book-hero__cover">
+    <div class="book-cover">{% include 'partials/book-cover.html.twig' with {item: page, w: 640} %}</div>
+  </div>
+  <div class="book-hero__text">
+    <p class="eye">كتاب</p>
+    <h1>{{ page.title }}</h1>
+    {% if h.subtitle %}<p class="lead" style="margin-top:-6px">{{ h.subtitle }}</p>{% endif %}
+    <div class="byline"><span>تأليف: {{ author }}</span></div>
+    {% if h.summary %}<p class="lead">{{ h.summary }}</p>{% endif %}
+
+    {% set facts = [] %}
+    {% if h.year %}{% set facts = facts|merge(['سنة النشر: ' ~ h.year]) %}{% endif %}
+    {% if h.pages %}{% set facts = facts|merge([h.pages ~ ' صفحة']) %}{% endif %}
+    {% if h.publisher %}{% set facts = facts|merge(['الناشر: ' ~ h.publisher]) %}{% endif %}
+    {% if pdf %}{% set facts = facts|merge(['PDF · ' ~ (pdf.size / 1048576)|round(1) ~ ' م.ب']) %}{% endif %}
+    {% if facts|length %}<div class="chips">{% for f in facts %}<span class="chip">{{ f }}</span>{% endfor %}</div>{% endif %}
+
+    <div class="actions" style="margin-top:8px">
+      {% if h.status == 'soon' %}
+        <span class="chip chip--gold">قريباً بإذن الله</span>
+      {% elseif h.status == 'print' %}
+        <span class="chip chip--gold">متوفر ورقياً</span>
+      {% elseif pdf %}
+        <a href="{{ pdf.url }}" class="btn gold" download>
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+          تحميل الكتاب PDF</a>
+      {% endif %}
+      {% if h.read_url %}<a href="{{ h.read_url }}" class="btn ghost" rel="noopener">اقرأ على الموقع</a>{% endif %}
+      {% if related %}<a href="{{ related.url }}" class="btn ghost">شاهد: {{ related.title }}</a>{% endif %}
+    </div>
+  </div>
+</section>
+
+{% if page.content|trim or h.toc %}
+<section class="wrap layout" style="padding-bottom:64px">
+  <article class="prose">
+    {% if page.content|trim %}<h2>عن الكتاب</h2>{{ page.content|raw }}{% endif %}
+  </article>
+  {% if h.toc %}
+  <aside class="aside">
+    <div class="glass box">
+      <h2 class="k">فصول الكتاب</h2>
+      <ol class="toc toc--plain">
+        {% for c in h.toc %}<li><span>{{ loop.index }}</span>{{ c }}</li>{% endfor %}
+      </ol>
+    </div>
+  </aside>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if others|length %}
+<section class="wrap" style="padding-bottom:96px">
+  <div class="sec-head"><p class="eye">المكتبة</p><h2 class="h2">كتب أخرى</h2></div>
+  <div class="grid-books">
+    {% for item in others %}{% include 'partials/card.html.twig' with {item: item} %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

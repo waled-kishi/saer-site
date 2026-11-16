@@ -1,0 +1,18 @@
+{# Card for a book. Expects: item #}
+{%- set h = item.header -%}
+{%- set pdf = item.media.files|filter(f => f.extension == 'pdf')|first -%}
+<article class="glass card card--book">
+  <a href="{{ item.url }}" class="book-cover" tabindex="-1" aria-hidden="true">
+    {% include 'partials/book-cover.html.twig' with {item: item, w: 480} %}
+  </a>
+  <h3><a href="{{ item.url }}" style="color:inherit">{{ item.title }}</a></h3>
+  {% if h.summary %}<p class="mut" style="font-size:16px">{{ h.summary }}</p>{% endif %}
+  <div class="card__actions">
+    {% if h.status == 'soon' %}
+      <span class="chip">قريباً</span>
+    {% elseif pdf and h.status != 'print' %}
+      <a href="{{ pdf.url }}" class="btn gold btn--sm" download>تحميل PDF</a>
+    {% endif %}
+    <a href="{{ item.url }}" class="btn ghost btn--sm">عن الكتاب</a>
+  </div>
+</article>

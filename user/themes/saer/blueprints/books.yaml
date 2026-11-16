@@ -1,0 +1,5 @@
+title: قائمة كتب
+'@extends':
+  type: content-base
+  context: theme://blueprints
+child_type: book
