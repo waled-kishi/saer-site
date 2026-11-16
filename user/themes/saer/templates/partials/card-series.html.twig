@@ -7,7 +7,7 @@
   <div class="card__top">
     {% if h.step_label %}<span class="card__step">{{ h.step_label }}</span>{% endif %}
     {%- set subs = eps|filter(k => k.template == 'series') -%}
-    <span class="chip">{% if h.step_no %}الخطوة {{ h.step_no }} · {% endif %}{% if subs|length %}{{ subs|length }} {{ subs|length > 10 or subs|length < 3 ? 'سلسلة' : 'سلاسل' }}{% else %}{{ w.count }}{% endif %}</span>
+    <span class="chip">{% if h.step_no %}الخطوة {{ h.step_no }} · {% endif %}{% if subs|length %}{{ ar_count(subs|length, 'سلسلة', 'سلسلتان', 'سلاسل') }}{% else %}{{ w.count }}{% endif %}</span>
   </div>
   {%- set target = (subs|length == 0 and first) ? first.url : item.url -%}
   <h3><a href="{{ target }}" style="color:inherit">{{ item.title }}</a></h3>

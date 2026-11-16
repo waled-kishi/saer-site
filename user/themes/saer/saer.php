@@ -31,6 +31,7 @@ class Saer extends Theme
         $twig->addFunction(new TwigFunction('book_files', [$this, 'bookFiles']));
         $twig->addFunction(new TwigFunction('book_cover', [$this, 'bookCover']));
         $twig->addFunction(new TwigFunction('item_words', [$this, 'itemWords']));
+        $twig->addFunction(new TwigFunction('ar_count', [self::class, 'arCount']));
     }
 
     /** Extract a YouTube video id from a URL or return the input if it already is an id. */
@@ -120,10 +121,10 @@ class Saer extends Theme
     public function itemWords($page, $n = null): array
     {
         $words = [
-            'episode' => ['حلقة', 'حلقات', 'الحلقة', 'الحلقة الأولى', 'تقديم: أ. سائر'],
-            'lesson'  => ['درس', 'دروس', 'الدرس', 'الدرس الأول', 'الشيخ محمد سائر الشبعان'],
-            'khutba'  => ['خطبة', 'خطب', 'الخطبة', 'الخطبة الأولى', 'الشيخ محمد سائر الشبعان'],
-            'lecture' => ['محاضرة', 'محاضرات', 'المحاضرة', 'المحاضرة الأولى', 'الشيخ محمد سائر الشبعان'],
+            'episode' => ['حلقة', 'حلقات', 'الحلقة', 'الحلقة الأولى', 'تقديم: أ. سائر', 'حلقتان'],
+            'lesson'  => ['درس', 'دروس', 'الدرس', 'الدرس الأول', 'الشيخ محمد سائر الشبعان', 'درسان'],
+            'khutba'  => ['خطبة', 'خطب', 'الخطبة', 'الخطبة الأولى', 'الشيخ محمد سائر الشبعان', 'خطبتان'],
+            'lecture' => ['محاضرة', 'محاضرات', 'المحاضرة', 'المحاضرة الأولى', 'الشيخ محمد سائر الشبعان', 'محاضرتان'],
         ];
         $key = null;
         for ($p = $page; $p && !$key; $p = $p->parent()) {
@@ -138,13 +139,26 @@ class Saer extends Theme
         if (!$key) {
             $key = ($page && str_starts_with((string) $page->route(), '/lectures')) ? 'lesson' : 'episode';
         }
-        [$one, $many, $the, $first, $by] = $words[$key];
+        [$one, $many, $the, $first, $by, $two] = $words[$key];
         $out = ['key' => $key, 'one' => $one, 'many' => $many, 'the' => $the, 'first' => $first, 'by' => $by, 'all' => 'ال' . $many];
         if ($n !== null) {
             $n = (int) $n;
-            $out['count'] = $n . ' ' . (($n >= 3 && $n <= 10) ? $many : $one);
+            $out['count'] = self::arCount($n, $one, $two, $many);
         }
         return $out;
+    }
+
+    /** Arabic count phrase: 1 → "خطبة واحدة"-style single, 2 → dual, 3–10 → plural, else singular. */
+    public static function arCount($n, string $one, string $two, string $many): string
+    {
+        $n = (int) $n;
+        if ($n === 1) {
+            return '1 ' . $one;
+        }
+        if ($n === 2) {
+            return $two;
+        }
+        return $n . ' ' . (($n >= 3 && $n <= 10) ? $many : $one);
     }
 
     /** The download files chosen in a book's "files" list, each with its button label. */

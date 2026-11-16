@@ -17,7 +17,7 @@
   <span class="chip chip--gold" style="align-self:flex-start;margin-top:10px">
     {%- if h.step_no %}الخطوة {{ h.step_no }} · {% endif -%}
     {%- if h.step_label %}{{ h.step_label }} · {% endif -%}
-    {%- if sub_series|length %}{{ sub_series|length }} {{ sub_series|length > 10 or sub_series|length < 3 ? 'سلسلة' : 'سلاسل' }}{% else %}{{ w.count }}{% endif -%}
+    {%- if sub_series|length %}{{ ar_count(sub_series|length, 'سلسلة', 'سلسلتان', 'سلاسل') }}{% else %}{{ w.count }}{% endif -%}
   </span>
   <h1>{{ page.title }}</h1>
   <div class="byline"><span>{{ w.by }}</span></div>
