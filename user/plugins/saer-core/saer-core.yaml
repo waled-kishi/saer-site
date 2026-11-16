@@ -1,0 +1,3 @@
+enabled: true
+# Default for books that don't choose: off | optional | required
+download_form: required

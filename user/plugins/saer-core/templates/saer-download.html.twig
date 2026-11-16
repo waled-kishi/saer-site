@@ -1,0 +1,96 @@
+{% extends 'partials/base.html.twig' %}
+{#
+  Download form / thank-you page for /dl/{id}. Variables come from saer-core in `dl`:
+  id, book (page), label, mode (optional|required), state (form|thanks), errors, values,
+  ages, genders, countries {top, rest}, stamp, url.
+#}
+{%- set b = dl.book -%}
+{%- set v = dl.values -%}
+{% block head_extra %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+{% block content %}
+<section class="wrap wrap--narrow page-head" style="padding-bottom:96px;gap:18px">
+  <nav class="crumbs" aria-label="مسار الصفحة"><ol>
+    <li><a href="{{ home_url }}">الرئيسية</a></li>
+    {% if b.parent and not b.parent.root %}<li><a href="{{ b.parent.url }}">{{ b.parent.title }}</a></li>{% endif %}
+    <li><a href="{{ b.url }}">{{ b.title }}</a></li>
+  </ol></nav>
+
+  {% if dl.state == 'thanks' %}
+    <div class="glass dlform" role="status">
+      <span class="chip chip--gold" style="align-self:flex-start">شكراً لك</span>
+      <h1 class="h2">يبدأ التحميل الآن</h1>
+      <p class="lead">{{ b.title }}{% if dl.label and dl.label != 'تحميل الكتاب' %} · {{ dl.label }}{% endif %}</p>
+      <p class="mut">إن لم يبدأ التحميل خلال ثوانٍ، اضغط الزر. ولن نسألك عن بياناتك مرة أخرى على هذا الجهاز عند تحميل كتب أخرى.</p>
+      <div class="actions">
+        <a href="{{ dl.url }}" class="btn gold" id="dl-go" download>تحميل الملف</a>
+        <a href="{{ b.url }}" class="btn ghost">العودة إلى الكتاب</a>
+      </div>
+    </div>
+    <script>setTimeout(function(){ window.location.href = {{ dl.url|json_encode|raw }}; }, 600);</script>
+  {% else %}
+    <div class="glass dlform">
+      <span class="chip chip--gold" style="align-self:flex-start">تحميل</span>
+      <h1 class="h2">{{ b.title }}</h1>
+      {% if dl.label and dl.label != 'تحميل الكتاب' %}<p class="lead" style="margin-top:-8px">{{ dl.label }}</p>{% endif %}
+      <p class="mut">قبل التحميل، نرجو تعبئة هذه البيانات المختصرة. تساعدنا على معرفة من يقرأ كتب الشيخ، ولا تُنشر ولا تُشارك مع أحد.</p>
+
+      {% if dl.errors.form %}<p class="dlform__err" role="alert">{{ dl.errors.form }}</p>{% endif %}
+
+      <form method="post" action="{{ dl.url }}" class="dlform__f" novalidate>
+        <div class="dlform__row">
+          <label for="dl-name">الاسم</label>
+          <input id="dl-name" name="name" type="text" required maxlength="80" autocomplete="name" value="{{ v.name ?? '' }}"
+            {% if dl.errors.name %}aria-invalid="true" aria-describedby="dl-name-e"{% endif %}>
+          {% if dl.errors.name %}<p class="dlform__err" id="dl-name-e">{{ dl.errors.name }}</p>{% endif %}
+        </div>
+
+        <fieldset class="dlform__row">
+          <legend>العمر</legend>
+          <div class="dlform__opts">
+            {% for k, l in dl.ages %}
+              <label class="opt"><input type="radio" name="age" value="{{ k }}" required {{ (v.age ?? '') == k ? 'checked' }}><span>{{ l }}</span></label>
+            {% endfor %}
+          </div>
+          {% if dl.errors.age %}<p class="dlform__err">{{ dl.errors.age }}</p>{% endif %}
+        </fieldset>
+
+        <div class="dlform__row">
+          <label for="dl-country">البلد</label>
+          <select id="dl-country" name="country" required {% if dl.errors.country %}aria-invalid="true"{% endif %}>
+            <option value="">اختر البلد…</option>
+            <optgroup label="الأكثر اختياراً">
+              {% for k, l in dl.countries.top %}<option value="{{ k }}" {{ (v.country ?? '') == k ? 'selected' }}>{{ l }}</option>{% endfor %}
+            </optgroup>
+            <optgroup label="كل الدول">
+              {% for k, l in dl.countries.rest %}<option value="{{ k }}" {{ (v.country ?? '') == k ? 'selected' }}>{{ l }}</option>{% endfor %}
+            </optgroup>
+          </select>
+          {% if dl.errors.country %}<p class="dlform__err">{{ dl.errors.country }}</p>{% endif %}
+        </div>
+
+        <fieldset class="dlform__row">
+          <legend>الجنس</legend>
+          <div class="dlform__opts">
+            {% for k, l in dl.genders %}
+              <label class="opt"><input type="radio" name="gender" value="{{ k }}" required {{ (v.gender ?? '') == k ? 'checked' }}><span>{{ l }}</span></label>
+            {% endfor %}
+          </div>
+          {% if dl.errors.gender %}<p class="dlform__err">{{ dl.errors.gender }}</p>{% endif %}
+        </fieldset>
+
+        <div class="dlform__hp" aria-hidden="true"><label>اتركه فارغاً <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <input type="hidden" name="stamp" value="{{ dl.stamp }}">
+
+        <div class="actions">
+          <button type="submit" class="btn gold">
+            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+            إرسال وتحميل
+          </button>
+          {% if dl.mode == 'optional' %}<a href="{{ dl.url }}?skip=1" class="btn ghost" rel="nofollow">تخطَّ وحمّل</a>{% endif %}
+          <a href="{{ b.url }}" class="btn ghost">العودة</a>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

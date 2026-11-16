@@ -50,7 +50,7 @@
       {% elseif h.status == 'print' %}
         <span class="chip chip--gold">متوفر ورقياً</span>
       {% elseif files|length == 1 %}
-        <a href="{{ files[0].url }}" class="btn gold" download>
+        <a href="{{ files[0].url }}" class="btn gold">
           <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
           {{ files[0].label }}{% if files[0].ext %} · {{ files[0].ext|upper }}{% endif %}{% if files[0].size %} · {{ (files[0].size / 1048576)|round(1) }} م.ب{% endif %}</a>
       {% endif %}
@@ -65,7 +65,7 @@
         <li>
           <span class="dl-list__name">{{ f.label }}</span>
           <span class="mut dl-list__meta">{{ f.ext|upper }}{% if f.size %} · {{ (f.size / 1048576)|round(1) }} م.ب{% endif %}</span>
-          <a href="{{ f.url }}" class="btn gold btn--sm" download>تحميل</a>
+          <a href="{{ f.url }}" class="btn gold btn--sm">تحميل</a>
         </li>
         {% endfor %}
       </ul>

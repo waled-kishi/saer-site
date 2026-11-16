@@ -179,6 +179,15 @@ class Saer extends Theme
             if ($f['label'] === '') {
                 $out[$i]['label'] = count($out) > 1 ? $f['name'] : 'تحميل الكتاب';
             }
+            // Count downloads: page files go through saer-core's /dl/{id} when the plugin is on.
+            if ($f['medium'] && isset($this->grav['saer_core'])) {
+                try {
+                    $id = $this->grav['saer_core']->fileId((string) $page->route(), $f['name'], $out[$i]['label']);
+                    $out[$i]['url'] = rtrim((string) $this->grav['base_url'], '/') . '/dl/' . $id;
+                } catch (\Throwable $e) {
+                    // keep the direct link
+                }
+            }
         }
         return $out;
     }

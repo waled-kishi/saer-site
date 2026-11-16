@@ -60,6 +60,9 @@ RewriteRule .* index.php [L]
 RewriteRule ^(\.git|cache|bin|logs|backup|tmp|webserver-configs|tests)/(.*) error [F,NC]
 # Saer: block the repo's tooling folder and stray dotfiles (deployed from GitHub)
 RewriteRule ^(\.saer|\.github)/(.*) error [F,NC]
+# saer-core: downloads go through /dl/{id} so they are counted; its data folder stays private
+RewriteRule ^user/pages/(.*)\.(pdf|epub|zip)$ error [F,NC]
+RewriteRule ^user/plugins/saer-core/(data|classes|lib)/ error [F,NC]
 RewriteRule (^|/)\.(?!well-known/)[^/]+$ error [F,NC]
 # Block all direct access to these sensitive user folders, whatever the file type
 RewriteRule ^(user)/(env/[^/]+/)?config/(.*) error [F,NC]

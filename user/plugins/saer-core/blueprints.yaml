@@ -1,0 +1,30 @@
+name: Saer Core
+slug: saer-core
+type: plugin
+version: 1.0.0
+description: "Downloads through /dl/{id} with a short form, and cookie-free site statistics shown in Admin2."
+icon: chart-line
+author:
+  name: Claude for Walid
+license: MIT
+dependencies:
+  - { name: grav, version: '>=2.0.0' }
+  - { name: api, version: '>=1.0.0' }
+
+form:
+  validation: loose
+  fields:
+    enabled:
+      type: toggle
+      label: مفعّلة
+      default: 1
+      options: { 1: نعم, 0: لا }
+      validate: { type: bool }
+    download_form:
+      type: select
+      label: النموذج قبل التحميل (الافتراضي للكتب)
+      default: required
+      options:
+        off: بدون نموذج
+        optional: اختياري (مع زر تخطٍّ)
+        required: إجباري

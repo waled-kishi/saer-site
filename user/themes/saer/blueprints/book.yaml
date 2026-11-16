@@ -47,6 +47,15 @@ form:
                   label: الملف
                   sources: [page]
                   accept: ['application/pdf', 'application/epub+zip', 'application/zip']
+            header.download_form:
+              type: select
+              label: النموذج قبل التحميل
+              default: ''
+              options:
+                '': الافتراضي للموقع (إجباري)
+                required: إجباري
+                optional: اختياري (مع زر تخطٍّ)
+                off: بدون نموذج
             header.status:
               type: select
               label: حالة الكتاب

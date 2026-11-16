@@ -11,7 +11,7 @@
     {% if h.status == 'soon' %}
       <span class="chip">قريباً</span>
     {% elseif files|length == 1 and h.status != 'print' %}
-      <a href="{{ files[0].url }}" class="btn gold btn--sm" download>تحميل</a>
+      <a href="{{ files[0].url }}" class="btn gold btn--sm">تحميل</a>
     {% elseif files|length > 1 and h.status != 'print' %}
       <a href="{{ item.url }}#downloads" class="btn gold btn--sm">{{ files|length }} ملفات</a>
     {% endif %}

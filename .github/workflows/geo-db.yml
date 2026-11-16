@@ -1,0 +1,34 @@
+name: geo-db
+# Monthly copy of DB-IP "IP to Country Lite" (CC BY 4.0, attribution: "IP Geolocation by DB-IP")
+# into the saer-core plugin, so visitor countries can be looked up without any outside service.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 4 3 * *'
+  push:
+    branches: [main]
+    paths: ['.github/workflows/geo-db.yml']
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download DB-IP Country Lite
+        run: |
+          set -e
+          out=user/plugins/saer-core/data/dbip-country-lite.mmdb
+          for m in "$(date -u +%Y-%m)" "$(date -u -d '-1 month' +%Y-%m)"; do
+            if curl -fsSL "https://download.db-ip.com/free/dbip-country-lite-$m.mmdb.gz" -o /tmp/db.gz; then
+              gunzip -c /tmp/db.gz > "$out"; echo "got $m"; ls -la "$out"; break
+            fi
+          done
+          test -s "$out"
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add user/plugins/saer-core/data/dbip-country-lite.mmdb
+          git diff --cached --quiet || git commit -m "Update DB-IP country database"
+          git pull --rebase && git push

@@ -184,6 +184,23 @@ a.book-cover:hover{transform:translateY(-4px)}
 .soon h1{font-size:clamp(32px,5vw,58px)}
 .article__img img{display:block;width:100%;height:auto;border-radius:22px}
 .card__img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:18px}
+.dlform{padding:clamp(24px,5vw,48px);margin-top:16px;display:flex;flex-direction:column;gap:18px}
+.dlform__f{display:flex;flex-direction:column;gap:22px;margin-top:6px}
+.dlform__row{display:flex;flex-direction:column;gap:10px;border:0;margin:0;padding:0;min-width:0}
+.dlform__row>label,.dlform__row legend{font-weight:700;color:var(--ink-strong);padding:0}
+.dlform input[type=text],.dlform select{width:100%;min-height:52px;padding:0 16px;border-radius:14px;border:1px solid var(--glass-line);background:rgba(10,3,24,.55);color:var(--ink);font:inherit;font-size:17px}
+.dlform select option,.dlform select optgroup{background:#1B0C30;color:var(--ink)}
+.dlform input[type=text]:focus,.dlform select:focus{outline:2px solid var(--gold);outline-offset:2px;border-color:var(--gold)}
+.dlform [aria-invalid=true]{border-color:#E59A8F}
+.dlform__opts{display:flex;flex-wrap:wrap;gap:10px}
+.opt{position:relative;cursor:pointer}
+.opt input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.opt span{display:inline-flex;align-items:center;min-height:46px;padding:0 18px;border-radius:999px;border:1px solid var(--glass-line);background:rgba(255,255,255,.05)}
+.opt input:checked+span{background:rgba(235,211,160,.18);border-color:var(--gold);color:var(--ink-strong);font-weight:700}
+.opt input:focus-visible+span{outline:2px solid var(--gold);outline-offset:3px}
+.dlform__err{color:#F2B8AE;font-size:15px}
+.dlform__hp{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.dlform{position:relative}
 .toc--plain li{min-height:42px;display:flex;align-items:center;gap:12px;padding:0 14px}
 .toc--plain li span{color:var(--gold);font-weight:700}
 
