@@ -170,7 +170,6 @@ a.book-cover:hover{transform:translateY(-4px)}
 .book-cover__img{display:block;width:100%;height:100%;object-fit:cover}
 .book-cover__ph{height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;padding:12% 10%;background:linear-gradient(160deg,#3A1D63,#1B0C30);border:1px solid rgba(235,211,160,.5);border-radius:14px}
 .book-cover__t{font-family:var(--font-head);font-weight:800;font-size:clamp(20px,2.2vw,28px);line-height:1.6;color:var(--gold)}
-.book-cover__mark{margin-top:18px;font-family:var(--font-head);font-size:14px;color:var(--gold-line);border-top:1px solid rgba(235,211,160,.4);padding-top:8px;min-width:40%}
 .book-hero{padding-top:32px;padding-bottom:72px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:56px}
 .book-hero__cover{flex:0 1 340px;margin:0 auto}
 .book-hero__text{flex:1 1 460px;display:flex;flex-direction:column;gap:20px}
