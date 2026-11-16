@@ -2,8 +2,10 @@
 """Add new YouTube videos to programmes that have "مزامنة مع يوتيوب" switched on.
 
 For every page with template "series", header.youtube_sync: true and a header.youtube_playlist,
-this reads the playlist with yt-dlp and creates an episode page for each video that the
-programme does not have yet. Existing episodes are never changed or removed.
+this reads the playlist with yt-dlp and creates an episode page for each video that is not on
+the site yet (anywhere). A video whose title matches another series' header.youtube_title_match
+goes to that series instead. Series with header.sync_last run last (catch-all lists, such as
+khutbas by year). Existing episodes are never changed or removed.
 
 Env: GRAV_API_URL (e.g. https://site/api/v1), GRAV_API_KEY. Optional: DRY_RUN=1.
 Runs hourly from .github/workflows/youtube-sync.yml.
@@ -11,7 +13,7 @@ Runs hourly from .github/workflows/youtube-sync.yml.
 import json, os, re, subprocess, sys, time, urllib.error, urllib.request
 
 sys.path.insert(0, os.path.dirname(__file__))
-from ytclean import EXTRA, dur, split_title  # noqa: E402
+from ytclean import EXTRA, dur, khutba_date, split_title  # noqa: E402
 
 API = os.environ["GRAV_API_URL"].rstrip("/")
 KEY = os.environ["GRAV_API_KEY"]
@@ -71,47 +73,85 @@ def truthy(v):
     return v is True or str(v).lower() in ("1", "true", "yes", "on")
 
 
+def children_of(pages, prog):
+    route = prog["raw_route"]
+    return [p for p in pages if p.get("parent_route") == prog["route"] or p.get("raw_route", "").rsplit("/", 1)[0] == route]
+
+
 def main():
     pages = all_pages()
-    programmes = [p for p in pages if p.get("template") == "series"
-                  and truthy((p.get("header") or {}).get("youtube_sync"))
+    series = [p for p in pages if p.get("template") == "series"]
+    programmes = [p for p in series
+                  if truthy((p.get("header") or {}).get("youtube_sync"))
                   and (p.get("header") or {}).get("youtube_playlist")]
-    print(f"{len(programmes)} programme(s) with YouTube sync on")
+    # Series that take videos by title from any synced playlist (e.g. a named khutba series that
+    # has no playlist of its own). A matching video goes there instead of the playlist's series.
+    routers = []
+    for p in series:
+        rx = (p.get("header") or {}).get("youtube_title_match")
+        if rx:
+            try:
+                routers.append((re.compile(rx), p))
+            except re.error:
+                print(f"bad youtube_title_match on {p['raw_route']}: {rx}")
+    # Catch-all series (khutbas by year) run last, so a video that also sits in a named series'
+    # playlist lands there first.
+    programmes.sort(key=lambda p: truthy((p.get("header") or {}).get("sync_last")))
+    # A video already anywhere on the site is never added again.
+    site_ids = {video_id((p.get("header") or {}).get("youtube", "")) for p in pages} - {""}
+    state = {}  # route -> [next_order, next_number]
+
+    def slot(prog):
+        r = prog["raw_route"]
+        if r not in state:
+            kids = children_of(pages, prog)
+            orders = [int(m.group(1)) for k in kids if (m := re.match(r"^(\d+)\.", k.get("folder", "")))]
+            numbers = [int(n) for k in kids if str(n := (k.get("header") or {}).get("number", "")).isdigit()]
+            state[r] = [max(orders, default=0) + 1, max(numbers, default=0) + 1]
+        return state[r]
+
+    print(f"{len(programmes)} series with YouTube sync on, {len(routers)} routed by title")
     created = 0
     for prog in programmes:
-        route, h = prog["raw_route"], prog["header"]
-        title = h.get("title") or prog.get("title") or route
+        h = prog["header"]
+        title = h.get("title") or prog.get("title") or prog["raw_route"]
         pid = playlist_id(h["youtube_playlist"])
-        kids = [p for p in pages if p.get("parent_route") == prog["route"] or p.get("raw_route", "").rsplit("/", 1)[0] == route]
-        have = {video_id((k.get("header") or {}).get("youtube", "")) for k in kids} - {""}
-        orders = [int(m.group(1)) for k in kids if (m := re.match(r"^(\d+)\.", k.get("folder", "")))]
-        numbers = [int(n) for k in kids if str(n := (k.get("header") or {}).get("number", "")).isdigit()]
-        next_order = max(orders, default=0) + 1
-        next_number = max(numbers, default=0) + 1
-        print(f"- {title} ({route}): {len(kids)} existing, playlist {pid}")
+        print(f"- {title} ({prog['raw_route']}): playlist {pid}")
         data = fetch_playlist(pid)
         if not data:
             continue
         new = []
         for v in data.get("entries") or []:
-            if not v or not v.get("id") or v["id"] in have or EXTRA.search(v.get("title") or ""):
+            if not v or not v.get("id") or v["id"] in site_ids or EXTRA.search(v.get("title") or ""):
                 continue
-            if (v.get("title") or "").strip() in ("[Private video]", "[Deleted video]"):
+            if (v.get("title") or "").strip() in ("", "[Private video]", "[Deleted video]"):
                 continue
-            have.add(v["id"])
-            n, t = split_title(v.get("title") or "", title)
-            new.append({"id": v["id"], "n": n, "t": t, "dur": dur(v.get("duration"))})
+            site_ids.add(v["id"])
+            target = next((r for rx, r in routers if rx.search(v.get("title") or "")), prog)
+            ttitle = (target.get("header") or {}).get("title") or target.get("title") or title
+            n, t = split_title(v.get("title") or "", ttitle)
+            new.append({"id": v["id"], "n": n, "t": t, "dur": dur(v.get("duration")), "target": target,
+                        "date": khutba_date(v.get("title") or "")})
+        # YouTube lists may run newest-first; add the oldest first so numbers follow time.
         if all(e["n"] for e in new):
             new.sort(key=lambda e: e["n"])
+        elif len([e for e in new if e["date"]]) == len(new) and new:
+            new.sort(key=lambda e: e["date"])
         for e in new:
-            num = e["n"] or next_number
-            next_number = max(next_number, num + 1)
-            header = {"title": e["t"] or f"الحلقة {num}", "number": num,
+            target = e["target"]
+            route = target["raw_route"]
+            order, number = slot(target)
+            num = e["n"] if (e["n"] and target is prog) else number
+            word = {"khutba": "الخطبة", "lesson": "الدرس", "lecture": "المحاضرة"}.get(
+                (target.get("header") or {}).get("item_word") or (prog.get("header") or {}).get("item_word"), "الحلقة")
+            header = {"title": e["t"] or f"{word} {num}", "number": num,
                       "youtube": f"https://www.youtube.com/watch?v={e['id']}", "synced_from": "youtube"}
             if e["dur"]:
                 header["duration"] = e["dur"]
-            body = {"route": f"{route}/ep-{next_order:02d}", "title": header["title"], "template": "episode",
-                    "header": header, "content": "", "order": next_order}
+            if e["date"]:
+                header["date"] = e["date"] + " 12:00"
+            body = {"route": f"{route}/ep-{order:02d}", "title": header["title"], "template": "episode",
+                    "header": header, "content": "", "order": order}
             if DRY:
                 st = "dry-run"
             else:
@@ -121,7 +161,7 @@ def main():
                     continue
                 created += 1
             print(f"  + {body['route']}  #{num}  {header['title']}  [{st}]")
-            next_order += 1
+            state[route] = [order + 1, max(number, num) + 1]
     print(f"done: {created} episode(s) created")
 
 
