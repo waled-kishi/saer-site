@@ -100,11 +100,17 @@ jobs:
       - name: Transcribe
         run: |
           mkdir -p out
-          python3 .saer/whisper.py /tmp/a.wav "out/${{ matrix.item.id }}.json" "${{ matrix.item.id }}"
+          set -o pipefail
+          python3 .saer/whisper.py /tmp/a.wav "out/${{ matrix.item.id }}.json" "${{ matrix.item.id }}" 2>&1 | tail -40 > "out/${{ matrix.item.id }}.log" \
+            || { cp "out/${{ matrix.item.id }}.log" "out/${{ matrix.item.id }}.err"; exit 1; }
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: transcript-${{ matrix.item.id }}
-          path: out/${{ matrix.item.id }}.json
+          path: |
+            out/${{ matrix.item.id }}.json
+            out/${{ matrix.item.id }}.err
+          if-no-files-found: ignore
           retention-days: 7
 
   commit:
