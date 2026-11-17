@@ -47,7 +47,7 @@ jobs:
           fi
           export SERIES
           echo "series=$SERIES" >> "$GITHUB_OUTPUT"
-          if git fetch -q --depth=1 origin audio 2>/dev/null; then
+          if git fetch -q --depth=1 origin +refs/heads/audio:refs/remotes/origin/audio 2>/dev/null; then
             git ls-tree --name-only origin/audio > /tmp/audio.txt
           else
             : > /tmp/audio.txt
@@ -84,7 +84,7 @@ jobs:
         run: |
           ID="${{ matrix.item.id }}"
           F=""
-          if git fetch -q --depth=1 origin audio 2>/dev/null; then
+          if git fetch -q --depth=1 origin +refs/heads/audio:refs/remotes/origin/audio 2>/dev/null; then
             F=$(git ls-tree --name-only origin/audio | grep "^$ID\." | head -1 || true)
           fi
           if [ -n "$F" ]; then
