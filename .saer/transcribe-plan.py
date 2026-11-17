@@ -18,7 +18,7 @@ spec.loader.exec_module(ys)
 
 wanted = [s.strip().rstrip("/") for s in os.environ.get("SERIES", "").split(",") if s.strip()]
 pages = ys.all_pages()
-done = {f[:-5] for f in os.listdir(os.path.join(HERE, "transcripts"))} if os.path.isdir(
+done = {f[:-5] for f in os.listdir(os.path.join(HERE, "transcripts")) if f.endswith(".json")} if os.path.isdir(
     os.path.join(HERE, "transcripts")) else set()
 
 # Without YouTube cookies, only videos whose audio is on the "audio" branch can be transcribed.
