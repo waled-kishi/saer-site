@@ -1,0 +1,52 @@
+2026.10.26
+== default
+exit 1
+[youtube] IulgwlZ-DOM: Downloading tv samsung player API JSON
+[youtube] IulgwlZ-DOM: Downloading visionos player API JSON
+WARNING: [youtube] No title found in player responses; falling back to title from initial data. Other metadata may also be missing
+ERROR: [youtube] IulgwlZ-DOM: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+ls: cannot access '/tmp/p_default.*': No such file or directory
+== tv
+exit 1
+[youtube] IulgwlZ-DOM: Downloading player b559f50c-main
+[youtube] IulgwlZ-DOM: Downloading tv player API JSON
+WARNING: [youtube] No title found in player responses; falling back to title from initial data. Other metadata may also be missing
+ERROR: [youtube] IulgwlZ-DOM: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+ls: cannot access '/tmp/p_tv.*': No such file or directory
+== web_safari
+exit 1
+[youtube] IulgwlZ-DOM: Downloading web safari client config
+[youtube] IulgwlZ-DOM: Downloading web safari player API JSON
+WARNING: [youtube] No title found in player responses; falling back to title from initial data. Other metadata may also be missing
+ERROR: [youtube] IulgwlZ-DOM: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+ls: cannot access '/tmp/p_web_safari.*': No such file or directory
+== mweb
+exit 1
+[youtube] IulgwlZ-DOM: Downloading mweb client config
+[youtube] IulgwlZ-DOM: Downloading mweb player API JSON
+WARNING: [youtube] No title found in player responses; falling back to title from initial data. Other metadata may also be missing
+ERROR: [youtube] IulgwlZ-DOM: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+ls: cannot access '/tmp/p_mweb.*': No such file or directory
+== android_vr
+exit 1
+[youtube] IulgwlZ-DOM: Downloading webpage
+[youtube] IulgwlZ-DOM: Downloading android vr player API JSON
+WARNING: [youtube] No title found in player responses; falling back to title from initial data. Other metadata may also be missing
+ERROR: [youtube] IulgwlZ-DOM: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+ls: cannot access '/tmp/p_android_vr.*': No such file or directory
+== web_embedded
+exit 1
+[youtube] IulgwlZ-DOM: Downloading player b559f50c-main
+[youtube] IulgwlZ-DOM: Downloading web embedded player API JSON
+WARNING: [youtube] No title found in player responses; falling back to title from initial data. Other metadata may also be missing
+ERROR: [youtube] IulgwlZ-DOM: Sign in to confirm you’re not a bot. This helps protect our community. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+ls: cannot access '/tmp/p_web_embedded.*': No such file or directory
+== ios
+exit 1
+[youtube] IulgwlZ-DOM: Downloading webpage
+[youtube] IulgwlZ-DOM: Downloading ios player API JSON
+WARNING: [youtube] No title found in player responses; falling back to title from initial data. Other metadata may also be missing
+ERROR: [youtube] IulgwlZ-DOM: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies
+ls: cannot access '/tmp/p_ios.*': No such file or directory
+== invidious/piped style check
+200
