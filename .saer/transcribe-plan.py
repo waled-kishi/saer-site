@@ -6,7 +6,8 @@ its route is given in SERIES (workflow_dispatch input, comma separated; "all" = 
 has the switch on). A video is skipped when .saer/transcripts/<video id>.json already exists.
 
 Prints a JSON list for the GitHub Actions matrix: [{"id": ..., "route": ...}, ...] (max 200).
-Env: GRAV_API_URL, GRAV_API_KEY, SERIES (optional).
+Env: GRAV_API_URL, GRAV_API_KEY, SERIES (optional), AUDIO_LIST (files on the audio branch),
+HAS_COOKIES ("true" when YouTube cookies are set: then every video is planned).
 """
 import importlib.util, json, os, sys
 
@@ -20,6 +21,11 @@ pages = ys.all_pages()
 done = {f[:-5] for f in os.listdir(os.path.join(HERE, "transcripts"))} if os.path.isdir(
     os.path.join(HERE, "transcripts")) else set()
 
+# Without YouTube cookies, only videos whose audio is on the "audio" branch can be transcribed.
+audio = None
+if os.environ.get("HAS_COOKIES") != "true" and os.environ.get("AUDIO_LIST"):
+    audio = {line.strip().split(".")[0] for line in open(os.environ["AUDIO_LIST"]) if line.strip()}
+
 out = []
 for s in pages:
     if s.get("template") != "series":
@@ -31,7 +37,7 @@ for s in pages:
         continue
     for p in ys.children_of(pages, s):
         vid = ys.video_id(p["header"].get("youtube", ""))
-        if vid and vid not in done and p.get("template") != "series":
+        if vid and vid not in done and p.get("template") != "series" and (audio is None or vid in audio):
             out.append({"id": vid, "route": p["route"]})
             done.add(vid)
 print(json.dumps(out[:200]))

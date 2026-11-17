@@ -61,6 +61,18 @@ form:
               validate:
                 type: bool
               ordering@: header.youtube_playlist
+            header.transcribe:
+              type: toggle
+              label: فرّغ هذه السلسلة
+              help: عند التفعيل تُفرَّغ كل خطبة لها ملف صوت، ويُكتب لها نص كتابي وملف PDF، ويُبنى كتيّب للسلسلة في قسم الكتب (غير منشور حتى تراجعه).
+              highlight: 1
+              default: 0
+              options:
+                1: مفعّل
+                0: متوقف
+              validate:
+                type: bool
+              ordering@: header.youtube_sync
             header.book:
               type: select
               label: الكتيّب المرتبط

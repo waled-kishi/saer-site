@@ -1,18 +1,21 @@
 name: transcribe
-# Whisper transcripts for series with "فرّغ هذه السلسلة" on (header.transcribe), or for the
-# series routes given by hand. Each video runs in its own job, in parallel.
-# Results: .saer/transcripts/<video id>.json (segments). Then transcribe-publish.yml takes over.
+# Khutba transcripts, book-style text, PDFs and series booklets.
+# Series: header.transcribe on ("فرّغ هذه السلسلة"), or the routes in .saer/transcribe-request.txt
+# (pushing that file starts a run), or the workflow_dispatch input.
+# Audio: YouTube blocks downloads from GitHub, so audio comes from the "audio" branch
+# (<video id>.<ext>, uploaded from Walid's laptop), or from YouTube when secret YT_COOKIES is set.
+# Steps: plan -> whisper (one job per video, parallel) -> commit .saer/transcripts -> publish.
 on:
   workflow_dispatch:
     inputs:
       series:
-        description: 'Series route(s), comma separated (e.g. /lectures/khutab/fiqh-al-mutaghayyirat). Empty = all series with the switch on.'
+        description: 'Series route(s), comma separated. Empty = all series with the switch on.'
         required: false
         default: ''
-      model:
-        description: 'Whisper model'
+      force_pdf:
+        description: 'Rebuild all PDFs (1 = yes)'
         required: false
-        default: 'large-v3'
+        default: '0'
   push:
     branches: [main]
     paths: ['.saer/transcribe-request.txt']
@@ -23,22 +26,33 @@ permissions:
 concurrency:
   group: transcribe
   cancel-in-progress: false
+env:
+  GRAV_API_URL: https://saer1.rifd-dt.com/api/v1
 jobs:
   plan:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
+      series: ${{ steps.plan.outputs.series }}
     steps:
       - uses: actions/checkout@v4
       - id: plan
         env:
-          GRAV_API_URL: https://saer1.rifd-dt.com/api/v1
           GRAV_API_KEY: ${{ secrets.GRAV_API_KEY }}
-          SERIES: ${{ github.event.inputs.series }}
+          HAS_COOKIES: ${{ secrets.YT_COOKIES != '' }}
         run: |
+          SERIES="${{ github.event.inputs.series }}"
           if [ "${{ github.event_name }}" = "push" ]; then
-            export SERIES="$(grep -v '^\s*#' .saer/transcribe-request.txt | tr '\n' ',' )"
+            SERIES="$(grep -v '^\s*#' .saer/transcribe-request.txt | grep -v '^\s*$' | paste -sd, -)"
           fi
+          export SERIES
+          echo "series=$SERIES" >> "$GITHUB_OUTPUT"
+          if git fetch -q --depth=1 origin audio 2>/dev/null; then
+            git ls-tree --name-only origin/audio > /tmp/audio.txt
+          else
+            : > /tmp/audio.txt
+          fi
+          export AUDIO_LIST=/tmp/audio.txt
           echo "matrix=$(python3 .saer/transcribe-plan.py)" >> "$GITHUB_OUTPUT"
 
   whisper:
@@ -56,25 +70,34 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
       - uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
-          key: whisper-${{ github.event.inputs.model || 'large-v3' }}
+          key: whisper-large-v3
       - name: Install
         run: |
           sudo apt-get install -y -qq ffmpeg >/dev/null
-          pip install -q -U "yt-dlp[default]" faster-whisper
-      - name: Download audio
-        run: |
-          yt-dlp -f "bestaudio" -x --audio-format mp3 --audio-quality 5 -o "/tmp/a.%(ext)s" \
-            "https://www.youtube.com/watch?v=${{ matrix.item.id }}"
-          ffmpeg -loglevel error -i /tmp/a.mp3 -ac 1 -ar 16000 /tmp/a.wav
-      - name: Transcribe
+          pip install -q faster-whisper
+      - name: Get audio
         env:
-          WHISPER_MODEL: ${{ github.event.inputs.model || 'large-v3' }}
+          YT_COOKIES: ${{ secrets.YT_COOKIES }}
+        run: |
+          ID="${{ matrix.item.id }}"
+          F=""
+          if git fetch -q --depth=1 origin audio 2>/dev/null; then
+            F=$(git ls-tree --name-only origin/audio | grep "^$ID\." | head -1 || true)
+          fi
+          if [ -n "$F" ]; then
+            git show "origin/audio:$F" > "/tmp/src.${F##*.}"
+          else
+            pip install -q -U "yt-dlp[default]"
+            curl -fsSL https://deno.land/install.sh | sh -s -- -y >/dev/null
+            export PATH="$HOME/.deno/bin:$PATH"
+            printf '%s' "$YT_COOKIES" > /tmp/cookies.txt
+            yt-dlp --cookies /tmp/cookies.txt -f "600/249/worstaudio" -o "/tmp/src.%(ext)s" "https://www.youtube.com/watch?v=$ID"
+          fi
+          ffmpeg -loglevel error -i /tmp/src.* -ac 1 -ar 16000 /tmp/a.wav
+      - name: Transcribe
         run: |
           mkdir -p out
           python3 .saer/whisper.py /tmp/a.wav "out/${{ matrix.item.id }}.json" "${{ matrix.item.id }}"
@@ -103,3 +126,24 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "Whisper transcripts ($(git diff --cached --name-only | wc -l))"
           for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
+
+  publish:
+    needs: [plan, commit]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Install
+        run: |
+          git pull -q origin main || true
+          sudo apt-get install -y -qq fonts-hosny-amiri poppler-utils >/dev/null
+          pip install -q weasyprint markdown
+      - name: Publish
+        env:
+          GRAV_API_KEY: ${{ secrets.GRAV_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SERIES: ${{ needs.plan.outputs.series }}
+          FORCE_PDF: ${{ github.event.inputs.force_pdf }}
+        run: python3 .saer/transcribe-publish.py

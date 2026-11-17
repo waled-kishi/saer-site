@@ -23,7 +23,7 @@
   <div class="byline"><span>{{ w.by }}</span></div>
   {% if h.summary %}<p class="lead">{{ h.summary }}</p>{% endif %}
   <div class="actions" style="margin-top:8px">
-    {% set bfiles = book ? book_files(book) : [] %}
+    {% set bfiles = (book and book.published and book.header.status not in ['soon', 'print']) ? book_files(book) : [] %}
     {% if bfiles|length == 1 %}<a href="{{ bfiles[0].url }}" class="btn gold">تحميل الكتيّب</a>
     {% elseif bfiles|length > 1 %}<a href="{{ book.url }}#downloads" class="btn gold">ملفات الكتيّب</a>{% endif %}
     {% if first_ep %}<a href="{{ first_ep.url }}" class="btn ghost">

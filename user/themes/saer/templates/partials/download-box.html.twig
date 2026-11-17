@@ -1,6 +1,6 @@
 {# Download box for the booklet linked to a series. Expects: book (page) #}
 {%- set bfiles = book ? book_files(book) : [] -%}
-{% if bfiles|length and book.header.status not in ['soon', 'print'] %}
+{% if bfiles|length and book.published and book.header.status not in ['soon', 'print'] %}
 <div class="glass box">
   <h2 class="k">{{ heading ?? 'السلسلة في كتيّب واحد' }}</h2>
   <p style="font-size:16px"><a href="{{ book.url }}" style="color:inherit">{{ book.header.summary ?: book.title }}</a></p>

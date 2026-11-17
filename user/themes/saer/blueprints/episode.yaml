@@ -24,3 +24,9 @@ form:
               label: المدة
               placeholder: '2:23'
               ordering@: header.youtube
+            header.written:
+              type: markdown
+              label: النسخة الكتابية (للـ PDF والكتيّب)
+              help: تُكتب تلقائياً من التفريغ بأسلوب كتابي. عدّلها هنا، ويُعاد بناء ملف PDF والكتيّب تلقائياً خلال يوم (أو فوراً عند تشغيل التفريغ). المحتوى أعلاه هو التفريغ كما قيل في الخطبة.
+              validate:
+                type: textarea

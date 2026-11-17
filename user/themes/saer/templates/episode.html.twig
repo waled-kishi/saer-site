@@ -56,6 +56,19 @@
     </div>
     {% endif %}
     {% include 'partials/download-box.html.twig' with {book: book} %}
+    {#- The written khutba (PDF) shows once its series booklet is published and available. -#}
+    {%- set own = book_files(page) -%}
+    {% if own|length and (not book or (book.published and book.header.status not in ['soon', 'print'])) and (book or h.files_public) %}
+    <div class="glass box">
+      <h2 class="k">{{ w.the }} مكتوبة</h2>
+      {% for f in own %}
+      <a href="{{ f.url }}" class="btn ghost btn--sm">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+        {{ f.label }}
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
   </aside>
 </section>
 {% endblock %}
