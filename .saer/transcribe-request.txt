@@ -1,0 +1,2 @@
+# Series routes to transcribe now (one per line). Editing this file starts the transcribe workflow.
+/lectures/khutab/fiqh-al-mutaghayyirat

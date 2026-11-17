@@ -13,6 +13,9 @@ on:
         description: 'Whisper model'
         required: false
         default: 'large-v3'
+  push:
+    branches: [main]
+    paths: ['.saer/transcribe-request.txt']
   schedule:
     - cron: '41 2 * * *'
 permissions:
@@ -32,7 +35,11 @@ jobs:
           GRAV_API_URL: https://saer1.rifd-dt.com/api/v1
           GRAV_API_KEY: ${{ secrets.GRAV_API_KEY }}
           SERIES: ${{ github.event.inputs.series }}
-        run: echo "matrix=$(python3 .saer/transcribe-plan.py)" >> "$GITHUB_OUTPUT"
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            export SERIES="$(grep -v '^\s*#' .saer/transcribe-request.txt | tr '\n' ',' )"
+          fi
+          echo "matrix=$(python3 .saer/transcribe-plan.py)" >> "$GITHUB_OUTPUT"
 
   whisper:
     needs: plan
