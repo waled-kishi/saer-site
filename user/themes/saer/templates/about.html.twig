@@ -74,7 +74,7 @@
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
         {{ f.label == 'تحميل الكتاب' ? 'تحميل السيرة الذاتية' : f.label }}
       </a>
-      {% if f.size %}<span class="about-cv__meta">{{ f.ext|upper }} · {{ (f.size / 1048576)|number_format(1) }} ميغابايت</span>{% endif %}
+      {% if f.size %}<span class="about-cv__meta" dir="rtl">ملف <bdi>{{ f.ext|upper }}</bdi>، <bdi>{{ (f.size / 1048576)|number_format(1) }}</bdi> ميغابايت</span>{% endif %}
       {% endfor %}
     </div>
   </div>
