@@ -3,6 +3,7 @@ namespace Grav\Plugin\SaerCore;
 
 use Grav\Framework\Psr7\Response;
 use Grav\Plugin\Api\Controllers\AbstractApiController;
+use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\Api\Response\ApiResponse;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
@@ -235,6 +236,32 @@ class StatsController extends AbstractApiController
         $st = $pdo->prepare('DELETE FROM profiles WHERE id = ?');
         $st->execute([$id]);
         return ApiResponse::create(['deleted' => $st->rowCount()]);
+    }
+
+    /**
+     * DELETE /saer-core/data?scope=views|all: start the statistics from zero.
+     * views: page views (and the crawler list). all: also downloads and download-form answers.
+     * Download ids (/dl/{id}) are kept so links keep working.
+     */
+    public function reset(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.system.write');
+        $scope = (string) ($request->getQueryParams()['scope'] ?? '');
+        if (!in_array($scope, ['views', 'all'], true)) {
+            throw new ValidationException('scope must be views or all');
+        }
+        $pdo = $this->pdo();
+        $out = [];
+        $pdo->beginTransaction();
+        $out['views'] = $pdo->exec('DELETE FROM views');
+        $pdo->exec('DELETE FROM crawlers');
+        if ($scope === 'all') {
+            $out['downloads'] = $pdo->exec('DELETE FROM downloads');
+            $out['profiles'] = $pdo->exec('DELETE FROM profiles');
+        }
+        $pdo->commit();
+        $pdo->exec('VACUUM');
+        return ApiResponse::create(['scope' => $scope, 'deleted' => $out]);
     }
 
     public function export(ServerRequestInterface $request): ResponseInterface

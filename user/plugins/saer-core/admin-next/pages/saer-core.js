@@ -50,6 +50,7 @@
   .mini{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:10px}
   .mini h4{font-size:12px;margin:0 0 6px;opacity:.75;font-weight:600}
   .err{color:#d9534f}
+  button.danger{border-color:#d9534f;color:#d9534f}
   a{color:inherit}
   .scroll{overflow-x:auto}
   .note{font-size:12px;opacity:.65;line-height:1.7}
@@ -89,6 +90,17 @@
       this.load();
     }
 
+    async reset(scope) {
+      const what = scope === 'all'
+        ? 'كل الإحصائيات: الزيارات والتحميلات وبيانات من عبّأ النموذج'
+        : 'كل الزيارات (تبقى التحميلات وبيانات المحمّلين)';
+      if (!confirm(`سيُحذف ${what}، وتبدأ الأرقام من الصفر. لا يمكن التراجع.\nيُستحسن تصدير البيانات أولاً. متابعة؟`)) return;
+      if (scope === 'all' && prompt('للتأكيد اكتب كلمة: حذف') !== 'حذف') return;
+      const r = await fetch(api(`/saer-core/data?scope=${scope}`), { method: 'DELETE', headers: headers(), credentials: 'same-origin' });
+      if (!r.ok) { alert('تعذّر الحذف'); return; }
+      this.load();
+    }
+
     render(body) {
       const ranges = RANGES.map(([d, l]) => `<button type="button" data-days="${d}" aria-pressed="${d === this.days}">${l}</button>`).join('');
       this.root.innerHTML = `<style>${CSS}</style><div class="wrap">
@@ -99,6 +111,7 @@
         ${body}</div>`;
       this.root.querySelectorAll('[data-days]').forEach((b) => b.addEventListener('click', () => { this.days = +b.dataset.days; this.load(); }));
       this.root.querySelectorAll('[data-export]').forEach((b) => b.addEventListener('click', () => this.exportCsv(b.dataset.export)));
+      this.root.querySelectorAll('[data-reset]').forEach((b) => b.addEventListener('click', () => this.reset(b.dataset.reset)));
       this.root.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', () => this.del(+b.dataset.del)));
     }
 
@@ -166,7 +179,11 @@
           <div class="card"><h2>المحمّلون: البلد</h2>${this.bars(d.people.countries.slice(0, 12), 'n', 'label', true)}</div>
         </div>
         <div class="card"><h2>آخر من حمّل</h2>${recent}</div>
-        <p class="note">لا يحفظ الموقع عناوين IP ولا يضع كوكيز للعدّ. "الزائر" يُحسب مرة واحدة في اليوم. البلد في الزيارات من قاعدة DB-IP Lite (IP Geolocation by DB-IP)، وفي النموذج من اختيار الشخص. الروبوتات ومحركات البحث لا تُحسب.</p>`;
+        <p class="note">لا يحفظ الموقع عناوين IP ولا يضع كوكيز للعدّ. "الزائر" يُحسب مرة واحدة في اليوم. البلد في الزيارات من قاعدة DB-IP Lite (IP Geolocation by DB-IP)، وفي النموذج من اختيار الشخص. الروبوتات ومحركات البحث لا تُحسب، وكذلك أي زائر يفتح 30 صفحة خلال 5 دقائق (زاحف آلي يتظاهر بأنه متصفح).</p>
+        <div class="card"><h2>البدء من الصفر</h2>
+          <p class="note">لحذف أرقام التجربة قبل الإعلان، أو متى شئت. روابط التحميل تبقى تعمل كما هي.</p>
+          <div class="ranges"><button type="button" data-reset="views">مسح الزيارات فقط</button>
+          <button type="button" data-reset="all" class="danger">مسح كل الإحصائيات</button></div></div>`;
     }
   }
   customElements.define(TAG, SaerStats);

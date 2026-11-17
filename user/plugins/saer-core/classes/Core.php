@@ -206,11 +206,34 @@ class Core
 
     /* ---------- recording ---------- */
 
+    /** A visitor who opens this many pages within CRAWL_WINDOW seconds is a crawler, not a reader. */
+    public const CRAWL_PAGES = 30;
+    public const CRAWL_WINDOW = 300;
+
     public function recordView(string $route, string $title, string $template): void
     {
-        $this->pdo()->prepare('INSERT INTO views (day, ts, route, title, template, visitor, geo, device, ref) VALUES (?,?,?,?,?,?,?,?,?)')
-            ->execute([$this->today(), time(), $route, mb_substr($title, 0, 200), $template, $this->visitor(), $this->geo(),
+        $pdo = $this->pdo();
+        $visitor = $this->visitor();
+        $st = $pdo->prepare('SELECT 1 FROM crawlers WHERE visitor = ?');
+        $st->execute([$visitor]);
+        if ($st->fetchColumn()) {
+            return;
+        }
+        $pdo->prepare('INSERT INTO views (day, ts, route, title, template, visitor, geo, device, ref) VALUES (?,?,?,?,?,?,?,?,?)')
+            ->execute([$this->today(), time(), $route, mb_substr($title, 0, 200), $template, $visitor, $this->geo(),
                        $this->device(), $this->referrer()]);
+
+        // A browser-looking crawler walks every page in minutes: drop all of its views for the day.
+        $st = $pdo->prepare('SELECT COUNT(*) FROM views WHERE visitor = ? AND ts > ?');
+        $st->execute([$visitor, time() - self::CRAWL_WINDOW]);
+        if ((int) $st->fetchColumn() >= self::CRAWL_PAGES) {
+            $pdo->beginTransaction();
+            $del = $pdo->prepare('DELETE FROM views WHERE visitor = ?');
+            $del->execute([$visitor]);
+            $pdo->prepare('INSERT OR REPLACE INTO crawlers (visitor, day, ts, views) VALUES (?,?,?,?)')
+                ->execute([$visitor, $this->today(), time(), $del->rowCount()]);
+            $pdo->commit();
+        }
     }
 
     public function recordDownload(array $file, ?int $profileId): void

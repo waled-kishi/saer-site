@@ -11,6 +11,7 @@ use PDO;
  *   profiles   what a visitor typed into the download form (name, age band, country, gender)
  *   downloads  one row per download (linked to a profile when the visitor filled the form)
  *   views      one row per page view (no IP stored; "visitor" is a salted daily hash)
+ *   crawlers   daily visitor hashes caught opening pages faster than a person reads (not counted)
  */
 class Db
 {
@@ -96,6 +97,18 @@ class Db
                 CREATE INDEX IF NOT EXISTS views_day ON views(day);
                 CREATE INDEX IF NOT EXISTS views_route ON views(route);
                 PRAGMA user_version = 1;
+            SQL);
+        }
+        if ($version < 2) {
+            $pdo->exec(<<<SQL
+                CREATE TABLE IF NOT EXISTS crawlers (
+                    visitor TEXT PRIMARY KEY,
+                    day TEXT NOT NULL,
+                    ts INTEGER NOT NULL,
+                    views INTEGER NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS views_visitor_ts ON views(visitor, ts);
+                PRAGMA user_version = 2;
             SQL);
         }
     }

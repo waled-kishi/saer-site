@@ -14,6 +14,10 @@ Site plugin for saer1.rifd-dt.com.
   CC BY 4.0 — "IP Geolocation by DB-IP") or a CDN country header when present.
 - **Admin2**: sidebar item "الإحصائيات" (component page `admin-next/pages/saer-core.js`), dashboard widget
   (`admin-next/widgets/saer-core.js`), API under `/api/v1/saer-core/*` (needs `api.system.read`).
+- Crawlers that look like browsers: a visitor opening 30 pages within 5 minutes is put in `crawlers`
+  for the day and all its views are dropped.
+- Reset: `DELETE /api/v1/saer-core/data?scope=views|all` (`api.system.write`), also buttons at the bottom
+  of the stats page. `all` also clears downloads and form answers; `/dl/{id}` ids are kept.
 - Data: `user/data/saer-core/saer.sqlite` (+ `secret`). Not in the repository.
 
 Bundled: MaxMind DB Reader (lib/MaxMind, Apache-2.0).
