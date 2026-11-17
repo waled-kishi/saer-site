@@ -1,18 +1,25 @@
 {% extends 'partials/base.html.twig' %}
 {#
-  About the Sheikh. Header fields:
-    chips: [] (values, shown in gold)
-    other_programs: [] (titles of other programmes on YouTube)
-  Uses the first image in the page media as the portrait.
+  About the Sheikh. Header fields (blueprints/about.yaml):
+    lead            short intro in the hero (when empty, the page content goes in the hero instead)
+    chips: []       values, shown in gold
+    other_programs  titles of other programmes on YouTube
+    facts: []       {n, label} figures shown as a strip under the hero
+    files: []       {label, file}: download buttons at the end (counted through /dl, form per download_form)
+    files_heading, files_note
+  Uses the "portrait" field or the first image in the page media as the portrait.
 #}
 {%- set h = page.header -%}
 {%- set tc = config.theme -%}
-{%- set img = page.media.images|first -%}
+{%- set pick = media_pick(page, h.portrait)|first -%}
+{%- set img = (pick and pick.medium) ? pick.medium : page.media.images|first -%}
+{%- set has_lead = h.lead|trim is not empty -%}
+{%- set cv = book_files(page) -%}
 {% block content %}
 <section class="wrap" style="padding-top:64px">
   {% include 'partials/breadcrumbs.html.twig' %}
 </section>
-<section class="wrap hero" style="padding-top:40px;padding-bottom:96px">
+<section class="wrap hero" style="padding-top:40px;padding-bottom:{{ has_lead ? 64 : 96 }}px">
   {% if img %}
   <div style="flex:0 1 320px;margin:0 auto">
     <div class="glass" style="padding:12px;border-radius:36px">
@@ -23,7 +30,11 @@
   <div class="hero__text" style="flex:1 1 480px;gap:18px">
     <p class="eye">عن المقدّم</p>
     <h1 class="h2">{{ h.display_name ?: page.title }}</h1>
-    <div class="prose" style="max-width:none;flex:none">{{ page.content|raw }}</div>
+    {% if has_lead %}
+      <p class="lead">{{ h.lead|nl2br }}</p>
+    {% else %}
+      <div class="prose" style="max-width:none;flex:none">{{ page.content|raw }}</div>
+    {% endif %}
     {% if h.chips %}<div class="chips">{% for c in h.chips %}<span class="chip chip--gold">{{ c }}</span>{% endfor %}</div>{% endif %}
     {% if h.other_programs %}
       <p style="margin-top:8px;font-weight:700;color:#fff">من برامجه الأخرى على يوتيوب</p>
@@ -37,4 +48,38 @@
     </div>
   </div>
 </section>
+
+{% if h.facts %}
+<div class="wrap" style="padding-bottom:72px"><div class="glass stats">
+  {% for s in h.facts %}<div><strong>{{ s.n }}</strong><span>{{ s.label }}</span></div>{% endfor %}
+</div></div>
+{% endif %}
+
+{% if has_lead and page.content|trim %}
+<section class="wrap wrap--narrow about-body">
+  <article class="prose">{{ page.content|raw }}</article>
+</section>
+{% endif %}
+
+{% if cv|length %}
+<section class="wrap wrap--narrow" style="padding-top:56px;padding-bottom:96px">
+  <div class="glass about-cv">
+    <div class="about-cv__text">
+      <h2 class="k">{{ h.files_heading ?: 'السيرة الذاتية كاملة' }}</h2>
+      {% if h.files_note %}<p>{{ h.files_note }}</p>{% endif %}
+    </div>
+    <div class="about-cv__actions">
+      {% for f in cv %}
+      <a href="{{ f.url }}" class="btn gold">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+        {{ f.label == 'تحميل الكتاب' ? 'تحميل السيرة الذاتية' : f.label }}
+      </a>
+      {% if f.size %}<span class="about-cv__meta">{{ f.ext|upper }} · {{ (f.size / 1048576)|number_format(1) }} ميغابايت</span>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% elseif has_lead %}
+<div style="height:96px"></div>
+{% endif %}
 {% endblock %}

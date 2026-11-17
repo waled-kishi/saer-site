@@ -1,0 +1,91 @@
+title: عن الشيخ
+'@extends':
+  type: content-base
+  context: theme://blueprints
+
+form:
+  fields:
+    tabs:
+      fields:
+        content:
+          fields:
+            header.display_name:
+              type: text
+              label: الاسم كما يظهر في رأس الصفحة
+              ordering@: header.title
+            header.lead:
+              type: textarea
+              label: المقدّمة
+              help: سطران أو ثلاثة بجانب الصورة. إذا تُركت فارغة يظهر نص الصفحة كاملاً بجانب الصورة.
+              rows: 3
+              ordering@: header.display_name
+            header.portrait:
+              type: media
+              label: الصورة
+              help: إذا لم تُختر تُستعمل أول صورة في وسائط الصفحة.
+              sources: [page]
+              accept: ['image/*']
+              ordering@: header.lead
+            header.portrait_alt:
+              type: text
+              label: وصف الصورة (لقارئات الشاشة)
+              ordering@: header.portrait
+            header.chips:
+              type: array
+              label: الشعارات الذهبية
+              value_only: true
+              ordering@: header.portrait_alt
+            header.other_programs:
+              type: array
+              label: من برامجه الأخرى على يوتيوب
+              value_only: true
+              ordering@: header.chips
+            header.facts:
+              type: list
+              label: أرقام تحت الصورة
+              btnLabel: إضافة رقم
+              collapsed: false
+              ordering@: header.other_programs
+              fields:
+                .n:
+                  type: text
+                  label: الرقم
+                  placeholder: '+70 ألف'
+                .label:
+                  type: text
+                  label: الوصف
+            header.files:
+              type: list
+              label: ملفات التحميل في آخر الصفحة
+              btnLabel: إضافة ملف
+              collapsed: false
+              ordering@: header.facts
+              fields:
+                .label:
+                  type: text
+                  label: اسم الزر
+                  placeholder: تحميل السيرة الذاتية
+                .file:
+                  type: media
+                  label: الملف
+                  sources: [page]
+                  accept: ['application/pdf']
+            header.files_heading:
+              type: text
+              label: عنوان قسم التحميل
+              placeholder: السيرة الذاتية كاملة
+              ordering@: header.files
+            header.files_note:
+              type: textarea
+              label: سطر تحت العنوان
+              rows: 2
+              ordering@: header.files_heading
+            header.download_form:
+              type: select
+              label: النموذج قبل التحميل
+              default: 'off'
+              options:
+                'off': بدون نموذج
+                optional: اختياري (مع زر تخطٍّ)
+                required: إجباري
+              ordering@: header.files_note

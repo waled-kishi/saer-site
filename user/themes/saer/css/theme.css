@@ -233,3 +233,17 @@ a.book-cover:hover{transform:translateY(-4px)}
 .error-page .code{font-family:var(--font-head);font-size:96px;font-weight:800;color:var(--gold);line-height:1}
 
 @media print{body{background:#fff;color:#000}body::before,body::after,.site-head,.site-foot,.aside,.pager,.video{display:none}.prose{font-size:14pt;color:#000}.glass{background:none;border:0;box-shadow:none}}
+
+/* About page */
+.about-body .prose{max-width:none}
+.about-body .prose h2{color:var(--ink-strong);padding-top:18px;display:flex;align-items:center;gap:14px}
+.about-body .prose h2::before{content:"";flex:none;width:34px;height:2px;border-radius:2px;background:var(--gold)}
+.about-body .prose ul{padding-inline-start:1.2em;display:flex;flex-direction:column;gap:8px}
+.about-body .prose li::marker{color:var(--gold)}
+.about-cv{padding:34px 36px;border-radius:28px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px}
+.about-cv__text{flex:1 1 380px;display:flex;flex-direction:column;gap:10px}
+.about-cv__text h2{font-size:clamp(24px,2.4vw,30px);font-weight:700;color:var(--ink-strong)}
+.about-cv__text p{margin:0;font-size:18px;line-height:1.9}
+.about-cv__actions{display:flex;flex-wrap:wrap;gap:12px}
+.about-cv__actions{align-items:center}
+.about-cv__meta{font-size:14px;color:var(--muted)}
