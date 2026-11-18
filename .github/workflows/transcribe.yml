@@ -52,7 +52,7 @@ jobs:
           URL=$(grep -v '^\s*#' .saer/audio-drive.txt | grep -m1 -o 'https://[^ ]*' || true)
           if [ -n "$URL" ]; then
             pip install -q gdown
-            gdown --folder "$URL" -O /tmp/drive --quiet --remaining-ok || echo "::warning::Drive download failed"
+            gdown --folder "$URL" -O /tmp/drive --quiet || echo "::warning::Drive download failed"
             git fetch -q --depth=1 origin +refs/heads/audio:refs/remotes/origin/audio
             git worktree add -q --detach /tmp/aud origin/audio
             n=0

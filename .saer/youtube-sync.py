@@ -10,6 +10,7 @@ khutbas by year). Existing episodes are never changed or removed.
 Env: GRAV_API_URL (e.g. https://site/api/v1), GRAV_API_KEY. Optional: DRY_RUN=1.
 Runs hourly from .github/workflows/youtube-sync.yml.
 """
+import http.client
 import json, os, re, subprocess, sys, time, urllib.error, urllib.request
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -31,7 +32,7 @@ def call(method, path, body=None, tries=4):
         except urllib.error.HTTPError as e:
             if e.code < 500:
                 return e.code, {"error": e.read()[:300].decode("utf-8", "replace")}
-        except (urllib.error.URLError, TimeoutError, ValueError):
+        except (urllib.error.URLError, TimeoutError, ValueError, http.client.HTTPException):
             pass
         time.sleep(5 * (i + 1))
     return -1, {"error": "unreachable"}
