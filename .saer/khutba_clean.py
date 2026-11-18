@@ -59,7 +59,8 @@ def paragraphs(segments, gap=0.8, soft=350, hard=750):
         if not t:
             continue
         pause = (s["s"] - last_end) if last_end is not None else 0
-        if cur and ((pause >= gap and len(cur) >= soft) or len(cur) >= hard):
+        ends = cur.rstrip()[-1:] in ".؟?!"
+        if cur and ((pause >= gap and len(cur) >= soft) or (ends and len(cur) >= soft) or len(cur) >= hard):
             paras.append(cur.strip())
             cur = ""
         cur += (" " if cur else "") + t
