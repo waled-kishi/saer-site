@@ -1,3 +1,4 @@
 # Google Drive folder with khutba audio (shared as "Anyone with the link").
 # File names = YouTube video id (e.g. wjQfB1Q4APY.mp4), one subfolder per series is fine (max 50 files per folder).
 # The transcribe workflow copies new files from here to the "audio" branch on every run.
+https://drive.google.com/drive/folders/1vUSi5vSIeSkHBpLV6n4JIeUwigtJSgTF
