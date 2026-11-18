@@ -40,7 +40,11 @@ def call(method, path, body=None, tries=4):
 def all_pages():
     pages, page = [], 1
     while True:
-        st, res = call("GET", f"/pages?per_page=100&page={page}")
+        for attempt in range(6):  # the site answers 404 for a minute while a deploy runs
+            st, res = call("GET", f"/pages?per_page=100&page={page}")
+            if st == 200:
+                break
+            time.sleep(20)
         if st != 200:
             sys.exit(f"Cannot list pages: {st} {res}")
         pages += res.get("data", [])

@@ -53,7 +53,8 @@ jobs:
             : > /tmp/audio.txt
           fi
           export AUDIO_LIST=/tmp/audio.txt
-          echo "matrix=$(python3 .saer/transcribe-plan.py)" >> "$GITHUB_OUTPUT"
+          M=$(python3 .saer/transcribe-plan.py)
+          echo "matrix=$M" >> "$GITHUB_OUTPUT"
 
   whisper:
     needs: plan
