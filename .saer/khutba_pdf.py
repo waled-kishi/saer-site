@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """PDF for one khutba and a booklet for a whole series (WeasyPrint, A5, Amiri + Noto Kufi Arabic).
 
-khutba_pdf(item, out_path)                       item: {title, number, date, location, url, video, text}
+khutba_pdf(item, out_path)                       item: {title, number, date, location, route, text}
 booklet_pdf(series, items, out_path)             series: {title, summary, url}
 text is Markdown (### subheadings, ﴿ ﴾ verses, « » quotes).
 """
@@ -13,7 +13,7 @@ from weasyprint.text.fonts import FontConfiguration
 HERE = os.path.dirname(os.path.abspath(__file__))
 FONTS = os.path.normpath(os.path.join(HERE, "..", "user", "themes", "saer", "fonts"))
 AUTHOR = "الشيخ محمد سائر الشبعان"
-SITE = "saer1.rifd-dt.com"
+SITE = os.environ.get("SITE_URL", "https://saer1.rifd-dt.com").split("://")[-1].rstrip("/")
 
 CSS_TEXT = """
 @font-face { font-family: Kufi; font-weight: 400; src: url('file://%(f)s/noto-kufi-arabic-arabic-400-normal.woff2'); }
@@ -78,7 +78,7 @@ def chapter(it, cls=""):
     eyebrow = f"خطبة {it['number']}" if it.get("number") else ""
     if it.get("series"):
         eyebrow = f"{it['series']} · {eyebrow}" if eyebrow else it["series"]
-    end = f"شاهد الخطبة: youtube.com/watch?v={it['video']}" if it.get("video") else ""
+    end = f"شاهد الخطبة واستمع إليها: {SITE}{it['route']}" if it.get("route") else ""
     return (f'<section class="{cls}" id="k{it.get("number", "")}">'
             f'<div class="eyebrow">{html.escape(eyebrow)}</div><h1>{html.escape(it["title"])}</h1>'
             f'<div class="meta">{meta(it)}</div>{md(it["text"])}'

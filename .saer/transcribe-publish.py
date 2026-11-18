@@ -27,6 +27,7 @@ from khutba_docx import booklet_docx  # noqa: E402
 
 TDIR = os.path.join(HERE, "transcripts")
 FORCE = os.environ.get("FORCE_PDF") == "1"
+LINK_V = "site-link-1"  # bump to rebuild every PDF after a layout change
 
 
 def q(route):
@@ -129,17 +130,18 @@ def do_series(s, pages):
 
         text = written or content
         item = {"title": ep["title"], "number": hd.get("number"), "date": hd.get("date"),
-                "location": hd.get("location"), "video": vid, "text": text, "series": s["title"]}
+                "location": hd.get("location"), "video": vid, "route": ep["route"], "text": text,
+                "series": s["title"]}
         items.append(item)
 
-        # 3. per-khutba PDF, rebuilt when the text changes
-        if FORCE or hd.get("pdf_hash") != h(text):
+        # 3. per-khutba PDF, rebuilt when the text (or the page link in it) changes
+        if FORCE or hd.get("pdf_hash") != h(text + LINK_V):
             name = f"khutba-{int(hd.get('number') or len(items)):02d}.pdf"
             with tempfile.TemporaryDirectory() as tmp:
                 out = os.path.join(tmp, name)
                 khutba_pdf(item, out)
                 if upload(ep["route"], out, name, "application/pdf"):
-                    new_h.update({"pdf_hash": h(text), "download_form": "off",
+                    new_h.update({"pdf_hash": h(text + LINK_V), "download_form": "off",
                                   "files": [{"label": "الخطبة مكتوبة (PDF)", "file": name}]})
                     print(f"  + pdf {ep['route']}/{name}")
         if new_h:
@@ -152,7 +154,7 @@ def do_series(s, pages):
 def do_booklet(s, items):
     slug = s["route"].rstrip("/").rsplit("/", 1)[-1]
     route = f"/books/khutab-{slug}"
-    sig = h("".join(i["text"] for i in items) + str(len(items)))
+    sig = h("".join(i["text"] for i in items) + str(len(items)) + LINK_V)
     book = get_page(route)
     if not book:
         body = {"route": route, "title": s["title"], "template": "book", "order": 50, "content": "",

@@ -18,9 +18,9 @@ on:
         default: '0'
   push:
     branches: [main]
-    paths: ['.saer/transcribe-request.txt']
+    paths: ['.saer/transcribe-request.txt', '.saer/audio-drive.txt']
   schedule:
-    - cron: '41 2 * * *'
+    - cron: '41 */4 * * *'
 permissions:
   contents: write
 concurrency:
@@ -28,6 +28,7 @@ concurrency:
   cancel-in-progress: false
 env:
   GRAV_API_URL: https://saer1.rifd-dt.com/api/v1
+  SITE_URL: https://saer1.rifd-dt.com
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -47,6 +48,27 @@ jobs:
           fi
           export SERIES
           echo "series=$SERIES" >> "$GITHUB_OUTPUT"
+          # New audio from the shared Google Drive folder -> "audio" branch
+          URL=$(grep -v '^\s*#' .saer/audio-drive.txt | grep -m1 -o 'https://[^ ]*' || true)
+          if [ -n "$URL" ]; then
+            pip install -q gdown
+            gdown --folder "$URL" -O /tmp/drive --quiet --remaining-ok || echo "::warning::Drive download failed"
+            git fetch -q --depth=1 origin +refs/heads/audio:refs/remotes/origin/audio
+            git worktree add -q --detach /tmp/aud origin/audio
+            n=0
+            while IFS= read -r f; do
+              b=$(basename "$f")
+              if echo "$b" | grep -Eq '^[A-Za-z0-9_-]{11}\.(mp4|webm|m4a|mp3|opus|ogg)$' && [ ! -e "/tmp/aud/$b" ]; then
+                cp "$f" /tmp/aud/ && n=$((n+1))
+              fi
+            done < <(find /tmp/drive -type f 2>/dev/null)
+            if [ "$n" -gt 0 ]; then
+              git -C /tmp/aud add -A
+              git -C /tmp/aud -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -q -m "Audio from Google Drive ($n)"
+              git -C /tmp/aud push -q origin HEAD:refs/heads/audio
+              echo "copied $n audio files from Drive"
+            fi
+          fi
           if git fetch -q --depth=1 origin +refs/heads/audio:refs/remotes/origin/audio 2>/dev/null; then
             git ls-tree --name-only origin/audio > /tmp/audio.txt
           else

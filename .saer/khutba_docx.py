@@ -4,7 +4,7 @@
 booklet_docx(series, items, out)   same arguments as khutba_pdf.booklet_pdf.
 Fonts: Traditional Arabic for the text, Sakkal Majalla for headings (both ship with Windows).
 """
-import re
+import os, re
 from docx import Document
 from docx.enum.section import WD_SECTION
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
@@ -15,6 +15,7 @@ from docx.shared import Mm, Pt, RGBColor
 BODY, HEAD = "Traditional Arabic", "Sakkal Majalla"
 PURPLE, GOLD = RGBColor(0x2A, 0x12, 0x45), RGBColor(0xC9, 0x9A, 0x45)
 AUTHOR = "الشيخ محمد سائر الشبعان"
+SITE = os.environ.get("SITE_URL", "https://saer1.rifd-dt.com").split("://")[-1].rstrip("/")
 
 
 def rtl_par(p, align=WD_ALIGN_PARAGRAPH.JUSTIFY):
@@ -114,7 +115,7 @@ def booklet_docx(series, items, out):
                 para(doc, re.sub(r"^>\s?", "", block, flags=re.M), size=16, color=PURPLE)
             else:
                 para(doc, " ".join(block.split("\n")), size=16)
-        if it.get("video"):
-            para(doc, f"شاهد الخطبة: youtube.com/watch?v={it['video']}", font=HEAD, size=10,
+        if it.get("route"):
+            para(doc, f"شاهد الخطبة واستمع إليها: {SITE}{it['route']}", font=HEAD, size=10,
                  color=RGBColor(0x7A, 0x6A, 0x8F), align=WD_ALIGN_PARAGRAPH.CENTER)
     doc.save(out)
