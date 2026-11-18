@@ -52,7 +52,7 @@ def loose(phrase):
     return "".join(out)
 
 
-def paragraphs(segments, gap=1.2, soft=420, hard=950):
+def paragraphs(segments, gap=0.8, soft=350, hard=750):
     paras, cur, last_end = [], "", None
     for s in segments:
         t = s["t"].strip()
@@ -100,6 +100,8 @@ def clean(segments, phrases=None):
         if m and m.start() > len(full) * 0.55:
             full = full[:m.start()].rstrip(" ،,\n")
             break
+    # A bare "وبعد" left at the very start.
+    full = re.sub(r"^\s*و?" + loose("بعد") + r"\s*[،,:]?\s*", "", full) if re.match(r"^\s*و" + loose("بعد") + r"[\s،,:]", full) else full
     # Fixed formulas anywhere (whole phrase removed).
     for p in sorted(ph.get("remove", []), key=len, reverse=True):
         full = re.sub(loose(p) + r"\s*[،,.:]?\s*", " ", full)
