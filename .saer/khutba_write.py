@@ -7,7 +7,7 @@ fails. Env: GEMINI_API_KEY, GEMINI_MODEL (optional, comma separated, tried in or
 import json, os, sys, time, urllib.error, urllib.request
 
 MODELS = [m.strip() for m in os.environ.get(
-    "GEMINI_MODEL", "gemini-flash-latest,gemini-3.8-flash,gemini-flash-lite-latest").split(",") if m.strip()]
+    "GEMINI_MODEL", "gemini-flash-latest,gemini-3.8-flash").split(",") if m.strip()]
 
 PROMPT = """أنت محرّر عربي متمرّس. أمامك تفريغ آلي لخطبة جمعة ألقاها الشيخ محمد سائر الشبعان بعنوان «{title}».
 حوّلها إلى نصّ مكتوب بأسلوب كتاب: فصحى سليمة رصينة، سهلة، متّصلة الفقرات.
@@ -30,7 +30,10 @@ PROMPT = """أنت محرّر عربي متمرّس. أمامك تفريغ آل�
 """
 
 
-def call(model, key, prompt):
+MIN_RATIO = 0.55  # a reply much shorter than the transcript is a summary, not an edit: reject it
+
+
+def call(model, key, prompt, src_len=0):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     body = {"contents": [{"role": "user", "parts": [{"text": prompt}]}],
             "generationConfig": {"temperature": 0.3, "responseMimeType": "application/json",
@@ -43,6 +46,8 @@ def call(model, key, prompt):
     out = json.loads(txt)
     if not out.get("text") or len(out["text"]) < 200:
         raise ValueError("empty text")
+    if src_len and len(out["text"]) < MIN_RATIO * src_len:
+        raise ValueError(f"too short ({len(out['text'])} of {src_len} chars)")
     return out
 
 
@@ -51,16 +56,19 @@ def write(title, paragraphs):
     if not key:
         print("  (no GEMINI_API_KEY: skipping written version)")
         return None
-    prompt = PROMPT.format(title=title, body="\n\n".join(paragraphs))
+    body = "\n\n".join(paragraphs)
+    prompt = PROMPT.format(title=title, body=body)
     for model in MODELS:
         for attempt in range(4):
             try:
-                out = call(model, key, prompt)
+                out = call(model, key, prompt, len(body))
                 out["model"] = model
                 return out
             except urllib.error.HTTPError as e:
                 msg = e.read()[:200].decode("utf-8", "replace")
                 print(f"  {model}: HTTP {e.code} {msg}")
+                if e.code == 429 and "quota" in msg.lower():
+                    break  # daily free quota used up: the daily run tries again tomorrow
                 if e.code in (429, 500, 503):  # busy: wait and try the same model again
                     time.sleep(40 * (attempt + 1))
                     continue

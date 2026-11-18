@@ -264,6 +264,57 @@ class StatsController extends AbstractApiController
         return ApiResponse::create(['scope' => $scope, 'deleted' => $out]);
     }
 
+    /** Downloadable kinds listed in the page panel (PDF/EPUB/ZIP are blocked for direct links). */
+    private const FILE_EXT = ['pdf', 'epub', 'zip', 'docx', 'doc', 'odt', 'rtf', 'txt'];
+
+    /**
+     * GET /saer-core/files?route=/books/x: the page's downloadable files, including unpublished pages,
+     * for the "ملفات الصفحة" panel in the page editor.
+     */
+    public function files(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.pages.read');
+        $page = $this->page('/' . trim((string) ($request->getQueryParams()['route'] ?? ''), '/'));
+        if (!$page) {
+            throw new ValidationException('page not found');
+        }
+        $out = [];
+        foreach (glob($page->path() . '/*') ?: [] as $f) {
+            $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+            if (is_file($f) && in_array($ext, self::FILE_EXT, true)) {
+                $out[] = ['name' => basename($f), 'ext' => $ext, 'size' => filesize($f), 'modified' => filemtime($f)];
+            }
+        }
+        usort($out, fn($a, $b) => strcmp($a['name'], $b['name']));
+        $h = (array) $page->header();
+        return ApiResponse::create(['route' => $page->route(), 'title' => $page->title(),
+            'published' => $page->published(), 'status' => $h['status'] ?? null, 'files' => $out]);
+    }
+
+    /** GET /saer-core/file?route=/books/x&name=file.pdf: the file itself (works for unpublished pages). */
+    public function file(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.pages.read');
+        $q = $request->getQueryParams();
+        $page = $this->page('/' . trim((string) ($q['route'] ?? ''), '/'));
+        $name = basename((string) ($q['name'] ?? ''));
+        $path = $page ? $page->path() . '/' . $name : '';
+        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+        if (!$page || $name === '' || !in_array($ext, self::FILE_EXT, true) || !is_file($path)) {
+            throw new ValidationException('file not found');
+        }
+        $types = ['pdf' => 'application/pdf', 'epub' => 'application/epub+zip', 'zip' => 'application/zip',
+                  'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                  'doc' => 'application/msword', 'odt' => 'application/vnd.oasis.opendocument.text',
+                  'rtf' => 'application/rtf', 'txt' => 'text/plain; charset=utf-8'];
+        return new Response(200, [
+            'Content-Type' => $types[$ext],
+            'Content-Length' => (string) filesize($path),
+            'Content-Disposition' => "attachment; filename*=UTF-8''" . rawurlencode($name),
+            'Cache-Control' => 'no-store',
+        ], file_get_contents($path));
+    }
+
     public function export(ServerRequestInterface $request): ResponseInterface
     {
         $this->requirePermission($request, 'api.system.read');

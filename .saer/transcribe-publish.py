@@ -23,6 +23,7 @@ spec.loader.exec_module(ys)
 from khutba_clean import clean  # noqa: E402
 from khutba_write import write  # noqa: E402
 from khutba_pdf import booklet_pdf, khutba_pdf  # noqa: E402
+from khutba_docx import booklet_docx  # noqa: E402
 
 TDIR = os.path.join(HERE, "transcripts")
 FORCE = os.environ.get("FORCE_PDF") == "1"
@@ -166,7 +167,10 @@ def do_booklet(s, items):
         time.sleep(3)
         get_page(route)
         book = get_page(route) or {"header": {}}
-    if not FORCE and (book.get("header") or {}).get("booklet_hash") == sig:
+    bh = book.get("header") or {}
+    if bh.get("booklet_auto") is False:
+        print("  booklet: automatic updates are off (booklet_auto)")
+    elif not FORCE and bh.get("booklet_hash") == sig and bh.get("booklet_docx"):
         print("  booklet up to date")
     else:
         with tempfile.TemporaryDirectory() as tmp:
@@ -175,10 +179,15 @@ def do_booklet(s, items):
             booklet_pdf({"title": s["title"], "summary": s["header"].get("summary") or ""}, items, out)
             subprocess.run(["pdftoppm", "-jpeg", "-r", "110", "-f", "1", "-l", "1", "-singlefile",
                             out, os.path.join(tmp, "cover")], check=True)
+            docx_name = f"{s['title']} - كتيّب (Word).docx"
+            booklet_docx({"title": s["title"], "summary": s["header"].get("summary") or ""}, items,
+                         os.path.join(tmp, "b.docx"))
             ok = upload(route, out, name, "application/pdf")
             ok = upload(route, os.path.join(tmp, "cover.jpg"), "cover.jpg", "image/jpeg") and ok
+            ok = upload(route, os.path.join(tmp, "b.docx"), docx_name,
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document") and ok
             if ok:
-                patch(route, {"booklet_hash": sig, "cover": "cover.jpg",
+                patch(route, {"booklet_hash": sig, "cover": "cover.jpg", "booklet_docx": docx_name,
                               "files": [{"label": "تحميل الكتيّب", "file": name}]})
                 print(f"  + booklet {route} ({len(items)} khutbas)")
     if not s["header"].get("book"):

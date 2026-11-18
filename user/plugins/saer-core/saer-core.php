@@ -22,6 +22,7 @@ class SaerCorePlugin extends Plugin
             'onApiRegisterRoutes' => ['onApiRegisterRoutes', 0],
             'onApiSidebarItems' => ['onApiSidebarItems', 0],
             'onApiPluginPageInfo' => ['onApiPluginPageInfo', 0],
+            'onApiContextPanels' => ['onApiContextPanels', 0],
             'onApiDashboardWidgets' => ['onApiDashboardWidgets', 0],
         ];
     }
@@ -209,6 +210,8 @@ class SaerCorePlugin extends Plugin
         $routes->get('/saer-core/stats', [StatsController::class, 'stats']);
         $routes->get('/saer-core/summary', [StatsController::class, 'summary']);
         $routes->get('/saer-core/export', [StatsController::class, 'export']);
+        $routes->get('/saer-core/files', [StatsController::class, 'files']);
+        $routes->get('/saer-core/file', [StatsController::class, 'file']);
         $routes->delete('/saer-core/profiles/{id:\d+}', [StatsController::class, 'deleteProfile']);
         $routes->delete('/saer-core/data', [StatsController::class, 'reset']);
     }
@@ -240,6 +243,23 @@ class SaerCorePlugin extends Plugin
             'icon' => 'fa-chart-line',
             'page_type' => 'component',
         ];
+    }
+
+    /** "ملفات الصفحة" panel in the page editor: download a page's PDF/Word files, even unpublished. */
+    public function onApiContextPanels(Event $event): void
+    {
+        $panels = $event['panels'] ?? [];
+        $panels[] = [
+            'id' => 'saer-core-files',
+            'plugin' => 'saer-core',
+            'label' => 'ملفات الصفحة (PDF و Word)',
+            'icon' => 'file-down',
+            'contexts' => ['pages'],
+            'priority' => 20,
+            'width' => 460,
+            'authorize' => 'api.pages.read',
+        ];
+        $event['panels'] = $panels;
     }
 
     public function onApiDashboardWidgets(Event $event): void

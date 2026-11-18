@@ -64,6 +64,17 @@ form:
                 available: متاح للتحميل
                 soon: قريباً
                 print: ورقي فقط
+            header.booklet_auto:
+              type: toggle
+              label: تحديث الكتيّب تلقائياً
+              help: لكتيّبات الخطب فقط. أوقفه إذا رفعت نسخة PDF عدّلتها بنفسك (من ملف Word)، حتى لا يُستبدل ملفك.
+              highlight: 1
+              default: 1
+              options:
+                1: مفعّل
+                0: متوقف
+              validate:
+                type: bool
             header.year:
               type: text
               label: سنة النشر
