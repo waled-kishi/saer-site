@@ -7,7 +7,7 @@ fails. Env: GEMINI_API_KEY, GEMINI_MODEL (optional, comma separated, tried in or
 import json, os, sys, time, urllib.error, urllib.request
 
 MODELS = [m.strip() for m in os.environ.get(
-    "GEMINI_MODEL", "gemini-flash-latest,gemini-2.5-flash,gemini-flash-lite-latest").split(",") if m.strip()]
+    "GEMINI_MODEL", "gemini-flash-latest,gemini-3.8-flash,gemini-flash-lite-latest").split(",") if m.strip()]
 
 PROMPT = """أنت محرّر عربي متمرّس. أمامك تفريغ آلي لخطبة جمعة ألقاها الشيخ محمد سائر الشبعان بعنوان «{title}».
 حوّلها إلى نصّ مكتوب بأسلوب كتاب: فصحى سليمة رصينة، سهلة، متّصلة الفقرات.
@@ -53,7 +53,7 @@ def write(title, paragraphs):
         return None
     prompt = PROMPT.format(title=title, body="\n\n".join(paragraphs))
     for model in MODELS:
-        for attempt in range(3):
+        for attempt in range(4):
             try:
                 out = call(model, key, prompt)
                 out["model"] = model
@@ -61,7 +61,7 @@ def write(title, paragraphs):
             except urllib.error.HTTPError as e:
                 msg = e.read()[:200].decode("utf-8", "replace")
                 print(f"  {model}: HTTP {e.code} {msg}")
-                if e.code == 429:
+                if e.code in (429, 500, 503):  # busy: wait and try the same model again
                     time.sleep(40 * (attempt + 1))
                     continue
                 break
