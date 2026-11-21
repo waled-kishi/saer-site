@@ -90,6 +90,38 @@
       this.load();
     }
 
+    /** What the site search index holds right now. */
+    async searchStatus() {
+      const el = this.root.querySelector('[data-search-status]');
+      if (!el) return;
+      try {
+        const r = await fetch(api('/saer-core/search'), { headers: headers(), credentials: 'same-origin' });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const d = (await r.json()).data;
+        const when = d.updated ? new Date(d.updated * 1000).toLocaleString('ar-SY-u-nu-latn') : '—';
+        el.textContent = `${n(d.documents)} صفحة في الفهرس · آخر تحديث ${when}. يتحدث الفهرس تلقائياً مع كل حفظ، وتُعاد بناؤه كل ليلة.`;
+      } catch (e) {
+        el.textContent = 'تعذّر قراءة حالة الفهرس.';
+      }
+    }
+
+    async rebuildSearch(btn) {
+      const label = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'جارٍ إعادة البناء…';
+      try {
+        const r = await fetch(api('/saer-core/search/rebuild'), { method: 'POST', headers: headers(), credentials: 'same-origin' });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const d = (await r.json()).data;
+        alert(`تمت فهرسة ${n(d.indexed)} صفحة في ${d.seconds} ثانية.`);
+      } catch (e) {
+        alert('تعذّرت إعادة بناء الفهرس.');
+      }
+      btn.disabled = false;
+      btn.textContent = label;
+      this.searchStatus();
+    }
+
     async reset(scope) {
       const what = scope === 'all'
         ? 'كل الإحصائيات: الزيارات والتحميلات وبيانات من عبّأ النموذج'
@@ -112,6 +144,8 @@
       this.root.querySelectorAll('[data-days]').forEach((b) => b.addEventListener('click', () => { this.days = +b.dataset.days; this.load(); }));
       this.root.querySelectorAll('[data-export]').forEach((b) => b.addEventListener('click', () => this.exportCsv(b.dataset.export)));
       this.root.querySelectorAll('[data-reset]').forEach((b) => b.addEventListener('click', () => this.reset(b.dataset.reset)));
+      this.root.querySelectorAll('[data-search]').forEach((b) => b.addEventListener('click', () => this.rebuildSearch(b)));
+      if (this.root.querySelector('[data-search-status]')) this.searchStatus();
       this.root.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', () => this.del(+b.dataset.del)));
     }
 
@@ -180,6 +214,9 @@
         </div>
         <div class="card"><h2>آخر من حمّل</h2>${recent}</div>
         <p class="note">لا يحفظ الموقع عناوين IP ولا يضع كوكيز للعدّ. "الزائر" يُحسب مرة واحدة في اليوم. البلد في الزيارات من قاعدة DB-IP Lite (IP Geolocation by DB-IP)، وفي النموذج من اختيار الشخص. الروبوتات ومحركات البحث لا تُحسب، وكذلك أي زائر يفتح 30 صفحة خلال 5 دقائق (زاحف آلي يتظاهر بأنه متصفح).</p>
+        <div class="card"><h2>فهرس البحث</h2>
+          <p class="note" data-search-status>…</p>
+          <div class="ranges"><button type="button" data-search="rebuild">إعادة بناء الفهرس</button></div></div>
         <div class="card"><h2>البدء من الصفر</h2>
           <p class="note">لحذف أرقام التجربة قبل الإعلان، أو متى شئت. روابط التحميل تبقى تعمل كما هي.</p>
           <div class="ranges"><button type="button" data-reset="views">مسح الزيارات فقط</button>

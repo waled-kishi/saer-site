@@ -1,0 +1,24 @@
+name: search-index
+# The search index follows every page saved through the admin API on its own.
+# This is the safety net: a full rebuild once a day, so the index can never
+# drift away from the pages (after a restore, say).
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '19 3 * * *'
+env:
+  GRAV_API_URL: ${{ vars.GRAV_API_URL || 'https://saer1.rifd-dt.com/api/v1' }}
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rebuild the site search index
+        env:
+          GRAV_API_KEY: ${{ secrets.GRAV_API_KEY }}
+        run: |
+          set -e
+          code=$(curl -sS -o /tmp/out.json -w '%{http_code}' -X POST \
+            -H "X-API-Key: $GRAV_API_KEY" "$GRAV_API_URL/saer-core/search/rebuild")
+          echo "HTTP $code"
+          cat /tmp/out.json | head -c 400; echo
+          test "$code" = "200"
