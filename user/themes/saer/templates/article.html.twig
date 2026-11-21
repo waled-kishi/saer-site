@@ -23,7 +23,7 @@
   <h1 style="font-size:clamp(32px,4.8vw,58px)">{{ page.title }}</h1>
   <div class="byline"><span>{{ author }}</span><span class="mut">· {{ page.date|date('Y/m/d') }}</span></div>
   {% if h.summary %}<p class="lead">{{ h.summary }}</p>{% endif %}
-  {% if img %}<div class="article__img">{% if img.medium %}{{ img.medium.cropResize(1200, 800).html('', page.title)|raw }}{% else %}<img src="{{ img.url }}" alt="{{ page.title }}">{% endif %}</div>{% endif %}
+  {% if img %}<div class="article__img">{% if img.medium %}{% set aim = img.medium.cropResize(1200, 800) %}<img src="{{ aim.url }}" width="1200" height="800" alt="{{ page.title }}" loading="eager" decoding="async">{% else %}<img src="{{ img.url }}" alt="{{ page.title }}" loading="eager" decoding="async">{% endif %}</div>{% endif %}
 </section>
 <section class="wrap wrap--narrow" style="padding-bottom:64px">
   <article class="prose" style="max-width:none">{{ page.content|raw }}</article>

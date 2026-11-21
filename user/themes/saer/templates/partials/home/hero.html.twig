@@ -10,7 +10,8 @@
   </div>
   {% if portrait %}
   <div class="hero__media">
-    <div class="glass portrait">{{ portrait.cropZoom(760,760).html('', h.portrait_alt ?: 'محمد سائر الشبعان')|raw }}</div>
+    {%- set pimg = portrait.cropZoom(760,760) -%}
+    <div class="glass portrait"><img src="{{ pimg.url }}" width="760" height="760" alt="{{ h.portrait_alt ?: 'محمد سائر الشبعان' }}" loading="eager" fetchpriority="high" decoding="async"></div>
     {% if hero.float_quote %}<div class="glass fl k float float--a">«{{ hero.float_quote }}»</div>{% endif %}
     {% if hero.float_stat %}<div class="glass fl2 float float--b"><strong class="k gold-text" style="font-size:22px;display:block">{{ hero.float_stat }}</strong><span>{{ hero.float_stat_sub }}</span></div>{% endif %}
     {% if hero.float_pill %}<div class="glass fl float float--c">{{ hero.float_pill }}</div>{% endif %}

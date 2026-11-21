@@ -23,7 +23,8 @@
   {% if img %}
   <div style="flex:0 1 320px;margin:0 auto">
     <div class="glass" style="padding:12px;border-radius:36px">
-      {{ img.cropZoom(640,800).html('', h.portrait_alt ?: page.title, 'about__img')|raw }}
+      {%- set aimg = img.cropZoom(640,800) -%}
+      <img src="{{ aimg.url }}" width="640" height="800" class="about__img" alt="{{ h.portrait_alt ?: page.title }}" loading="eager" fetchpriority="high" decoding="async">
     </div>
   </div>
   {% endif %}

@@ -2,7 +2,9 @@
 {%- set c = book_cover(item) -%}
 {%- set w = w ?? 480 -%}
 {% if c and c.medium %}
-  {{ c.medium.cropZoom(w, (w * 1.414)|round).html('', 'غلاف كتاب ' ~ item.title, 'book-cover__img')|raw }}
+  {%- set ch = (w * 1.414)|round -%}
+  {%- set cimg = c.medium.cropZoom(w, ch) -%}
+  <img src="{{ cimg.url }}" width="{{ w }}" height="{{ ch }}" class="book-cover__img" alt="غلاف كتاب {{ item.title }}" loading="lazy" decoding="async">
 {% elseif c %}
   <img src="{{ c.url }}" alt="غلاف كتاب {{ item.title }}" class="book-cover__img" loading="lazy">
 {% else %}
