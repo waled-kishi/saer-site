@@ -1,0 +1,37 @@
+name: backup
+# Weekly full-site backup (pages, accounts, config, data) created by Grav itself
+# and kept on the server under backup/, which Hostinger's deployment preserves.
+# Download a copy now and then from hPanel -> File Manager -> backup/.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 1 * * 0'
+env:
+  GRAV_API_URL: ${{ vars.GRAV_API_URL || 'https://saer1.rifd-dt.com/api/v1' }}
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask Grav for a backup
+        env:
+          GRAV_API_KEY: ${{ secrets.GRAV_API_KEY }}
+        run: |
+          set -e
+          code=$(curl -sS -o /tmp/out.json -w '%{http_code}' -X POST \
+            -H "X-API-Key: $GRAV_API_KEY" "$GRAV_API_URL/system/backup")
+          echo "HTTP $code"
+          cat /tmp/out.json | head -c 400; echo
+          test "$code" = "201"
+      - name: List what is on the server
+        env:
+          GRAV_API_KEY: ${{ secrets.GRAV_API_KEY }}
+        run: |
+          set -e
+          curl -sS -H "X-API-Key: $GRAV_API_KEY" "$GRAV_API_URL/system/backups" -o /tmp/list.json
+          python3 - <<'PY'
+          import json
+          d = json.load(open('/tmp/list.json'))['data']
+          for b in d['backups']:
+              print(b['date'][:10], b['filename'], round(b['size'] / 1048576, 1), 'MB')
+          print('total:', len(d['backups']), 'backups')
+          PY
