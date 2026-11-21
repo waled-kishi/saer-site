@@ -73,7 +73,8 @@ class SaerCorePlugin extends Plugin
     public function onPagesInitialized(): void
     {
         $path = '/' . trim((string) $this->grav['uri']->path(), '/');
-        if ($path === '/sitemap.xml') {
+        $ext = strtolower((string) $this->grav['uri']->extension());
+        if ($path === '/sitemap.xml' || ($path === '/sitemap' && $ext === 'xml')) {
             $this->sendSitemap();
         }
         if (!preg_match('~^/dl/(\d+)$~', $path, $m)) {
