@@ -12,6 +12,7 @@ use PDO;
  *   downloads  one row per download (linked to a profile when the visitor filled the form)
  *   views      one row per page view (no IP stored; "visitor" is a salted daily hash)
  *   crawlers   daily visitor hashes caught opening pages faster than a person reads (not counted)
+ *   search_docs / search_fts   the site search index (see Search)
  */
 class Db
 {
@@ -110,6 +111,10 @@ class Db
                 CREATE INDEX IF NOT EXISTS views_visitor_ts ON views(visitor, ts);
                 PRAGMA user_version = 2;
             SQL);
+        }
+        if ($version < 3) {
+            Search::migrate($pdo);
+            $pdo->exec('PRAGMA user_version = 3');
         }
     }
 }

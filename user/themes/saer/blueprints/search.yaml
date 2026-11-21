@@ -1,0 +1,4 @@
+title: صفحة البحث
+'@extends':
+  type: content-base
+  context: theme://blueprints

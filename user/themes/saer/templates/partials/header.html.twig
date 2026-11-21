@@ -22,6 +22,12 @@
     <nav aria-label="القائمة الرئيسية" class="nav-d">
       {{ nav.links(menu, current_top) }}
     </nav>
+    {%- set search_page = pages.find('/search') -%}
+    {% if search_page and search_page.published %}
+      <a class="hd__search" href="{{ search_page.url }}" aria-label="البحث في الموقع" title="بحث">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+      </a>
+    {% endif %}
     <details class="nav-m">
       <summary class="mbtn" aria-label="فتح القائمة">
         <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>

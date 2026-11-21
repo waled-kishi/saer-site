@@ -1,0 +1,70 @@
+{% extends 'partials/base.html.twig' %}
+{#
+  Site search. The results come from the saer-core plugin, which puts them in
+  the "search" variable: q, total, results (route, title, parent, section,
+  snippet), page and pages.
+#}
+{% set s = search ?? {q: '', total: 0, results: [], page: 1, pages: 0} %}
+
+{% block head_extra %}
+  <meta name="robots" content="noindex, follow">
+{% endblock %}
+
+{% block content %}
+<section class="wrap page-head">
+  {% include 'partials/breadcrumbs.html.twig' %}
+  <h1>{{ page.title }}</h1>
+  {% if page.header.summary and not s.q %}<p class="lead">{{ page.header.summary }}</p>{% endif %}
+
+  <form class="srch" action="{{ page.url }}" method="get" role="search">
+    <label class="srch__lbl" for="q">ابحث في الموقع</label>
+    <div class="srch__row">
+      <input class="srch__in" type="search" id="q" name="q" value="{{ s.q }}" autocomplete="off"
+             placeholder="اكتب كلمة أو جملة…" enterkeyhint="search" autofocus>
+      <button class="btn gold srch__btn" type="submit">بحث</button>
+    </div>
+  </form>
+</section>
+
+<section class="wrap" style="padding-bottom:96px">
+  {% if s.error ?? false %}
+    {% include 'partials/empty.html.twig' with {msg: 'تعذّر البحث الآن. جرّب بعد قليل.'} %}
+
+  {% elseif not s.q %}
+    <p class="mut srch__hint">ابحث في الخطب والدروس والبرامج والكتب: عناوينها ونصوصها المنشورة.</p>
+
+  {% elseif not s.terms|length %}
+    {% include 'partials/empty.html.twig' with {msg: 'اكتب كلمة من حرفين على الأقل.'} %}
+
+  {% elseif s.total == 0 %}
+    {% include 'partials/empty.html.twig' with {msg: 'لا نتائج لـ «' ~ s.q ~ '». جرّب كلمة أعمّ أو تهجئة أخرى.'} %}
+
+  {% else %}
+    <p class="mut srch__count">{{ ar_count(s.total, 'نتيجة', 'نتيجتان', 'نتائج') }} لـ «{{ s.q }}»</p>
+    <ol class="srch__list">
+      {% for r in s.results %}
+        <li class="glass srch__item">
+          <div class="srch__meta">
+            {% if r.section %}<span class="chip chip--gold">{{ r.section }}</span>{% endif %}
+            {% if r.parent %}<span class="mut">{{ r.parent }}</span>{% endif %}
+          </div>
+          <h2 class="srch__t"><a href="{{ base_url ~ r.route }}">{{ r.title }}</a></h2>
+          {% if r.snippet %}<p class="srch__s">{{ r.snippet|raw }}</p>{% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+
+    {% if s.pages > 1 %}
+      <nav class="srch__pager" aria-label="صفحات النتائج">
+        {% if s.page > 1 %}
+          <a class="btn ghost btn--sm" href="{{ page.url }}?q={{ s.q|url_encode }}&page={{ s.page - 1 }}">السابق</a>
+        {% endif %}
+        <span class="mut">صفحة {{ s.page }} من {{ s.pages }}</span>
+        {% if s.page < s.pages %}
+          <a class="btn ghost btn--sm" href="{{ page.url }}?q={{ s.q|url_encode }}&page={{ s.page + 1 }}">التالي</a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

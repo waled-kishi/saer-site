@@ -3,6 +3,7 @@ namespace Grav\Plugin;
 
 use Grav\Common\Plugin;
 use Grav\Plugin\SaerCore\Core;
+use Grav\Plugin\SaerCore\Search;
 use Grav\Plugin\SaerCore\StatsController;
 use RocketTheme\Toolbox\Event\Event;
 
@@ -24,6 +25,9 @@ class SaerCorePlugin extends Plugin
             'onApiPluginPageInfo' => ['onApiPluginPageInfo', 0],
             'onApiContextPanels' => ['onApiContextPanels', 0],
             'onApiDashboardWidgets' => ['onApiDashboardWidgets', 0],
+            'onApiPageCreated' => ['onApiPageChanged', 0],
+            'onApiPageUpdated' => ['onApiPageChanged', 0],
+            'onApiPageDeleted' => ['onApiPageRemoved', 0],
         ];
     }
 
@@ -146,7 +150,7 @@ class SaerCorePlugin extends Plugin
             if (!$page || !$page->routable() || !$page->published()) {
                 continue;
             }
-            if (in_array($page->template(), ['error', 'saer-download'], true)) {
+            if (in_array($page->template(), ['error', 'saer-download', 'search'], true)) {
                 continue;
             }
             $soon = false;
@@ -218,6 +222,61 @@ class SaerCorePlugin extends Plugin
         if ($this->dl !== null) {
             $this->grav['twig']->twig_vars['dl'] = $this->dl;
         }
+        $page = $this->grav['page'] ?? null;
+        if ($page && $page->template() === 'search') {
+            $this->grav['twig']->twig_vars['search'] = $this->runSearch();
+        }
+    }
+
+    /** Results for the /search page, read from the query string. */
+    private function runSearch(): array
+    {
+        $q = trim((string) ($_GET['q'] ?? ''));
+        $q = mb_substr($q, 0, 120);
+        $per = 20;
+        $page = max(1, (int) ($_GET['page'] ?? 1));
+        $out = ['q' => $q, 'page' => $page, 'per' => $per, 'total' => 0, 'results' => [], 'pages' => 0,
+                'terms' => Search::terms($q)];
+        if ($q === '' || !$out['terms']) {
+            return $out;
+        }
+        try {
+            $found = Search::query($this->grav['saer_core']->pdo(), $q, $per, ($page - 1) * $per);
+        } catch (\Throwable $e) {
+            $this->grav['log']->warning('saer-core: search failed: ' . $e->getMessage());
+            return $out + ['error' => true];
+        }
+        $out['total'] = $found['total'];
+        $out['results'] = $found['results'];
+        $out['pages'] = (int) ceil($found['total'] / $per);
+        return $out;
+    }
+
+    /** Keep the index in step with pages saved or created through the admin API. */
+    public function onApiPageChanged(Event $event): void
+    {
+        $page = $event['page'] ?? null;
+        if (!$page) {
+            return;
+        }
+        try {
+            Search::indexPage($this->grav['saer_core']->pdo(), $page);
+        } catch (\Throwable $e) {
+            $this->grav['log']->warning('saer-core: search index not updated: ' . $e->getMessage());
+        }
+    }
+
+    public function onApiPageRemoved(Event $event): void
+    {
+        $route = (string) ($event['route'] ?? '');
+        if ($route === '') {
+            return;
+        }
+        try {
+            Search::removeRoute($this->grav['saer_core']->pdo(), $route);
+        } catch (\Throwable $e) {
+            $this->grav['log']->warning('saer-core: search index not updated: ' . $e->getMessage());
+        }
     }
 
     public function onOutputGenerated(): void
@@ -272,6 +331,8 @@ class SaerCorePlugin extends Plugin
         $routes->get('/saer-core/file', [StatsController::class, 'file']);
         $routes->delete('/saer-core/profiles/{id:\d+}', [StatsController::class, 'deleteProfile']);
         $routes->delete('/saer-core/data', [StatsController::class, 'reset']);
+        $routes->get('/saer-core/search', [StatsController::class, 'searchStatus']);
+        $routes->post('/saer-core/search/rebuild', [StatsController::class, 'searchRebuild']);
     }
 
     public function onApiSidebarItems(Event $event): void

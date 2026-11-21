@@ -5,6 +5,7 @@ use Grav\Framework\Psr7\Response;
 use Grav\Plugin\Api\Controllers\AbstractApiController;
 use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\Api\Response\ApiResponse;
+use Grav\Plugin\SaerCore\Search;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -262,6 +263,37 @@ class StatsController extends AbstractApiController
         $pdo->commit();
         $pdo->exec('VACUUM');
         return ApiResponse::create(['scope' => $scope, 'deleted' => $out]);
+    }
+
+    /**
+     * GET /saer-core/search: how the site search index is doing.
+     */
+    public function searchStatus(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.system.read');
+        $pdo = $this->pdo();
+        Search::migrate($pdo);
+        return ApiResponse::create([
+            'engine' => Search::engine($pdo),
+            'documents' => (int) $pdo->query('SELECT COUNT(*) FROM search_docs')->fetchColumn(),
+            'updated' => (int) $pdo->query('SELECT COALESCE(MAX(updated), 0) FROM search_docs')->fetchColumn(),
+        ]);
+    }
+
+    /**
+     * POST /saer-core/search/rebuild: index every public page again from scratch.
+     */
+    public function searchRebuild(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.system.write');
+        $pages = $this->grav['pages'];
+        if (method_exists($pages, 'enablePages')) {
+            $pages->enablePages();
+        }
+        $started = microtime(true);
+        $out = Search::rebuild($this->pdo(), $pages);
+        $out['seconds'] = round(microtime(true) - $started, 1);
+        return ApiResponse::create($out);
     }
 
     /** Downloadable kinds listed in the page panel (PDF/EPUB/ZIP are blocked for direct links). */
