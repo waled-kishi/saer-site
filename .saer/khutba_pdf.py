@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""PDF for one khutba and a booklet for a whole series (WeasyPrint, A5, Amiri + Noto Kufi Arabic).
+"""PDF for one khutba or episode, and a booklet for a whole series (WeasyPrint, A5, Amiri + Noto Kufi).
 
-khutba_pdf(item, out_path)                       item: {title, number, date, location, route, text}
-booklet_pdf(series, items, out_path)             series: {title, summary, url}
+khutba_pdf(item, out_path)             item: {title, number, date, location, route, text, kind}
+booklet_pdf(series, items, out_path)   series: {title, summary, kind_label}
+booklet_pdf(series, [], out, parts=[{title, summary, items}])   a book of several series
+"kind" is the word for one piece ("خطبة" by default, "حلقة" for a programme).
 text is Markdown (### subheadings, ﴿ ﴾ verses, « » quotes).
 """
 import html, os, re
@@ -56,6 +58,11 @@ h3 + p, .meta + p { text-indent: 0; }
 .toc li .n { color: #c99a45; font-weight: 700; display: inline-block; width: 8mm; }
 .toc li a { color: #1b1424; text-decoration: none; }
 .toc li a::after { content: leader('.') target-counter(attr(href), page, arabic-indic); color: #5a2d82; }
+.toc li.part { font-weight: 700; color: #2a1245; border-bottom: .6pt solid #d6b26e; margin-top: 4mm; }
+section.part { page-break-before: always; padding-top: 55mm; text-align: center; }
+section.part h1 { text-align: center; font-size: 24pt; string-set: running content(); }
+section.part .eyebrow { text-align: center; }
+.part-sum { text-indent: 0; text-align: center; font-size: 12pt; color: #5a2d82; margin-top: 6mm; }
 """
 
 
@@ -74,12 +81,13 @@ def meta(it):
     return " · ".join(html.escape(p) for p in parts)
 
 
-def chapter(it, cls=""):
-    eyebrow = f"خطبة {it['number']}" if it.get("number") else ""
+def chapter(it, cls="", anchor=""):
+    kind = it.get("kind") or "خطبة"
+    eyebrow = f"{kind} {it['number']}" if it.get("number") else ""
     if it.get("series"):
         eyebrow = f"{it['series']} · {eyebrow}" if eyebrow else it["series"]
-    end = f"شاهد الخطبة واستمع إليها: {SITE}{it['route']}" if it.get("route") else ""
-    return (f'<section class="{cls}" id="k{it.get("number", "")}">'
+    end = f"شاهد ال{kind} واستمع إليها: {SITE}{it['route']}" if it.get("route") else ""
+    return (f'<section class="{cls}" id="{anchor or ("k" + str(it.get("number", "")))}">'
             f'<div class="eyebrow">{html.escape(eyebrow)}</div><h1>{html.escape(it["title"])}</h1>'
             f'<div class="meta">{meta(it)}</div>{md(it["text"])}'
             f'<p class="end">{html.escape(end)}</p></section>')
@@ -96,15 +104,31 @@ def khutba_pdf(item, out):
     render(chapter(item), out)
 
 
-def booklet_pdf(series, items, out):
-    cover = (f'<div class="cover"><div class="band"></div><div class="k">سلسلة خطب جمعة</div>'
+def booklet_pdf(series, items, out, parts=None):
+    """One series (items), or a book made of several series (parts)."""
+    label = series.get("kind_label") or "سلسلة خطب جمعة"
+    cover = (f'<div class="cover"><div class="band"></div><div class="k">{html.escape(label)}</div>'
              f'<h1>{html.escape(series["title"])}</h1><div class="by">{AUTHOR}</div>'
              f'<div class="foot">{SITE}</div></div>')
     intro = ""
     if series.get("summary"):
         intro = f'<section class="intro"><p>{html.escape(series["summary"])}</p></section>'
-    toc = "".join(f'<li><span class="n">{i.get("number", "")}</span><a href="#k{i.get("number", "")}">'
-                  f'{html.escape(i["title"])}</a></li>' for i in items)
-    toc = f'<section class="toc"><h2>الفهرس</h2><ol>{toc}</ol></section>'
-    chapters = "".join(chapter(it, "chapter") for it in items)
-    render(cover + intro + toc + chapters, out)
+
+    groups = parts if parts else [{"title": "", "items": items}]
+    toc_rows, chapters, n = [], [], 0
+    for gi, g in enumerate(groups, 1):
+        if parts:
+            toc_rows.append(f'<li class="part">{html.escape(g["title"])}</li>')
+            chapters.append(
+                f'<section class="part" id="p{gi}"><div class="eyebrow">القسم {gi}</div>'
+                f'<h1>{html.escape(g["title"])}</h1>'
+                + (f'<p class="part-sum">{html.escape(g["summary"])}</p>' if g.get("summary") else "")
+                + '</section>')
+        for it in g["items"]:
+            n += 1
+            anchor = f"c{n}"
+            toc_rows.append(f'<li><span class="n">{it.get("number", "")}</span>'
+                            f'<a href="#{anchor}">{html.escape(it["title"])}</a></li>')
+            chapters.append(chapter(it, "chapter", anchor))
+    toc = f'<section class="toc"><h2>الفهرس</h2><ol>{"".join(toc_rows)}</ol></section>'
+    render(cover + intro + toc + "".join(chapters), out)

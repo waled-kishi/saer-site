@@ -71,7 +71,7 @@ def page_break(doc):
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
 
 
-def booklet_docx(series, items, out):
+def booklet_docx(series, items, out, parts=None):
     doc = Document()
     sec = doc.sections[0]
     sec.page_width, sec.page_height = Mm(148), Mm(210)
@@ -83,39 +83,60 @@ def booklet_docx(series, items, out):
     # Cover
     for _ in range(8):
         para(doc, space=0)
-    para(doc, "سلسلة خطب جمعة", font=HEAD, size=14, color=GOLD, align=WD_ALIGN_PARAGRAPH.CENTER)
+    para(doc, series.get("kind_label") or "سلسلة خطب جمعة", font=HEAD, size=14, color=GOLD, align=WD_ALIGN_PARAGRAPH.CENTER)
     para(doc, series["title"], font=HEAD, size=34, bold=True, color=PURPLE, align=WD_ALIGN_PARAGRAPH.CENTER, space=18)
     para(doc, AUTHOR, font=HEAD, size=16, color=GOLD, align=WD_ALIGN_PARAGRAPH.CENTER)
     if series.get("summary"):
         page_break(doc)
         para(doc, series["summary"], size=18, align=WD_ALIGN_PARAGRAPH.CENTER)
 
+    groups = parts if parts else [{"title": "", "items": items}]
+
     # Contents
     page_break(doc)
     para(doc, "الفهرس", font=HEAD, size=20, bold=True, color=PURPLE, align=WD_ALIGN_PARAGRAPH.RIGHT, space=12)
-    for it in items:
-        p = para(doc, align=WD_ALIGN_PARAGRAPH.RIGHT, space=4)
-        run(p, f"{it.get('number', '')}  ", font=HEAD, size=14, bold=True, color=GOLD)
-        run(p, it["title"], font=HEAD, size=14)
+    for g in groups:
+        if parts:
+            para(doc, g["title"], font=HEAD, size=16, bold=True, color=PURPLE,
+                 align=WD_ALIGN_PARAGRAPH.RIGHT, space=4)
+        for it in g["items"]:
+            p = para(doc, align=WD_ALIGN_PARAGRAPH.RIGHT, space=4)
+            run(p, f"{it.get('number', '')}  ", font=HEAD, size=14, bold=True, color=GOLD)
+            run(p, it["title"], font=HEAD, size=14)
 
-    # Khutbas
-    for it in items:
-        page_break(doc)
-        eyebrow = f"{it.get('series', '')} · خطبة {it.get('number', '')}".strip(" ·")
-        para(doc, eyebrow, font=HEAD, size=12, color=GOLD, align=WD_ALIGN_PARAGRAPH.RIGHT, space=0)
-        para(doc, it["title"], font=HEAD, size=24, bold=True, color=PURPLE, align=WD_ALIGN_PARAGRAPH.RIGHT, space=14)
-        for block in re.split(r"\n\s*\n", (it.get("text") or "").strip()):
-            block = block.strip()
-            if not block:
-                continue
-            m = re.match(r"^#{1,6}\s+(.*)", block)
-            if m:
-                para(doc, m.group(1), font=HEAD, size=17, bold=True, color=PURPLE, align=WD_ALIGN_PARAGRAPH.RIGHT, space=4)
-            elif block.startswith(">"):
-                para(doc, re.sub(r"^>\s?", "", block, flags=re.M), size=16, color=PURPLE)
-            else:
-                para(doc, " ".join(block.split("\n")), size=16)
-        if it.get("route"):
-            para(doc, f"شاهد الخطبة واستمع إليها: {SITE}{it['route']}", font=HEAD, size=10,
-                 color=RGBColor(0x7A, 0x6A, 0x8F), align=WD_ALIGN_PARAGRAPH.CENTER)
+    # Chapters
+    for gi, g in enumerate(groups, 1):
+        if parts:
+            page_break(doc)
+            for _ in range(6):
+                para(doc, space=0)
+            para(doc, f"القسم {gi}", font=HEAD, size=13, color=GOLD, align=WD_ALIGN_PARAGRAPH.CENTER, space=4)
+            para(doc, g["title"], font=HEAD, size=26, bold=True, color=PURPLE,
+                 align=WD_ALIGN_PARAGRAPH.CENTER, space=10)
+            if g.get("summary"):
+                para(doc, g["summary"], size=16, align=WD_ALIGN_PARAGRAPH.CENTER)
+        for it in g["items"]:
+            _chapter_docx(doc, it)
     doc.save(out)
+
+
+def _chapter_docx(doc, it):
+    kind = it.get("kind") or "خطبة"
+    page_break(doc)
+    eyebrow = f"{it.get('series', '')} · {kind} {it.get('number', '')}".strip(" ·")
+    para(doc, eyebrow, font=HEAD, size=12, color=GOLD, align=WD_ALIGN_PARAGRAPH.RIGHT, space=0)
+    para(doc, it["title"], font=HEAD, size=24, bold=True, color=PURPLE, align=WD_ALIGN_PARAGRAPH.RIGHT, space=14)
+    for block in re.split(r"\n\s*\n", (it.get("text") or "").strip()):
+        block = block.strip()
+        if not block:
+            continue
+        m = re.match(r"^#{1,6}\s+(.*)", block)
+        if m:
+            para(doc, m.group(1), font=HEAD, size=17, bold=True, color=PURPLE, align=WD_ALIGN_PARAGRAPH.RIGHT, space=4)
+        elif block.startswith(">"):
+            para(doc, re.sub(r"^>\s?", "", block, flags=re.M), size=16, color=PURPLE)
+        else:
+            para(doc, " ".join(block.split("\n")), size=16)
+    if it.get("route"):
+        para(doc, f"شاهد ال{kind} واستمع إليها: {SITE}{it['route']}", font=HEAD, size=10,
+             color=RGBColor(0x7A, 0x6A, 0x8F), align=WD_ALIGN_PARAGRAPH.CENTER)

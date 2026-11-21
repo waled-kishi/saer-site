@@ -1,0 +1,31 @@
+name: booklet
+# Booklets for the programme series: Gemini writes each episode in book style,
+# then a PDF, a Word version and a book page under /books (unpublished, "soon").
+on:
+  workflow_dispatch:
+    inputs:
+      books:
+        description: 'Which books: all, or keys from .saer/program_booklet.py (nabni, nusqit, nuwahhid, surya)'
+        default: all
+      force:
+        description: 'Rebuild the files even when nothing changed (1)'
+        default: ''
+env:
+  GRAV_API_URL: ${{ vars.GRAV_API_URL || 'https://saer1.rifd-dt.com/api/v1' }}
+  SITE_URL: ${{ vars.SITE_URL || 'https://saer1.rifd-dt.com' }}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install
+        run: |
+          sudo apt-get install -y -qq fonts-hosny-amiri poppler-utils >/dev/null
+          pip install -q weasyprint markdown python-docx
+      - name: Build the booklets
+        env:
+          GRAV_API_KEY: ${{ secrets.GRAV_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          BOOKS: ${{ github.event.inputs.books }}
+          FORCE_PDF: ${{ github.event.inputs.force }}
+        run: python3 .saer/program_booklet.py
