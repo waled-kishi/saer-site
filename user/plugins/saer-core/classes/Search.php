@@ -157,8 +157,8 @@ class Search
         $h = $page->header();
         $title = (string) $page->title();
         $summary = trim((string) ($h->summary ?? ''));
-        $parts = [$summary, (string) ($h->written ?? ''), (string) ($h->location ?? ''), self::plain($page)];
-        $body = trim(implode("\n", array_filter(array_map('trim', $parts))));
+        $parts = [$summary, (string) ($h->written ?? ''), (string) ($h->location ?? ''), (string) $page->rawMarkdown()];
+        $body = self::plain(implode("\n", array_filter(array_map('trim', $parts))));
 
         // The section is the top-level page this one sits under ("خطب الجمعة"...)
         $top = $page;
@@ -203,10 +203,9 @@ class Search
         return ['engine' => self::engine($pdo), 'indexed' => $count];
     }
 
-    /** The page's own words, without the markdown and twig scaffolding. */
-    private static function plain($page): string
+    /** The words themselves, without the markdown and twig scaffolding. */
+    private static function plain(string $raw): string
     {
-        $raw = (string) $page->rawMarkdown();
         $raw = (string) preg_replace('/\{%.*?%\}|\{\{.*?\}\}|\[\w+[^\]]*\].*?\[\/\w+\]/us', ' ', $raw);
         $raw = (string) preg_replace('/!?\[([^\]]*)\]\([^)]*\)/u', '$1', $raw);
         $raw = (string) preg_replace('/[#>*_`~|-]+/u', ' ', $raw);
