@@ -73,6 +73,9 @@ class SaerCorePlugin extends Plugin
     public function onPagesInitialized(): void
     {
         $path = '/' . trim((string) $this->grav['uri']->path(), '/');
+        if ($path === '/sitemap.xml') {
+            $this->sendSitemap();
+        }
         if (!preg_match('~^/dl/(\d+)$~', $path, $m)) {
             return;
         }
@@ -126,6 +129,60 @@ class SaerCorePlugin extends Plugin
             $this->sendFile($media->path(), (string) $file['filename']);
         }
         $this->renderDownloadPage($page, $vars);
+    }
+
+    /* ---------------- sitemap ---------------- */
+
+    /**
+     * Serves /sitemap.xml: every published, routable page that is not marked
+     * "coming soon" (the page itself or any ancestor, which is what the theme
+     * turns into a noindex panel).
+     */
+    private function sendSitemap(): void
+    {
+        $items = [];
+        foreach ($this->grav['pages']->all() as $page) {
+            if (!$page || !$page->routable() || !$page->published()) {
+                continue;
+            }
+            if (in_array($page->template(), ['error', 'saer-download'], true)) {
+                continue;
+            }
+            $soon = false;
+            for ($p = $page; $p; $p = $p->parent()) {
+                if (($p->header()->coming_soon ?? false)) {
+                    $soon = true;
+                    break;
+                }
+            }
+            if ($soon) {
+                continue;
+            }
+            $url = (string) $page->canonical(true);
+            if ($url === '') {
+                continue;
+            }
+            $items[$url] = (int) $page->modified();
+        }
+        ksort($items);
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
+             . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        foreach ($items as $url => $modified) {
+            $xml .= '  <url><loc>' . htmlspecialchars($url, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '</loc>'
+                 . ($modified ? '<lastmod>' . gmdate('Y-m-d', $modified) . '</lastmod>' : '')
+                 . "</url>\n";
+        }
+        $xml .= '</urlset>' . "\n";
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        header('Content-Type: application/xml; charset=utf-8');
+        header('Content-Length: ' . strlen($xml));
+        header('Cache-Control: public, max-age=3600');
+        echo $xml;
+        exit;
     }
 
     private function renderDownloadPage($book, array $vars): void

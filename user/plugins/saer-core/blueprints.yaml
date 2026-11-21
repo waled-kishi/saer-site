@@ -1,7 +1,7 @@
 name: Saer Core
 slug: saer-core
 type: plugin
-version: 1.1.0
+version: 1.2.0
 description: "Downloads through /dl/{id} with a short form, and cookie-free site statistics shown in Admin2."
 icon: chart-line
 author:
