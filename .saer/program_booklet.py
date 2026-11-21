@@ -73,9 +73,10 @@ def chapters_of(series_page, pages):
                 print(f"  + written {ep['route']} ({len(written)} chars, {r['model']})")
                 time.sleep(6)
             else:
-                print(f"  ! {ep['route']}: no written version yet, using the page text")
+                print(f"  ! {ep['route']}: no written version yet")
         out.append({"title": ep["title"], "date": hd.get("date"), "route": ep["route"],
-                    "text": written or content, "kind": "حلقة", "series": series_page["title"]})
+                    "text": written or content, "kind": "حلقة", "series": series_page["title"],
+                    "ready": bool(written)})
     return out
 
 
@@ -128,6 +129,11 @@ def build(book, pages):
                           "items": items})
     if not parts:
         print("  nothing to build")
+        return
+    missing = [c["title"] for p in parts for c in p["items"] if not c.get("ready")]
+    if missing and os.environ.get("ALLOW_PARTIAL") != "1":
+        print(f"  waiting for the written version of {len(missing)} chapter(s); "
+              f"the booklet is not built from raw transcripts. Run again later.")
         return
 
     title = book.get("title") or parts[0]["title"]

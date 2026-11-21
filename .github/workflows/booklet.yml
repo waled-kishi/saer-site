@@ -2,6 +2,8 @@ name: booklet
 # Booklets for the programme series: Gemini writes each episode in book style,
 # then a PDF, a Word version and a book page under /books (unpublished, "soon").
 on:
+  schedule:
+    - cron: '37 4 * * *'   # pick up whatever Gemini's free quota allows each day
   workflow_dispatch:
     inputs:
       books:
@@ -26,6 +28,6 @@ jobs:
         env:
           GRAV_API_KEY: ${{ secrets.GRAV_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          BOOKS: ${{ github.event.inputs.books }}
+          BOOKS: ${{ github.event.inputs.books || 'all' }}
           FORCE_PDF: ${{ github.event.inputs.force }}
         run: python3 .saer/program_booklet.py
