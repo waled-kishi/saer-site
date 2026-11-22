@@ -32,6 +32,9 @@ from khutba_pdf import booklet_pdf  # noqa: E402
 from khutba_docx import booklet_docx  # noqa: E402
 
 FORCE = os.environ.get("FORCE_PDF") == "1"
+# The episodes on the site are already readable text, so the booklet uses them as they are.
+# USE_WRITTEN=1 switches to the Gemini book-style rewrite in header.written instead.
+USE_WRITTEN = os.environ.get("USE_WRITTEN") == "1"
 LABEL = "من برنامج معايير سوريا الجديدة"
 
 BOOKS = [
@@ -61,22 +64,10 @@ def chapters_of(series_page, pages):
         if not content:
             print(f"  - {ep['route']}: no text yet")
             continue
-        written = (hd.get("written") or "").strip()
-        if not written:
-            r = write(ep["title"], [content], kind="episode", series=series_page["title"])
-            if r:
-                written = r["text"].strip()
-                new = {"written": written, "written_by": r["model"]}
-                if not hd.get("summary") and r.get("summary"):
-                    new["summary"] = r["summary"].strip()
-                tp.patch(ep["route"], new)
-                print(f"  + written {ep['route']} ({len(written)} chars, {r['model']})")
-                time.sleep(6)
-            else:
-                print(f"  ! {ep['route']}: no written version yet")
+        text = (hd.get("written") or "").strip() if USE_WRITTEN else content
         out.append({"title": ep["title"], "date": hd.get("date"), "route": ep["route"],
-                    "text": written or content, "kind": "حلقة", "series": series_page["title"],
-                    "ready": bool(written)})
+                    "text": text or content, "kind": "حلقة", "series": series_page["title"],
+                    "ready": bool(text or content)})
     return out
 
 
@@ -91,6 +82,8 @@ def preface(book, parts, pages):
         return saved.strip()
     body = "\n".join(
         f"- {p['title']}: " + "؛ ".join(c["title"] for c in p["items"]) for p in parts)
+    if not os.environ.get("GEMINI_API_KEY"):
+        return ((parent or {}).get("header") or {}).get("summary") or ""
     r = write(book.get("title") or "", [body], kind="preface", min_ratio=0)
     text = (r or {}).get("text", "").strip()
     if text and parent:
@@ -148,7 +141,7 @@ def build(book, pages):
     if page is None:
         return
     bh = page.get("header") or {}
-    sig = tp.h("".join(c["text"] for c in chapters) + intro + str(len(chapters)) + "prog-1")
+    sig = tp.h("".join(c["text"] for c in chapters) + intro + str(len(chapters)) + "prog-2")
     if bh.get("booklet_auto") is False:
         print("  booklet: automatic updates are off (booklet_auto)")
         return
