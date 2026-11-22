@@ -12,7 +12,7 @@ For each book listed in BOOKS:
 
 Env: GRAV_API_URL, GRAV_API_KEY, GEMINI_API_KEY, BOOKS (keys or "all"), FORCE_PDF=1.
 """
-import importlib.util, json, os, subprocess, sys, tempfile, time
+import importlib.util, json, os, subprocess, sys, tempfile, time, urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -32,9 +32,9 @@ from khutba_pdf import booklet_pdf  # noqa: E402
 from khutba_docx import booklet_docx  # noqa: E402
 
 FORCE = os.environ.get("FORCE_PDF") == "1"
-# The episodes on the site are already readable text, so the booklet uses them as they are.
-# USE_WRITTEN=1 switches to the Gemini book-style rewrite in header.written instead.
-USE_WRITTEN = os.environ.get("USE_WRITTEN") == "1"
+# The booklet is built from the book-style rewrite Gemini saves in header.written,
+# so it reads as a book and not as a transcript. USE_WRITTEN=0 falls back to the page text.
+USE_WRITTEN = os.environ.get("USE_WRITTEN", "1") == "1"
 LABEL = "من برنامج معايير سوريا الجديدة"
 
 BOOKS = [
@@ -45,7 +45,7 @@ BOOKS = [
     {"key": "nuwahhid", "route": "/books/surya-nuwahhid", "order": 62,
      "series": ["/programs/surya-jadida/nuwahhid"]},
     {"key": "surya", "route": "/books/maayir-surya-al-jadida", "order": 63,
-     "title": "معايير سوريا الجديدة", "parent": "/programs/surya-jadida",
+     "title": "نحو سورية الجديدة", "parent": "/programs/surya-jadida",
      "series": ["/programs/surya-jadida/nuwahhid",
                 "/programs/surya-jadida/nusqit",
                 "/programs/surya-jadida/nabni"]},
@@ -64,10 +64,24 @@ def chapters_of(series_page, pages):
         if not content:
             print(f"  - {ep['route']}: no text yet")
             continue
-        text = (hd.get("written") or "").strip() if USE_WRITTEN else content
+        text = content
+        if USE_WRITTEN:
+            text = (hd.get("written") or "").strip()
+            if not text:
+                r = write(ep["title"], [content], kind="episode", series=series_page["title"])
+                if r:
+                    text = r["text"].strip()
+                    new = {"written": text, "written_by": r["model"]}
+                    if not hd.get("summary") and r.get("summary"):
+                        new["summary"] = r["summary"].strip()
+                    tp.patch(ep["route"], new)
+                    print(f"  + written {ep['route']} ({len(text)} chars, {r['model']})")
+                    time.sleep(6)
+                else:
+                    print(f"  ! {ep['route']}: no written version yet")
         out.append({"title": ep["title"], "date": hd.get("date"), "route": ep["route"],
                     "text": text or content, "kind": "حلقة", "series": series_page["title"],
-                    "ready": bool(text or content)})
+                    "ready": bool(text)})
     return out
 
 
@@ -91,9 +105,22 @@ def preface(book, parts, pages):
     return text
 
 
+def drop_old_files(route, keep):
+    """Remove booklet files left over from an earlier build (a renamed book, say)."""
+    st, res = ys.call("GET", f"/pages{route}/media")
+    for m in (res.get("data") or {}).get("media", []) if isinstance(res, dict) else []:
+        name = m.get("name") or ""
+        if name not in keep and name.rsplit(".", 1)[-1].lower() in ("pdf", "docx"):
+            ys.call("DELETE", f"/pages{route}/media/{urllib.parse.quote(name)}")
+            print(f"  - old file {name}")
+
+
 def ensure_book_page(book, title, subtitle, summary):
     page = tp.get_page(book["route"])
     if page:
+        if (page.get("header") or {}).get("title") != title:
+            tp.patch(book["route"], {"title": title, "subtitle": subtitle})
+            print(f"  ~ renamed {book['route']} -> {title}")
         return page
     body = {"route": book["route"], "title": title, "template": "book", "order": book["order"],
             "content": "",
@@ -141,7 +168,7 @@ def build(book, pages):
     if page is None:
         return
     bh = page.get("header") or {}
-    sig = tp.h("".join(c["text"] for c in chapters) + intro + str(len(chapters)) + "prog-2")
+    sig = tp.h("".join(c["text"] for c in chapters) + intro + str(len(chapters)) + "prog-3")
     if bh.get("booklet_auto") is False:
         print("  booklet: automatic updates are off (booklet_auto)")
         return
@@ -165,6 +192,7 @@ def build(book, pages):
         ok = tp.upload(book["route"], docx, docx_name,
                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document") and ok
         if ok:
+            drop_old_files(book["route"], {pdf_name, docx_name, "cover.jpg"})
             tp.patch(book["route"], {"booklet_hash": sig, "cover": "cover.jpg",
                                      "booklet_docx": docx_name,
                                      "files": [{"label": "تحميل الكتيّب", "file": pdf_name}]})
