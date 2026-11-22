@@ -35,6 +35,10 @@ FORCE = os.environ.get("FORCE_PDF") == "1"
 # The booklet is built from the book-style rewrite Gemini saves in header.written,
 # so it reads as a book and not as a transcript. USE_WRITTEN=0 falls back to the page text.
 USE_WRITTEN = os.environ.get("USE_WRITTEN", "1") == "1"
+# Books whose chapters are rewritten (once) with the chapter prompt: spoken -> written, linked to the
+# chapter before. header.written_v marks a chapter already done. Env REWRITE: keys, or "all".
+REWRITE = {w.strip() for w in os.environ.get("REWRITE", "").split(",") if w.strip()}
+WRITTEN_V = 2
 LABEL = "من برنامج معايير سوريا الجديدة"
 
 BOOKS = [
@@ -52,11 +56,12 @@ BOOKS = [
 ]
 
 
-def chapters_of(series_page, pages):
+def chapters_of(series_page, pages, rewrite=False):
     """The episodes of one series, in order, each with its book-style text."""
     eps = [p for p in ys.children_of(pages, series_page) if p.get("template") != "series"]
     eps.sort(key=lambda p: (p.get("order") or "", p["route"]))
     out = []
+    prev_text = ""
     for ep in eps:
         page = tp.get_page(ep["route"]) or ep
         hd = page.get("header") or {}
@@ -67,18 +72,26 @@ def chapters_of(series_page, pages):
         text = content
         if USE_WRITTEN:
             text = (hd.get("written") or "").strip()
+            if rewrite and hd.get("written_v") != WRITTEN_V:
+                text = ""  # written before this chapter prompt existed: do it again
             if not text:
-                r = write(ep["title"], [content], kind="episode", series=series_page["title"])
+                prev = (prev_text[-900:] if prev_text else "")
+                r = write(ep["title"], [content], kind="chapter" if rewrite else "episode",
+                          series=series_page["title"], previous=prev)
                 if r:
                     text = r["text"].strip()
                     new = {"written": text, "written_by": r["model"]}
-                    if not hd.get("summary") and r.get("summary"):
+                    if rewrite:
+                        new["written_v"] = WRITTEN_V
+                    if r.get("summary") and (rewrite or not hd.get("summary")):
                         new["summary"] = r["summary"].strip()
                     tp.patch(ep["route"], new)
                     print(f"  + written {ep['route']} ({len(text)} chars, {r['model']})")
                     time.sleep(6)
                 else:
                     print(f"  ! {ep['route']}: no written version yet")
+        if text:
+            prev_text = text
         out.append({"title": ep["title"], "date": hd.get("date"), "route": ep["route"],
                     "text": text or content, "kind": "حلقة", "series": series_page["title"],
                     "ready": bool(text)})
@@ -137,13 +150,14 @@ def ensure_book_page(book, title, subtitle, summary):
 
 
 def build(book, pages):
+    rw = "all" in REWRITE or book["key"] in REWRITE or bool(set(book.get("keys", [])) & REWRITE)
     parts = []
     for route in book["series"]:
         s = next((p for p in pages if p["route"].rstrip("/") == route.rstrip("/")), None)
         if not s:
             print(f"  ! series not found: {route}")
             continue
-        items = chapters_of(s, pages)
+        items = chapters_of(s, pages, rewrite=rw or s["route"].rstrip("/").rsplit("/", 1)[-1] in REWRITE)
         if items:
             parts.append({"title": s["title"], "summary": (s.get("header") or {}).get("summary") or "",
                           "items": items})

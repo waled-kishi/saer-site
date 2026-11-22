@@ -9,6 +9,9 @@ on:
       books:
         description: 'Which books: all, or keys from .saer/program_booklet.py (nabni, nusqit, nuwahhid, surya)'
         default: all
+      rewrite:
+        description: 'Rewrite chapters spoken -> written, linked to the previous chapter (series keys: nusqit, nuwahhid, nabni, or all)'
+        default: 'nusqit,nuwahhid'
       force:
         description: 'Rebuild the files even when nothing changed (1)'
         default: ''
@@ -29,5 +32,6 @@ jobs:
           GRAV_API_KEY: ${{ secrets.GRAV_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           BOOKS: ${{ github.event.inputs.books || 'all' }}
+          REWRITE: ${{ github.event.inputs.rewrite || 'nusqit,nuwahhid' }}
           FORCE_PDF: ${{ github.event.inputs.force }}
         run: python3 .saer/program_booklet.py
