@@ -121,8 +121,11 @@ def preface(book, parts, pages):
 def drop_old_files(route, keep):
     """Remove booklet files left over from an earlier build (a renamed book, say)."""
     st, res = ys.call("GET", f"/pages{route}/media")
-    for m in (res.get("data") or {}).get("media", []) if isinstance(res, dict) else []:
-        name = m.get("name") or ""
+    data = res.get("data") if isinstance(res, dict) else res
+    if isinstance(data, dict):
+        data = data.get("media") or data.get("files") or []
+    for m in data or []:
+        name = (m.get("name") if isinstance(m, dict) else str(m)) or ""
         if name not in keep and name.rsplit(".", 1)[-1].lower() in ("pdf", "docx"):
             ys.call("DELETE", f"/pages{route}/media/{urllib.parse.quote(name)}")
             print(f"  - old file {name}")
