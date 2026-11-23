@@ -10,7 +10,8 @@ MODELS = [m.strip() for m in os.environ.get(
     "GEMINI_MODEL",
     # Each model has its own free daily allowance, so when the newest runs out the
     # older ones carry on. The quality guards below reject a weak reply anyway.
-    "gemini-flash-latest,gemini-3.8-flash,gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash"
+    "gemini-flash-latest,gemini-3.8-flash,gemini-flash-lite-latest,"
+    "gemini-3.5-flash-lite,gemini-3.1-flash-lite,gemini-3.5-flash"
 ).split(",") if m.strip()]
 
 EPISODE_PROMPT = """أنت محرّر عربي متمرّس. أمامك تفريغ حلقة قصيرة من برنامج مرئي للشيخ محمد سائر الشبعان، عنوانها «{title}»، وهي من سلسلة «{series}».
