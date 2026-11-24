@@ -64,33 +64,29 @@
 
   var pop = document.getElementById('lp-pop');
   if (!pop) return;
-  var chip = document.getElementById('lp-chip');
   var key = pop.dataset.key;
-  var hours = parseFloat(pop.dataset.hours) || 3;
+  var hours = parseFloat(pop.dataset.hours) || 1;
   var special = (pop.dataset.offerPrice || '').trim();   // never data-price: that is what the swap writes into
   var store = {
     get: function (k) { try { return localStorage.getItem(key + ':' + k); } catch (e) { return null; } },
     set: function (k, v) { try { localStorage.setItem(key + ':' + k, v); } catch (e) {} }
   };
-  var started = parseInt(store.get('start') || '0', 10);
-  if (!started) { started = Date.now(); store.set('start', String(started)); }
-  var ends = started + hours * 3600 * 1000;
 
-  /* The page as it stands, so it can be put back when the window closes. */
+  /* The page as it stands at the usual price, so it can be put back. */
   var prices = [].slice.call(document.querySelectorAll('[data-price]'));
-  var wases = [].slice.call(document.querySelectorAll('[data-was]'));
   var offs = [].slice.call(document.querySelectorAll('[data-off]'));
   var was = [].slice.call(document.querySelectorAll('[data-wa]'));
+  var wases = [].slice.call(document.querySelectorAll('[data-was]'));
   var field = document.querySelector('[data-offer-field]');
   var usual = prices.length ? prices[0].textContent.trim() : '';
   var waHrefs = was.map(function (a) { return a.href; });
   var num = function (t) { var m = String(t).replace(/[^\d.]/g, ''); return m ? parseFloat(m) : 0; };
-
   wases.forEach(function (el) { if (!el.dataset.orig) el.dataset.orig = el.textContent.trim(); });
+
   var applyOffer = function (on) {
     if (!special) return;
     prices.forEach(function (el) { el.textContent = on ? special : usual; });
-    var base = wases.length ? num(wases[0].dataset.orig) : 0;   // the usual full price, always
+    var base = wases.length ? num(wases[0].dataset.orig) : 0;
     offs.forEach(function (el) {
       var to = on ? num(special) : num(usual);
       el.textContent = base && to ? 'خصم ' + Math.round((1 - to / base) * 100) + '%' : el.textContent;
@@ -106,16 +102,30 @@
     document.querySelectorAll('[data-offer-note]').forEach(function (el) { el.hidden = !on; });
   };
 
-  if (Date.now() >= ends) { applyOffer(false); return; }
-  applyOffer(true);
+  var started = parseInt(store.get('start') || '0', 10);   // set when the offer is first shown
+  var ends = started ? started + hours * 3600 * 1000 : 0;
+  var timer = null;
 
-  var open = function () { pop.classList.add('on'); document.body.style.overflow = 'hidden'; };
-  var close = function () {
-    pop.classList.remove('on');
+  var stop = function () {
+    applyOffer(false);
     document.body.style.overflow = '';
-    store.set('seen', '1');
-    if (chip) chip.hidden = false;
+    if (pop.parentNode) pop.remove();
+    if (timer) clearInterval(timer);
   };
+
+  var tick = function () {
+    var left = ends - Date.now();
+    if (left <= 0) { stop(); return; }
+    var s = Math.floor(left / 1000);
+    var box = pop.querySelector('[data-pop-count]');
+    if (box) {
+      box.querySelector('[data-h]').textContent = pad(Math.floor(s / 3600));
+      box.querySelector('[data-m]').textContent = pad(Math.floor(s % 3600 / 60));
+      box.querySelector('[data-s]').textContent = pad(s % 60);
+    }
+  };
+
+  var close = function () { pop.classList.remove('on'); document.body.style.overflow = ''; };
   pop.querySelectorAll('[data-close]').forEach(function (b) { b.addEventListener('click', close); });
   pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && pop.classList.contains('on')) close(); });
@@ -126,52 +136,39 @@
       else { close(); }
     });
   }
-  if (chip) {
-    chip.addEventListener('click', function () {
-      if (!document.body.contains(pop)) { goRegister(); return; }
-      open();
-      var box = pop.querySelector('.lp-pop__box');
-      if (box) box.scrollTop = 0;
-    });
-  }
 
-  var tickPop = function () {
-    var left = ends - Date.now();
-    if (left <= 0) {
-      applyOffer(false);
-      pop.classList.remove('on');
-      document.body.style.overflow = '';
-      pop.remove();
-      if (chip) chip.remove();
-      clearInterval(timer);
-      return;
-    }
-    var s = Math.floor(left / 1000);
-    var hh = pad(Math.floor(s / 3600)), mm = pad(Math.floor(s % 3600 / 60)), ss = pad(s % 60);
-    var box = pop.querySelector('[data-pop-count]');
-    if (box) {
-      box.querySelector('[data-h]').textContent = hh;
-      box.querySelector('[data-m]').textContent = mm;
-      box.querySelector('[data-s]').textContent = ss;
-    }
-    if (chip) chip.querySelector('[data-chip]').textContent = hh + ':' + mm + ':' + ss;
+  var runWindow = function () {
+    tick();
+    timer = setInterval(tick, 1000);
+    applyOffer(true);
   };
-  tickPop();
-  var timer = setInterval(tickPop, 1000);
 
-  if (store.get('seen')) {
-    if (chip) chip.hidden = false;
-  } else {
-    var shown = false;
-    var maybe = function () {
-      if (shown) return;
-      if (window.scrollY > document.documentElement.scrollHeight * 0.2 || Date.now() - started > 20000) {
-        shown = true;
-        open();
-        window.removeEventListener('scroll', maybe);
-      }
-    };
-    window.addEventListener('scroll', maybe, { passive: true });
-    setTimeout(maybe, 20000);
+  if (started) {                       // the offer was already revealed on this device
+    if (Date.now() >= ends) { stop(); return; }
+    runWindow();                       // still running: the page keeps the special price
+    return;
   }
+
+  /* Not revealed yet: the page stays at the usual price until the offer shows itself —
+     once the reader has gone a little way down, or after two minutes on the page. */
+  var opened = false;
+  var reveal = function () {
+    if (opened) return;
+    opened = true;
+    window.removeEventListener('scroll', onScrollReveal);
+    started = Date.now();
+    store.set('start', String(started));
+    ends = started + hours * 3600 * 1000;
+    runWindow();
+    pop.classList.add('on');
+    document.body.style.overflow = 'hidden';
+    var box = pop.querySelector('.lp-pop__box');
+    if (box) box.scrollTop = 0;
+  };
+  var onScrollReveal = function () {
+    var seen = window.scrollY + window.innerHeight;
+    if (seen > document.documentElement.scrollHeight * 0.3) reveal();
+  };
+  window.addEventListener('scroll', onScrollReveal, { passive: true });
+  setTimeout(reveal, 120000);
 })();

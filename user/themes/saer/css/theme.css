@@ -412,9 +412,6 @@ html,body{overflow-x:hidden}
   .lp-top b{font-size:16px}
   .lp-top span{display:none}
 }
-.lp-chip{position:fixed;inset-inline-end:16px;bottom:16px;z-index:65;display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:999px;border:1px solid rgba(214,178,110,.5);background:linear-gradient(180deg,rgba(42,18,64,.98),rgba(21,8,38,.98));color:var(--ink);font:inherit;font-size:14px;cursor:pointer;box-shadow:0 12px 30px rgba(8,2,20,.55)}
-.lp-chip b{color:var(--gold);font-variant-numeric:tabular-nums;font-size:16px}
-@media (max-width:760px){.lp-chip{bottom:84px;inset-inline-end:12px;font-size:13px;padding:8px 13px}}
 
 /* ── Course landing: price tiers, the About block, and the phone ─────── */
 .lp-tiers{display:flex;flex-direction:column;gap:8px;width:100%}
@@ -425,9 +422,6 @@ html,body{overflow-x:hidden}
 .lp-tier--now span{color:var(--ink-strong);font-weight:700}
 .lp-tier--now b{font-size:30px;color:var(--gold);font-family:var(--font-head);line-height:1}
 .lp-pop__later{background:none;border:0;color:var(--muted);font:inherit;font-size:15px;text-decoration:underline;cursor:pointer;padding:4px}
-.lp-chip{gap:9px}
-.lp-chip svg{color:var(--gold);flex:none}
-.lp-chip__t{white-space:nowrap}
 
 .lp-about{position:relative;padding:clamp(24px,4vw,40px);border-radius:28px;background:linear-gradient(160deg,rgba(123,63,228,.2),rgba(10,3,24,.55));border:1px solid var(--glass-line);display:flex;flex-direction:column;gap:14px;overflow:hidden}
 .lp-about::before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,var(--gold),var(--violet))}
