@@ -269,7 +269,7 @@
 
 {# ── العرض الخاص: نافذة تظهر مرة، ومهلة تنتهي فعلاً ────────── #}
 {% if h.popup and can_register %}
-<div class="lp-pop" id="lp-pop" role="dialog" aria-modal="true" aria-labelledby="lp-pop-t" data-hours="{{ h.popup_hours ?: 1 }}" data-price="{{ h.popup_price }}" data-key="pop:{{ page.route }}">
+<div class="lp-pop" id="lp-pop" role="dialog" aria-modal="true" aria-labelledby="lp-pop-t" data-hours="{{ h.popup_hours ?: 1 }}" data-offer-price="{{ h.popup_price }}" data-key="pop:{{ page.route }}">
   <div class="lp-pop__box">
     <button type="button" class="lp-pop__x" data-close aria-label="إغلاق">×</button>
     <p class="lp-eyebrow" style="margin:0 auto">{% include 'partials/lp-icons.html.twig' with {i:'spark', size:16} %} {{ h.popup_badge ?: 'عرض خاص' }}</p>

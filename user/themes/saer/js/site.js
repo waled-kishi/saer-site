@@ -67,7 +67,7 @@
   var chip = document.getElementById('lp-chip');
   var key = pop.dataset.key;
   var hours = parseFloat(pop.dataset.hours) || 3;
-  var special = (pop.dataset.price || '').trim();
+  var special = (pop.dataset.offerPrice || '').trim();   // never data-price: that is what the swap writes into
   var store = {
     get: function (k) { try { return localStorage.getItem(key + ':' + k); } catch (e) { return null; } },
     set: function (k, v) { try { localStorage.setItem(key + ':' + k, v); } catch (e) {} }
