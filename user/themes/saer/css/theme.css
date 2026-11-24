@@ -453,3 +453,5 @@ html,body{overflow-x:hidden}
   .lp-pop{padding:14px}
   .lp-pop__box{padding:26px 18px;gap:13px}
 }
+.lp-about__img{border-radius:20px;overflow:hidden;margin-bottom:6px}
+.lp-about__img img{display:block;width:100%;height:auto}

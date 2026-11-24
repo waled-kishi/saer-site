@@ -11,11 +11,21 @@ form:
           type: tab
           title: بيانات الدورة
           fields:
+            media_info:
+              type: display
+              markdown: true
+              content: "**الفيديو أو الصورة** بيظهر بأعلى الصفحة مكان الرسم المتحرك. إذا حطيت التنين: الفيديو فوق بالواجهة، والصورة بقسم «فكرة الدورة». إذا تركتهن فاضيين بيضل الرسم المتحرك."
+            header.trailer:
+              type: text
+              label: فيديو تعريفي من يوتيوب
+              placeholder: https://www.youtube.com/watch?v=...
+              help: الصق رابط الفيديو أو رقمه. يظهر في أعلى الصفحة.
             header.image:
               type: media
               label: صورة الدورة
               sources: [page]
               accept: ['image/*']
+              help: تظهر في أعلى الصفحة إذا ما في فيديو، أو داخل قسم «فكرة الدورة» إذا في فيديو.
             header.status:
               type: select
               label: حالة التسجيل
@@ -41,9 +51,6 @@ form:
               type: text
               label: الرسوم
               placeholder: مجانية
-            header.trailer:
-              type: text
-              label: فيديو تعريفي على يوتيوب (اختياري)
             header.audience:
               type: textarea
               label: لمن هذه الدورة؟

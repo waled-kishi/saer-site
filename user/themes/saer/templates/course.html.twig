@@ -139,6 +139,7 @@
 <section class="wrap wrap--narrow sec sec--tight">
   <div class="lp-about">
     <span class="lp-about__mark" aria-hidden="true">”</span>
+    {% if h.trailer and img and img.medium %}<div class="lp-about__img">{{ img.medium.cropZoom(900, 500).html('', page.title)|raw }}</div>{% endif %}
     <p class="lp-eyebrow" style="margin:0">{% include 'partials/lp-icons.html.twig' with {i:'spark', size:15} %} فكرة الدورة</p>
     <article class="prose">{{ page.content|raw }}</article>
   </div>
