@@ -383,7 +383,7 @@ class StatsController extends AbstractApiController
                 'id' => (int) $r['id'], 'ts' => (int) $r['ts'], 'route' => $r['route'],
                 'course' => $r['course'], 'name' => $r['name'], 'whatsapp' => $r['whatsapp'],
                 'email' => $r['email'], 'city' => $r['city'], 'qualification' => $r['qualification'],
-                'note' => $r['note'], 'device' => $r['device'],
+                'note' => $r['note'], 'device' => $r['device'], 'offer' => $r['offer'] ?? '',
                 'age' => $r['age'] ? (Core::AGES[$r['age']] ?? $r['age']) : '',
                 'gender' => $r['gender'] ? (Core::GENDERS[$r['gender']] ?? $r['gender']) : '',
                 'country' => $r['country'] ? $core->countryName($r['country']) : '',
@@ -418,7 +418,7 @@ class StatsController extends AbstractApiController
                            Core::GENDERS[$r['gender'] ?? ''] ?? '', $r['geo'] ? $core->countryName($r['geo']) : '', $r['device']];
             }
         } elseif ($type === 'registrations') {
-            $head = ['الوقت', 'الدورة', 'الاسم', 'واتساب', 'البريد', 'العمر', 'البلد', 'المدينة', 'الجنس', 'المؤهل', 'سبب التسجيل'];
+            $head = ['الوقت', 'الدورة', 'الاسم', 'واتساب', 'البريد', 'العمر', 'البلد', 'المدينة', 'الجنس', 'المؤهل', 'سبب التسجيل', 'السعر المعروض'];
             $rows = [];
             $route = trim((string) ($request->getQueryParams()['route'] ?? ''));
             $sql = 'SELECT * FROM registrations' . ($route !== '' ? ' WHERE route = ?' : '') . ' ORDER BY ts DESC';
@@ -427,7 +427,7 @@ class StatsController extends AbstractApiController
                 $rows[] = [$when($r['ts']), $page ? $page->title() : ($r['course'] ?: $r['route']), $r['name'],
                            $r['whatsapp'], $r['email'], Core::AGES[$r['age'] ?? ''] ?? '',
                            $r['country'] ? $core->countryName($r['country']) : '', $r['city'],
-                           Core::GENDERS[$r['gender'] ?? ''] ?? '', $r['qualification'], $r['note']];
+                           Core::GENDERS[$r['gender'] ?? ''] ?? '', $r['qualification'], $r['note'], $r['offer'] ?? ''];
             }
         } else {
             $type = 'people';

@@ -1,0 +1,27 @@
+{# The drain's circles: three rings turning at their own pace around a still centre.
+   Decoration only, and it stops for anyone who asked for less motion. #}
+<svg class="lp-art" viewBox="0 0 320 320" role="img" aria-label="رسم: دوائر تدور حول مركز ساكن">
+  <defs>
+    <linearGradient id="lpg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#EBD3A0"/><stop offset="1" stop-color="#7B3FE4"/>
+    </linearGradient>
+    <radialGradient id="lpg2"><stop offset="0" stop-color="#EBD3A0" stop-opacity=".55"/><stop offset="1" stop-color="#EBD3A0" stop-opacity="0"/></radialGradient>
+  </defs>
+  <circle cx="160" cy="160" r="150" fill="url(#lpg2)"/>
+  <g class="lp-art__r lp-art__r--1" style="transform-origin:160px 160px">
+    <circle cx="160" cy="160" r="134" fill="none" stroke="url(#lpg1)" stroke-width="2" stroke-dasharray="26 16" opacity=".85"/>
+    <circle cx="160" cy="26" r="7" fill="#EBD3A0"/>
+  </g>
+  <g class="lp-art__r lp-art__r--2" style="transform-origin:160px 160px">
+    <circle cx="160" cy="160" r="104" fill="none" stroke="#B14DD6" stroke-width="2" stroke-dasharray="14 12" opacity=".8"/>
+    <circle cx="264" cy="160" r="6" fill="#B14DD6"/>
+  </g>
+  <g class="lp-art__r lp-art__r--3" style="transform-origin:160px 160px">
+    <circle cx="160" cy="160" r="74" fill="none" stroke="#EBD3A0" stroke-width="1.6" stroke-dasharray="6 10" opacity=".7"/>
+    <circle cx="160" cy="234" r="5" fill="#EBD3A0"/>
+  </g>
+  <circle cx="160" cy="160" r="46" fill="rgba(21,8,38,.72)" stroke="#D6B26E" stroke-width="1.5"/>
+  <g class="lp-art__pulse" style="transform-origin:160px 160px">
+    <path d="M160 139v26M160 177h.01" stroke="#EBD3A0" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</svg>

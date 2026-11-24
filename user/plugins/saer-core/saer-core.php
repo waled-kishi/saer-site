@@ -336,6 +336,10 @@ class SaerCorePlugin extends Plugin
         if (!$closed && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['saer_register'])) {
             $post = $_POST;
             [$values, $errors] = $core->validateRegistration($post, $fields);
+            // The special price travels with the form, and is kept only when it is the one
+            // this course offers, so Walid knows who was promised what.
+            $special = trim((string) ($h->popup_price ?? ''));
+            $values['offer'] = ($special !== '' && trim((string) ($post['offer'] ?? '')) === $special) ? $special : '';
             $vars['values'] = $values;
             if (!empty($post['website']) || !$core->stampOk((string) ($post['stamp'] ?? ''))) {
                 $errors['form'] = 'تعذّر إرسال النموذج. أعد المحاولة بعد لحظات.';

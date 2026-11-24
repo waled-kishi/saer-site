@@ -465,7 +465,7 @@ class Core
 
     public function createRegistration(string $route, string $course, array $v): int
     {
-        $cols = ['name', 'whatsapp', 'email', 'age', 'country', 'city', 'gender', 'qualification', 'note'];
+        $cols = ['name', 'whatsapp', 'email', 'age', 'country', 'city', 'gender', 'qualification', 'note', 'offer'];
         $row = [$route, $course];
         foreach ($cols as $c) {
             $row[] = (string) ($v[$c] ?? '');

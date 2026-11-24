@@ -117,6 +117,10 @@ class Db
             Search::migrate($pdo);
             $pdo->exec('PRAGMA user_version = 3');
         }
+        if ($version < 5 && $version >= 4) {
+            $pdo->exec('ALTER TABLE registrations ADD COLUMN offer TEXT');
+            $pdo->exec('PRAGMA user_version = 5');
+        }
         if ($version < 4) {
             // One row per registration. Every answer but the name is optional, because each
             // course decides which fields its form shows.
@@ -134,6 +138,7 @@ class Db
                     gender TEXT,
                     qualification TEXT,
                     note TEXT,
+                    offer TEXT,
                     day TEXT NOT NULL,
                     ts INTEGER NOT NULL,
                     visitor TEXT,
@@ -144,7 +149,7 @@ class Db
                 CREATE INDEX IF NOT EXISTS registrations_route ON registrations(route);
                 CREATE INDEX IF NOT EXISTS registrations_day ON registrations(day);
                 CREATE INDEX IF NOT EXISTS registrations_visitor ON registrations(route, visitor);
-                PRAGMA user_version = 4;
+                PRAGMA user_version = 5;
             SQL);
         }
     }

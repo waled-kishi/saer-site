@@ -75,6 +75,8 @@
         <div class="dlform__hp" aria-hidden="true"><label>اتركه فارغاً <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
         <input type="hidden" name="stamp" value="{{ reg.stamp }}">
         <input type="hidden" name="saer_register" value="1">
+        {# Filled by the page while a special offer is still running, so it travels with the form. #}
+        <input type="hidden" name="offer" value="" data-offer-field>
 
         <div class="actions">
           <button type="submit" class="btn gold">{{ page.header.register_label ?: 'سجّل الآن' }}</button>

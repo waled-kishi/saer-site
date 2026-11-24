@@ -40,57 +40,60 @@
 {# ── شريط ثابت أعلى الشاشة ─────────────────────────────────── #}
 {% if can_register %}
 <div class="lp-top" id="lp-top" hidden>
-  <b>{{ h.price }}</b>{% if h.price_before %} <s class="mut" style="font-size:15px">{{ h.price_before }}</s>{% endif %}
+  <b data-price>{{ h.price }}</b>{% if h.price_before %} <s class="mut" style="font-size:15px" data-was>{{ h.price_before }}</s>{% endif %}
   {% if h.register_deadline %}<span>التسجيل حتى {{ h.register_deadline|date('Y/m/d') }}</span>{% endif %}
   <a class="btn gold btn--sm" href="{{ cta_href }}" {{ blank|raw }}>{{ cta_label }}</a>
 </div>
 {% endif %}
 
 {# ── الواجهة ───────────────────────────────────────────────── #}
-<section class="wrap page-head lp-hero">
-  {% include 'partials/breadcrumbs.html.twig' %}
-  <span class="chip chip--gold" style="align-self:flex-start">{{ page.title }}{% if h.batch %} · {{ h.batch }}{% endif %} · {{ expired and h.status == 'open' ? 'انتهى موعد التسجيل' : st[h.status ?: 'soon'] }}</span>
-  <h1>{{ headline|raw }}</h1>
-  {% if h.summary %}<p class="lp-lede">{{ h.summary }}</p>{% endif %}
-  <div class="byline"><span>يقدّمها: الشيخ محمد سائر الشبعان</span></div>
-
-  {% set facts = [] %}
-  {% if h.start_date %}{% set facts = facts|merge(['البدء: ' ~ h.start_date]) %}{% endif %}
-  {% if h.duration %}{% set facts = facts|merge([h.duration]) %}{% endif %}
-  {% if h.format %}{% set facts = facts|merge([h.format]) %}{% endif %}
-  {% if facts|length %}<div class="chips">{% for f in facts %}<span class="chip">{{ f }}</span>{% endfor %}</div>{% endif %}
-
-  {% if h.trailer %}<div class="lp-media">{% include 'partials/youtube.html.twig' with {yt: h.trailer, title: 'تعريف بدورة ' ~ page.title} %}</div>
-  {% elseif img and img.medium %}<div class="article__img lp-media">{{ img.medium.cropZoom(1200, 675).html('', page.title)|raw }}</div>{% endif %}
-
-  {# بطاقة العرض #}
-  <div class="lp-offer">
-    {% if h.price %}
-      <div class="lp-pricerow">
-        <b>{{ h.price }}</b>
-        {% if h.price_before %}<s>{{ h.price_before }}</s>{% endif %}
-        {% if off > 0 %}<span class="lp-off">خصم {{ off }}%</span>{% endif %}
+<section class="lp-hero-wrap">
+  <div class="wrap lp-hero">
+    <div class="lp-hero__text">
+      <span class="lp-tag">{% include 'partials/lp-icons.html.twig' with {i:'spark', size:15} %} {{ h.batch ?: 'دورة تدريبية' }} · {{ expired and h.status == 'open' ? 'انتهى التسجيل' : st[h.status ?: 'soon'] }}</span>
+      <h1>{{ headline|raw }}</h1>
+      {% if h.summary %}<p class="lp-lede">{{ h.summary }}</p>{% endif %}
+      <div class="lp-facts">
+        {% if h.start_date %}<span>{% include 'partials/lp-icons.html.twig' with {i:'clock', size:19} %}{{ h.start_date }}</span>{% endif %}
+        {% if h.duration %}<span>{% include 'partials/lp-icons.html.twig' with {i:'replay', size:19} %}{{ h.duration }}</span>{% endif %}
+        {% if h.format %}<span>{% include 'partials/lp-icons.html.twig' with {i:'video', size:19} %}{{ h.format }}</span>{% endif %}
+        <span>{% include 'partials/lp-icons.html.twig' with {i:'award', size:19} %}شهادة حضور</span>
       </div>
-      {% if h.price_note %}<p class="mut" style="margin:0;font-size:15px">{{ h.price_note }}</p>{% endif %}
-    {% endif %}
+    </div>
 
-    {% if h.countdown and h.register_deadline and not expired and h.status == 'open' %}
-      {% include 'partials/course-countdown.html.twig' %}
-    {% endif %}
+    <div class="lp-hero__side">
+      {% if h.trailer %}<div class="lp-media">{% include 'partials/youtube.html.twig' with {yt: h.trailer, title: 'تعريف بدورة ' ~ page.title} %}</div>
+      {% elseif img and img.medium %}<div class="article__img lp-media">{{ img.medium.cropZoom(900, 600).html('', page.title)|raw }}</div>
+      {% else %}{% include 'partials/course-hero-art.html.twig' %}{% endif %}
 
-    {% if can_register %}
-      <a class="btn gold" href="{{ cta_href }}" {{ blank|raw }}>{{ cta_label }}</a>
-      {% if wa %}<a class="btn ghost" href="{{ wa }}" target="_blank" rel="noopener">{{ h.whatsapp_label ?: 'تواصل على واتساب' }}</a>{% endif %}
-      <ul class="lp-rsr">
-        {% if h.register_deadline %}<li>{% include 'partials/lp-icons.html.twig' with {i:'clock', size:18} %} التسجيل مفتوح حتى {{ h.register_deadline|date('Y/m/d') }}</li>{% endif %}
-        {% if h.register_note %}<li>{% include 'partials/lp-icons.html.twig' with {i:'check', size:18} %} {{ h.register_note }}</li>{% endif %}
-        <li>{% include 'partials/lp-icons.html.twig' with {i:'check', size:18} %} بياناتك لا تُنشر ولا تُشارك مع أحد</li>
-      </ul>
-    {% elseif expired and h.status == 'open' %}
-      <span class="btn ghost" aria-disabled="true">انتهى موعد التسجيل</span>
-    {% else %}
-      <span class="btn ghost" aria-disabled="true">{{ st[h.status ?: 'soon'] }}</span>
-    {% endif %}
+      <div class="lp-offer">
+        {% if off > 0 %}<span class="lp-off" data-off>خصم {{ off }}%</span>{% endif %}
+        {% if h.price %}
+          <div class="lp-pricerow">
+            <b data-price>{{ h.price }}</b>
+            {% if h.price_before %}<s data-was>{{ h.price_before }}</s>{% endif %}
+          </div>
+          {% if h.price_note %}<p class="lp-fine">{{ h.price_note }}</p>{% endif %}
+        {% endif %}
+
+        {% if h.countdown and h.register_deadline and not expired and h.status == 'open' %}
+          {% include 'partials/course-countdown.html.twig' %}
+        {% endif %}
+
+        {% if can_register %}
+          <a class="btn gold lp-go" href="{{ cta_href }}" data-cta {{ blank|raw }}>{{ cta_label }}</a>
+          {% if wa %}<a class="btn ghost" href="{{ wa }}" data-wa target="_blank" rel="noopener">{{ h.whatsapp_label ?: 'تواصل على واتساب' }}</a>{% endif %}
+          <ul class="lp-rsr">
+            <li>{% include 'partials/lp-icons.html.twig' with {i:'check', size:17} %} مقعدك يُثبّت فور وصول الإشعار</li>
+            <li>{% include 'partials/lp-icons.html.twig' with {i:'check', size:17} %} بياناتك لا تُنشر ولا تُشارك مع أحد</li>
+          </ul>
+        {% elseif expired and h.status == 'open' %}
+          <span class="btn ghost" aria-disabled="true">انتهى موعد التسجيل</span>
+        {% else %}
+          <span class="btn ghost" aria-disabled="true">{{ st[h.status ?: 'soon'] }}</span>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </section>
 
@@ -215,11 +218,12 @@
 
     {% if h.price %}
       <div class="lp-pricerow" style="justify-content:center">
-        <b>{{ h.price }}</b>
-        {% if h.price_before %}<s>{{ h.price_before }}</s>{% endif %}
-        {% if off > 0 %}<span class="lp-off">خصم {{ off }}%</span>{% endif %}
+        <b data-price>{{ h.price }}</b>
+        {% if h.price_before %}<s data-was>{{ h.price_before }}</s>{% endif %}
+        {% if off > 0 %}<span class="lp-off" data-off>خصم {{ off }}%</span>{% endif %}
       </div>
       {% if h.price_note %}<p class="mut" style="margin:-8px 0 0">{{ h.price_note }}</p>{% endif %}
+      {% if h.popup and h.popup_price %}<p class="lp-hotline" data-offer-note hidden>{% include 'partials/lp-icons.html.twig' with {i:'spark', size:16} %} هذا سعرك الخاص ما دام العدّاد يعمل، وسيُسجَّل مع طلبك.</p>{% endif %}
     {% endif %}
 
     {% if h.register_deadline and not expired %}
@@ -235,7 +239,7 @@
       {% elseif h.pay_note %}<p class="mut">{{ h.pay_note|nl2br }}</p>{% endif %}
 
       <div class="actions lp-actions">
-        {% if wa %}<a class="btn gold" href="{{ wa }}" target="_blank" rel="noopener">{{ h.whatsapp_label ?: 'تواصل معنا على واتساب' }}</a>{% endif %}
+        {% if wa %}<a class="btn gold" href="{{ wa }}" data-wa target="_blank" rel="noopener">{{ h.whatsapp_label ?: 'تواصل معنا على واتساب' }}</a>{% endif %}
         {% if internal %}<a class="btn {{ wa ? 'ghost' : 'gold' }}" href="#register-form">عبّئ نموذج التسجيل</a>
         {% else %}<a class="btn {{ wa ? 'ghost' : 'gold' }}" href="{{ h.register_url }}" target="_blank" rel="noopener">{{ cta_label }}</a>{% endif %}
       </div>
@@ -252,14 +256,14 @@
 {# ── شريط ثابت أسفل الموبايل ───────────────────────────────── #}
 {% if h.sticky_cta and can_register %}
 <div class="lp-bar">
-  <div><b>{{ h.price ?: cta_label }}</b>{% if h.register_deadline %}<span>التسجيل حتى {{ h.register_deadline|date('Y/m/d') }}</span>{% endif %}</div>
+  <div><b data-price>{{ h.price ?: cta_label }}</b>{% if h.register_deadline %}<span>التسجيل حتى {{ h.register_deadline|date('Y/m/d') }}</span>{% endif %}</div>
   <a class="btn gold btn--sm" href="{{ cta_href }}" {{ blank|raw }}>{{ cta_label }}</a>
 </div>
 {% endif %}
 
 {# ── العرض الخاص: نافذة تظهر مرة، ومهلة تنتهي فعلاً ────────── #}
 {% if h.popup and can_register %}
-<div class="lp-pop" id="lp-pop" role="dialog" aria-modal="true" aria-labelledby="lp-pop-t" data-hours="{{ h.popup_hours ?: 3 }}" data-key="pop:{{ page.route }}">
+<div class="lp-pop" id="lp-pop" role="dialog" aria-modal="true" aria-labelledby="lp-pop-t" data-hours="{{ h.popup_hours ?: 3 }}" data-price="{{ h.popup_price }}" data-key="pop:{{ page.route }}">
   <div class="lp-pop__box">
     <button type="button" class="lp-pop__x" data-close aria-label="إغلاق">×</button>
     <p class="lp-eyebrow" style="margin:0 auto">{% include 'partials/lp-icons.html.twig' with {i:'spark', size:16} %} {{ h.popup_badge ?: 'عرض خاص' }}</p>
@@ -276,6 +280,7 @@
       <span class="lp-count__u"><b data-s>—</b><i>ثانية</i></span>
     </div>
     <a class="btn gold" href="{{ cta_href }}" data-go {{ blank|raw }}>{{ h.popup_cta ?: cta_label }}</a>
+    <p class="lp-fine" style="margin:0">السعر الخاص يسري ما دام العدّاد يعمل، ويُسجَّل مع طلبك.</p>
     <button type="button" class="btn ghost" data-close>ليس الآن</button>
   </div>
 </div>

@@ -155,6 +155,7 @@
         <td class="nowrap">${esc(p.email || '—')}</td><td class="wrap-cell">${esc([p.country, p.city].filter(Boolean).join(' · ') || '—')}</td>
         <td class="wrap-cell">${esc([p.age, p.gender, p.qualification].filter(Boolean).join(' · ') || '—')}</td>
         <td class="wrap-cell">${esc(p.note || '—')}</td>
+        <td class="nowrap">${p.offer ? `<b style="color:#C99A45">${esc(p.offer)}</b>` : '—'}</td>
         <td class="nowrap"><button type="button" class="danger" data-delreg="${p.id}">حذف</button></td></tr>`).join('');
 
       this.root.innerHTML = `<style>${CSS}</style><div class="wrap">
@@ -169,7 +170,7 @@
         ${courses ? `<div class="card"><h2>التسجيلات حسب الدورة</h2>${courses}</div>` : ''}
         <div class="card"><h2>المسجّلون</h2>${d.registrations.length ? `<div class="scroll"><table><thead><tr>
           <th>الوقت</th><th>الدورة</th><th>الاسم</th><th>واتساب</th><th>البريد</th><th>البلد</th>
-          <th>بيانات أخرى</th><th>سبب التسجيل</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
+          <th>بيانات أخرى</th><th>سبب التسجيل</th><th>السعر المعروض</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
           : '<p class="muted">لا تسجيلات بعد. تظهر هنا تسجيلات الدورات التي يكون التسجيل فيها عبر نموذج الموقع، لا عبر رابط خارجي.</p>'}</div>
         <p class="note">رقم الواتساب يفتح محادثة مباشرة. البيانات هي ما كتبه الشخص بنفسه في نموذج الدورة، ولا تُنشر على الموقع.</p>
       </div>`;

@@ -22,14 +22,15 @@
 })();
 
 /* ── Course landing page ──────────────────────────────────────────────
-   Three small things: the deadline countdowns, the bar that appears once the
-   hero is out of sight, and the special offer. The offer's window is real: it
-   starts at the visitor's first view, it is kept in their browser, and when it
-   runs out the popup and its chip are gone for good on this device. */
+   The deadline countdowns, the bar that appears once the hero is away, and the
+   special offer. The offer's window is real: it starts at the visitor's first
+   view, it lives in their browser, and while it runs the special price replaces
+   the usual one everywhere on the page — the buttons, the WhatsApp message and
+   the registration form — so what they were promised is what they are asked for.
+   When it runs out, everything returns to the usual price. */
 (function () {
   var pad = function (n) { return n < 10 ? '0' + n : String(n); };
 
-  /* Deadline countdowns (days/hours/minutes/seconds). */
   var counts = document.querySelectorAll('.lp-count[data-ends]');
   if (counts.length) {
     var tickEnds = function () {
@@ -48,21 +49,25 @@
     setInterval(tickEnds, 1000);
   }
 
-  /* The top bar shows itself once the hero has scrolled away. */
-  var top = document.getElementById('lp-top');
-  if (top) {
-    top.hidden = false;
-    var onScroll = function () { top.classList.toggle('on', window.scrollY > 520); };
+  var topBar = document.getElementById('lp-top');
+  if (topBar) {
+    topBar.hidden = false;
+    var onScroll = function () { topBar.classList.toggle('on', window.scrollY > 560); };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
   }
 
-  /* The special offer. */
+  var goRegister = function () {
+    var t = document.getElementById('register');
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   var pop = document.getElementById('lp-pop');
   if (!pop) return;
   var chip = document.getElementById('lp-chip');
   var key = pop.dataset.key;
   var hours = parseFloat(pop.dataset.hours) || 3;
+  var special = (pop.dataset.price || '').trim();
   var store = {
     get: function (k) { try { return localStorage.getItem(key + ':' + k); } catch (e) { return null; } },
     set: function (k, v) { try { localStorage.setItem(key + ':' + k, v); } catch (e) {} }
@@ -70,7 +75,41 @@
   var started = parseInt(store.get('start') || '0', 10);
   if (!started) { started = Date.now(); store.set('start', String(started)); }
   var ends = started + hours * 3600 * 1000;
-  if (Date.now() >= ends) return;   // the window is over: nothing is shown again
+
+  /* The page as it stands, so it can be put back when the window closes. */
+  var prices = [].slice.call(document.querySelectorAll('[data-price]'));
+  var wases = [].slice.call(document.querySelectorAll('[data-was]'));
+  var offs = [].slice.call(document.querySelectorAll('[data-off]'));
+  var was = [].slice.call(document.querySelectorAll('[data-wa]'));
+  var field = document.querySelector('[data-offer-field]');
+  var usual = prices.length ? prices[0].textContent.trim() : '';
+  var waHrefs = was.map(function (a) { return a.href; });
+  var num = function (t) { var m = String(t).replace(/[^\d.]/g, ''); return m ? parseFloat(m) : 0; };
+
+  var applyOffer = function (on) {
+    if (!special) return;
+    prices.forEach(function (el) { el.textContent = on ? special : usual; });
+    wases.forEach(function (el) { el.textContent = on ? usual : el.dataset.orig || el.textContent; });
+    if (on) { wases.forEach(function (el) { if (!el.dataset.orig) el.dataset.orig = el.textContent; }); }
+    var base = wases.length ? num(wases[0].dataset.orig || wases[0].textContent) : 0;
+    offs.forEach(function (el) {
+      var from = on ? (base || num(usual)) : base;
+      var to = on ? num(special) : num(usual);
+      el.textContent = from && to ? 'خصم ' + Math.round((1 - to / from) * 100) + '%' : el.textContent;
+      el.classList.toggle('lp-off--hot', on);
+    });
+    was.forEach(function (a, i) {
+      var u = waHrefs[i];
+      a.href = on ? u.replace(/(\?text=)(.*)$/, function (_, p, t) {
+        return p + encodeURIComponent(decodeURIComponent(t) + ' (بالسعر الخاص ' + special + ')');
+      }) : u;
+    });
+    if (field) field.value = on ? special : '';
+    document.querySelectorAll('[data-offer-note]').forEach(function (el) { el.hidden = !on; });
+  };
+
+  if (Date.now() >= ends) { applyOffer(false); return; }
+  applyOffer(true);
 
   var open = function () { pop.classList.add('on'); document.body.style.overflow = 'hidden'; };
   var close = function () {
@@ -83,12 +122,18 @@
   pop.addEventListener('click', function (e) { if (e.target === pop) close(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && pop.classList.contains('on')) close(); });
   var go = pop.querySelector('[data-go]');
-  if (go) go.addEventListener('click', close);
+  if (go) {
+    go.addEventListener('click', function (e) {
+      if ((go.getAttribute('href') || '').charAt(0) === '#') { e.preventDefault(); close(); setTimeout(goRegister, 60); }
+      else { close(); }
+    });
+  }
   if (chip) chip.addEventListener('click', open);
 
   var tickPop = function () {
     var left = ends - Date.now();
-    if (left <= 0) {                 // honoured to the second: it disappears
+    if (left <= 0) {
+      applyOffer(false);
       pop.classList.remove('on');
       document.body.style.overflow = '';
       pop.remove();
@@ -110,18 +155,18 @@
   var timer = setInterval(tickPop, 1000);
 
   if (store.get('seen')) {
-    if (chip) chip.hidden = false;            // seen already: only the chip stays
+    if (chip) chip.hidden = false;
   } else {
     var shown = false;
     var maybe = function () {
       if (shown) return;
-      if (window.scrollY > document.documentElement.scrollHeight * 0.25 || Date.now() - started > 25000) {
+      if (window.scrollY > document.documentElement.scrollHeight * 0.2 || Date.now() - started > 20000) {
         shown = true;
         open();
         window.removeEventListener('scroll', maybe);
       }
     };
     window.addEventListener('scroll', maybe, { passive: true });
-    setTimeout(maybe, 25000);
+    setTimeout(maybe, 20000);
   }
 })();
