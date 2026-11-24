@@ -413,6 +413,17 @@ class SaerCorePlugin extends Plugin
             'priority' => 50,
             'authorize' => 'api.system.read',
         ];
+        // Registrations are their own screen inside the same page component (hash route),
+        // because a plugin may ship only one admin page.
+        $items[] = [
+            'id' => 'saer-core-registrations',
+            'plugin' => 'saer-core',
+            'label' => 'تسجيلات الدورات',
+            'icon' => 'fa-user-check',
+            'route' => '/plugin/saer-core#registrations',
+            'priority' => 51,
+            'authorize' => 'api.system.read',
+        ];
         $event['items'] = $items;
     }
 

@@ -56,9 +56,26 @@
   .note{font-size:12px;opacity:.65;line-height:1.7}
   `;
 
+  const screenOf = () => (String(location.hash || '').replace(/^#/, '').split('?')[0] === 'registrations' ? 'registrations' : 'stats');
+
   class SaerStats extends HTMLElement {
-    constructor() { super(); this.days = 30; this.root = this.attachShadow({ mode: 'open' }); }
-    connectedCallback() { this.load(); }
+    constructor() {
+      super();
+      this.days = 30;
+      this.course = '';
+      this.root = this.attachShadow({ mode: 'open' });
+      this.onHash = () => this.route();
+    }
+
+    connectedCallback() { window.addEventListener('hashchange', this.onHash); this.route(); }
+    disconnectedCallback() { window.removeEventListener('hashchange', this.onHash); }
+
+    /** Two screens live in this one page component: the statistics, and the course registrations. */
+    route() {
+      this.screen = screenOf();
+      if (this.screen === 'registrations') this.loadRegistrations();
+      else this.load();
+    }
 
     async load() {
       this.render('<p class="muted">جارٍ التحميل…</p>');
@@ -72,13 +89,14 @@
       }
     }
 
-    async exportCsv(type) {
-      const r = await fetch(api(`/saer-core/export?type=${type}&days=${this.days}`), { headers: headers(), credentials: 'same-origin' });
+    async exportCsv(type, route = '') {
+      const q = route ? `&route=${encodeURIComponent(route)}` : '';
+      const r = await fetch(api(`/saer-core/export?type=${type}&days=${this.days}${q}`), { headers: headers(), credentials: 'same-origin' });
       if (!r.ok) { alert('تعذّر التصدير'); return; }
       const blob = await r.blob();
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `saer-${type}-${this.days}d.csv`;
+      a.download = type === 'registrations' ? 'saer-registrations.csv' : `saer-${type}-${this.days}d.csv`;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     }
@@ -105,42 +123,61 @@
       }
     }
 
-    /** Course registrations: a line per course, then the people who signed up, newest first. */
-    async registrations() {
-      const el = this.root.querySelector('[data-registrations]');
-      if (!el) return;
+    /** The registrations screen: a count per course, a filter, and every person who signed up. */
+    async loadRegistrations() {
+      this.root.innerHTML = `<style>${CSS}</style><div class="wrap"><p class="muted">جارٍ التحميل…</p></div>`;
+      let d;
       try {
-        const r = await fetch(api('/saer-core/registrations?limit=200'), { headers: headers(), credentials: 'same-origin' });
+        const q = this.course ? `&route=${encodeURIComponent(this.course)}` : '';
+        const r = await fetch(api(`/saer-core/registrations?limit=500${q}`), { headers: headers(), credentials: 'same-origin' });
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const d = (await r.json()).data;
-        if (!d.total) { el.innerHTML = '<p class="muted">لا تسجيلات بعد. تظهر هنا تسجيلات الدورات التي يكون التسجيل فيها عبر نموذج الموقع.</p>'; return; }
-        const courses = d.courses.map((c) => `<div class="row"><span>${esc(c.title)}</span>
-          <div class="track"><div class="fill gold" style="width:${Math.round((c.count / Math.max(...d.courses.map((x) => x.count), 1)) * 100)}%"></div></div>
-          <b class="num">${n(c.count)}</b></div>`).join('');
-        const rows = d.registrations.map((p) => `<tr>
-          <td>${new Date(p.ts * 1000).toLocaleString('ar-SY-u-nu-latn')}</td>
-          <td>${esc(p.course || p.route)}</td><td>${esc(p.name)}</td>
-          <td>${p.whatsapp ? `<a href="https://wa.me/${esc(p.whatsapp)}" target="_blank" rel="noopener">${esc(p.whatsapp)}</a>` : '—'}</td>
-          <td>${esc(p.email || '—')}</td><td>${esc([p.country, p.city].filter(Boolean).join(' · ') || '—')}</td>
-          <td>${esc([p.age, p.gender, p.qualification].filter(Boolean).join(' · ') || '—')}</td>
-          <td>${esc(p.note || '—')}</td>
-          <td><button type="button" class="danger" data-delreg="${p.id}" title="حذف هذا التسجيل">حذف</button></td></tr>`).join('');
-        el.innerHTML = `<div class="rows">${courses}</div>
-          <div class="scroll" style="margin-top:14px"><table><thead><tr><th>الوقت</th><th>الدورة</th><th>الاسم</th>
-          <th>واتساب</th><th>البريد</th><th>البلد</th><th>بيانات أخرى</th><th>سبب التسجيل</th><th></th></tr></thead>
-          <tbody>${rows}</tbody></table></div>
-          <p class="note">المجموع ${n(d.total)} تسجيل. رقم الواتساب يفتح محادثة مباشرة.</p>`;
-        el.querySelectorAll('[data-delreg]').forEach((b) => b.addEventListener('click', () => this.deleteRegistration(+b.dataset.delreg)));
+        d = (await r.json()).data;
       } catch (e) {
-        el.innerHTML = '<p class="muted">تعذّرت قراءة التسجيلات.</p>';
+        this.root.innerHTML = `<style>${CSS}</style><div class="wrap"><p class="err">تعذّرت قراءة التسجيلات.</p></div>`;
+        return;
       }
+      const filters = [['', 'كل الدورات']].concat(d.courses.map((c) => [c.route, c.title]))
+        .map(([v, l]) => `<button type="button" data-course="${esc(v)}" aria-pressed="${v === this.course}">${esc(l)}</button>`).join('');
+      const max = Math.max(...d.courses.map((c) => c.count), 1);
+      const courses = d.courses.length ? `<div class="rows">${d.courses.map((c) => `<div class="row"><span>${esc(c.title)}</span>
+        <div class="track"><div class="fill gold" style="width:${Math.round((c.count / max) * 100)}%"></div></div>
+        <b class="num">${n(c.count)}</b></div>`).join('')}</div>` : '';
+      const rows = d.registrations.map((p) => `<tr>
+        <td>${new Date(p.ts * 1000).toLocaleString('ar-SY-u-nu-latn')}</td>
+        <td>${esc(p.course || p.route)}</td><td>${esc(p.name)}</td>
+        <td>${p.whatsapp ? `<a href="https://wa.me/${esc(p.whatsapp)}" target="_blank" rel="noopener">${esc(p.whatsapp)}</a>` : '—'}</td>
+        <td>${esc(p.email || '—')}</td><td>${esc([p.country, p.city].filter(Boolean).join(' · ') || '—')}</td>
+        <td>${esc([p.age, p.gender, p.qualification].filter(Boolean).join(' · ') || '—')}</td>
+        <td>${esc(p.note || '—')}</td>
+        <td><button type="button" class="danger" data-delreg="${p.id}">حذف</button></td></tr>`).join('');
+
+      this.root.innerHTML = `<style>${CSS}</style><div class="wrap">
+        <div class="bar"><div class="ranges" role="group" aria-label="الدورة">${filters}</div>
+          <div class="ranges"><button type="button" data-regexport>تصدير CSV</button>
+          <button type="button" data-regreload>تحديث</button></div></div>
+        <div class="kpis">
+          <div class="card kpi"><span>مجموع التسجيلات</span><b>${n(d.total)}</b><small>في كل الدورات</small></div>
+          <div class="card kpi"><span>دورات فيها تسجيل</span><b>${n(d.courses.length)}</b></div>
+          <div class="card kpi"><span>آخر تسجيل</span><b style="font-size:18px">${d.registrations.length ? new Date(d.registrations[0].ts * 1000).toLocaleString('ar-SY-u-nu-latn') : '—'}</b></div>
+        </div>
+        ${courses ? `<div class="card"><h2>التسجيلات حسب الدورة</h2>${courses}</div>` : ''}
+        <div class="card"><h2>المسجّلون</h2>${d.registrations.length ? `<div class="scroll"><table><thead><tr>
+          <th>الوقت</th><th>الدورة</th><th>الاسم</th><th>واتساب</th><th>البريد</th><th>البلد</th>
+          <th>بيانات أخرى</th><th>سبب التسجيل</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
+          : '<p class="muted">لا تسجيلات بعد. تظهر هنا تسجيلات الدورات التي يكون التسجيل فيها عبر نموذج الموقع، لا عبر رابط خارجي.</p>'}</div>
+        <p class="note">رقم الواتساب يفتح محادثة مباشرة. البيانات هي ما كتبه الشخص بنفسه في نموذج الدورة، ولا تُنشر على الموقع.</p>
+      </div>`;
+      this.root.querySelectorAll('[data-course]').forEach((b) => b.addEventListener('click', () => { this.course = b.dataset.course; this.loadRegistrations(); }));
+      this.root.querySelector('[data-regreload]').addEventListener('click', () => this.loadRegistrations());
+      this.root.querySelector('[data-regexport]').addEventListener('click', () => this.exportCsv('registrations', this.course));
+      this.root.querySelectorAll('[data-delreg]').forEach((b) => b.addEventListener('click', () => this.deleteRegistration(+b.dataset.delreg)));
     }
 
     async deleteRegistration(id) {
       if (!confirm('سيُحذف هذا التسجيل نهائياً. متابعة؟')) return;
       const r = await fetch(api(`/saer-core/registrations/${id}`), { method: 'DELETE', headers: headers(), credentials: 'same-origin' });
       if (!r.ok) { alert('تعذّر الحذف'); return; }
-      this.registrations();
+      this.loadRegistrations();
     }
 
     async rebuildSearch(btn) {
@@ -177,15 +214,13 @@
         <div class="bar"><div class="ranges" role="group" aria-label="المدة">${ranges}</div>
           <div class="ranges"><button type="button" data-export="people">تصدير بيانات المحمّلين</button>
           <button type="button" data-export="downloads">تصدير التحميلات</button>
-          <button type="button" data-export="views">تصدير الزيارات</button>
-          <button type="button" data-export="registrations">تصدير تسجيلات الدورات</button></div></div>
+          <button type="button" data-export="views">تصدير الزيارات</button></div></div>
         ${body}</div>`;
       this.root.querySelectorAll('[data-days]').forEach((b) => b.addEventListener('click', () => { this.days = +b.dataset.days; this.load(); }));
       this.root.querySelectorAll('[data-export]').forEach((b) => b.addEventListener('click', () => this.exportCsv(b.dataset.export)));
       this.root.querySelectorAll('[data-reset]').forEach((b) => b.addEventListener('click', () => this.reset(b.dataset.reset)));
       this.root.querySelectorAll('[data-search]').forEach((b) => b.addEventListener('click', () => this.rebuildSearch(b)));
       if (this.root.querySelector('[data-search-status]')) this.searchStatus();
-      if (this.root.querySelector('[data-registrations]')) this.registrations();
       this.root.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', () => this.del(+b.dataset.del)));
     }
 
@@ -254,7 +289,6 @@
         </div>
         <div class="card"><h2>آخر من حمّل</h2>${recent}</div>
         <p class="note">لا يحفظ الموقع عناوين IP ولا يضع كوكيز للعدّ. "الزائر" يُحسب مرة واحدة في اليوم. البلد في الزيارات من قاعدة DB-IP Lite (IP Geolocation by DB-IP)، وفي النموذج من اختيار الشخص. الروبوتات ومحركات البحث لا تُحسب، وكذلك أي زائر يفتح 30 صفحة خلال 5 دقائق (زاحف آلي يتظاهر بأنه متصفح).</p>
-        <div class="card"><h2>تسجيلات الدورات</h2><div data-registrations>…</div></div>
         <div class="card"><h2>فهرس البحث</h2>
           <p class="note" data-search-status>…</p>
           <div class="ranges"><button type="button" data-search="rebuild">إعادة بناء الفهرس</button></div></div>
