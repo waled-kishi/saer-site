@@ -139,6 +139,48 @@ form:
               highlight: 1
               options: { 1: نعم, 0: لا }
               validate: { type: bool }
+            popup_group:
+              type: fieldset
+              title: العرض الخاص (نافذة منبثقة)
+              icon: sparkles
+              collapsible: true
+              collapsed: true
+              fields:
+                popup_info:
+                  type: display
+                  markdown: true
+                  content: "النافذة بتطلع مرة وحدة لكل زائر، ومعها مهلة حقيقية بتنتهي فعلاً: بعدها بتختفي النافذة والشارة من جهازه. **التزم فيها** — يلي بتنتهي مهلته ما بياخد السعر الخاص."
+                header.popup:
+                  type: toggle
+                  label: تشغيل النافذة
+                  default: 0
+                  highlight: 1
+                  options: { 1: نعم, 0: لا }
+                  validate: { type: bool }
+                header.popup_hours:
+                  type: number
+                  label: مدة العرض بالساعات
+                  default: 3
+                header.popup_badge:
+                  type: text
+                  label: شارة صغيرة فوق العنوان
+                  placeholder: عرض خاص
+                header.popup_title:
+                  type: text
+                  label: عنوان النافذة
+                  placeholder: عرضك الخاص
+                header.popup_text:
+                  type: textarea
+                  label: نص النافذة
+                  rows: 2
+                header.popup_price:
+                  type: text
+                  label: سعر العرض الخاص (اتركه فاضي ليعرض سعر الدورة)
+                  placeholder: "39$"
+                header.popup_cta:
+                  type: text
+                  label: نص زر النافذة
+                  placeholder: احجز بالسعر الخاص
             header.countdown:
               type: toggle
               label: عدّاد تنازلي لآخر موعد للتسجيل
