@@ -60,6 +60,92 @@ form:
               type: text
               label: اسم الدفعة (اختياري)
               placeholder: "مثلاً: الدفعة الثانية"
+        landing:
+          type: tab
+          title: صفحة الهبوط
+          fields:
+            landing_info:
+              type: display
+              markdown: true
+              content: "كل قسم هون بيظهر بالصفحة **فقط إذا عبّيته**. اتركه فاضي ← القسم بيختفي."
+            header.promise:
+              type: text
+              label: وعد الدورة (العنوان الكبير)
+              help: النتيجة لا اسم الدورة. مثال "ليس التعب من كثرة العمل، بل من دوائر تدور فيها بلا مخرج".
+            header.trust_facts:
+              type: array
+              label: شريط الثقة (أرقام وحقائق قصيرة)
+              value_only: true
+              placeholder_value: "مثلاً: +70 ألف متدرّب"
+            header.pains:
+              type: array
+              label: "هل تجد نفسك هنا؟ (حالات قبل الدورة)"
+              value_only: true
+            header.curriculum:
+              type: list
+              label: المنهج (لقاء/محور لكل سطر)
+              collapsed: true
+              fields:
+                .title:
+                  type: text
+                  label: العنوان
+                .text:
+                  type: text
+                  label: سطر الوصف
+            header.not_for:
+              type: array
+              label: لمن ليست هذه الدورة
+              value_only: true
+            header.how_it_runs:
+              type: list
+              label: كيف تجري الدورة
+              collapsed: true
+              fields:
+                .title:
+                  type: text
+                  label: العنصر
+                  placeholder: "المنصة · التوقيت · التسجيلات · الشهادة"
+                .text:
+                  type: text
+                  label: التفصيل
+            header.testimonials:
+              type: list
+              label: آراء المتدربين
+              collapsed: true
+              fields:
+                .name:
+                  type: text
+                  label: الاسم
+                .text:
+                  type: textarea
+                  label: الرأي
+                  rows: 2
+            header.faq:
+              type: list
+              label: الأسئلة الشائعة
+              collapsed: true
+              fields:
+                .q:
+                  type: text
+                  label: السؤال
+                .a:
+                  type: textarea
+                  label: الجواب
+                  rows: 2
+            header.sticky_cta:
+              type: toggle
+              label: شريط التسجيل الثابت أسفل الشاشة (موبايل)
+              default: 1
+              highlight: 1
+              options: { 1: نعم, 0: لا }
+              validate: { type: bool }
+            header.countdown:
+              type: toggle
+              label: عدّاد تنازلي لآخر موعد للتسجيل
+              default: 1
+              highlight: 1
+              options: { 1: نعم, 0: لا }
+              validate: { type: bool }
         register:
           type: tab
           title: التسجيل
@@ -84,6 +170,59 @@ form:
               type: date
               label: آخر موعد للتسجيل
               help: بآخر هذا اليوم بينغلق التسجيل لحاله. اتركه فاضي إذا ما في موعد نهائي.
+            price_group:
+              type: fieldset
+              title: السعر والخصم
+              icon: tag
+              collapsible: true
+              collapsed: false
+              fields:
+                header.price_before:
+                  type: text
+                  label: السعر قبل الخصم (بينعرض مشطوب)
+                  help: خلّيه سعرك المعتاد الحقيقي. اتركه فاضي إذا ما في خصم.
+                  placeholder: "75$"
+                header.price_note:
+                  type: text
+                  label: سطر تحت السعر
+                  placeholder: "الرسوم تُدفع بالليرة بسعر اليوم"
+            pay_group:
+              type: fieldset
+              title: الدفع والتواصل (بقسم التسجيل)
+              icon: wallet
+              collapsible: true
+              collapsed: false
+              fields:
+                pay_info:
+                  type: display
+                  markdown: true
+                  content: "كل عنصر هون بيظهر فقط إذا عبّيته: صورة الـQR، وزر الواتساب. الصورة لازم تكون مرفوعة بوسائط هالصفحة أولاً."
+                header.pay_qr:
+                  type: media
+                  label: صورة QR للدفع (شام كاش)
+                  sources: [page]
+                  accept: ['image/*']
+                header.pay_title:
+                  type: text
+                  label: عنوان قسم الدفع
+                  placeholder: ادفع عبر شام كاش
+                header.pay_note:
+                  type: textarea
+                  label: تعليمات الدفع
+                  rows: 2
+                  placeholder: "امسح الرمز وادفع الرسوم، ثم أرسل صورة الإشعار على الواتساب."
+                header.whatsapp:
+                  type: text
+                  label: رقم الواتساب
+                  help: مع رمز الدولة وبلا رموز، مثل 963912345678.
+                header.whatsapp_label:
+                  type: text
+                  label: نص زر الواتساب
+                  placeholder: تواصل معنا على واتساب
+                header.whatsapp_text:
+                  type: text
+                  label: الرسالة الجاهزة بالواتساب
+                  placeholder: "السلام عليكم، أريد التسجيل في دورة …"
             external_group:
               type: fieldset
               title: 'إذا اخترت: رابط خارجي (فورم غوغل)'

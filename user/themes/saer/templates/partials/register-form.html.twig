@@ -4,7 +4,7 @@
   values, errors, state (form|thanks|already|closed), countries, stamp, thanks, intro.
 #}
 {%- set v = reg.values -%}
-<section class="wrap wrap--narrow" id="register" style="padding-bottom:40px">
+<section class="wrap wrap--narrow" id="register-form" style="padding-bottom:40px">
   <div class="glass dlform">
     {% if reg.state == 'thanks' %}
       <span class="chip chip--gold" style="align-self:flex-start">تم التسجيل</span>
@@ -25,7 +25,7 @@
 
       {% if reg.errors.form %}<p class="dlform__err" role="alert">{{ reg.errors.form }}</p>{% endif %}
 
-      <form method="post" action="{{ page.url }}#register" class="dlform__f" novalidate>
+      <form method="post" action="{{ page.url }}#register-form" class="dlform__f" novalidate>
         {% for key, f in reg.fields %}
           {% set err = reg.errors[key] ?? '' %}
           {% if f.type == 'ages' or f.type == 'genders' %}

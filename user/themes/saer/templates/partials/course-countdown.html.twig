@@ -1,0 +1,26 @@
+{# Countdown to the end of the registration deadline's own day. Server-rendered first,
+   so it reads right with no JavaScript, then ticks in the browser. #}
+{%- set ends = (page.header.register_deadline|date('Y-m-d')) ~ 'T23:59:59' -%}
+<div class="lp-count" data-ends="{{ ends }}" role="timer" aria-label="الوقت المتبقي للتسجيل">
+  <span class="lp-count__t">يُغلق التسجيل بعد</span>
+  <span class="lp-count__u"><b data-d>—</b><i>يوم</i></span>
+  <span class="lp-count__u"><b data-h>—</b><i>ساعة</i></span>
+  <span class="lp-count__u"><b data-m>—</b><i>دقيقة</i></span>
+</div>
+<script>
+(function () {
+  var el = document.currentScript.previousElementSibling;
+  var ends = new Date(el.dataset.ends).getTime();
+  var d = el.querySelector('[data-d]'), h = el.querySelector('[data-h]'), m = el.querySelector('[data-m]');
+  function tick() {
+    var left = ends - Date.now();
+    if (left <= 0) { el.textContent = 'انتهى موعد التسجيل'; return; }
+    var mins = Math.floor(left / 60000);
+    d.textContent = Math.floor(mins / 1440);
+    h.textContent = Math.floor(mins % 1440 / 60);
+    m.textContent = mins % 60;
+  }
+  tick();
+  setInterval(tick, 30000);
+})();
+</script>
