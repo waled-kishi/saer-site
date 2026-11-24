@@ -47,8 +47,9 @@
     {% endif %}
   </div>
   {% if h.register_note and (can_register or h.status == 'open') %}<p class="mut" style="font-size:15px;margin:-4px 0 0">{{ h.register_note }}</p>{% endif %}
-  {% if h.trailer %}<div style="max-width:760px;width:100%;margin-top:12px">{% include 'partials/youtube.html.twig' with {yt: h.trailer, title: 'تعريف بدورة ' ~ page.title} %}</div>
-  {% elseif img and img.medium %}<div class="article__img" style="max-width:760px">{{ img.medium.cropZoom(1200, 675).html('', page.title)|raw }}</div>{% endif %}
+  {# Image, video, or both: whichever the page carries. #}
+  {% if h.trailer %}<div style="max-width:760px;width:100%;margin-top:12px">{% include 'partials/youtube.html.twig' with {yt: h.trailer, title: 'تعريف بدورة ' ~ page.title} %}</div>{% endif %}
+  {% if img and img.medium %}<div class="article__img" style="max-width:760px{{ h.trailer ? ';margin-top:14px' }}">{{ img.medium.cropZoom(1200, 675).html('', page.title)|raw }}</div>{% endif %}
 </section>
 
 <section class="wrap layout">
