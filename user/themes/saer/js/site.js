@@ -78,6 +78,9 @@
   var was = [].slice.call(document.querySelectorAll('[data-wa]'));
   var wases = [].slice.call(document.querySelectorAll('[data-was]'));
   var field = document.querySelector('[data-offer-field]');
+  var offerClocks = [].slice.call(document.querySelectorAll('[data-offer-count]'));
+  var barNotes = [].slice.call(document.querySelectorAll('[data-bar-note]'));
+  var barWas = barNotes.map(function (el) { return el.textContent; });
   var usual = prices.length ? prices[0].textContent.trim() : '';
   var waHrefs = was.map(function (a) { return a.href; });
   var num = function (t) { var m = String(t).replace(/[^\d.]/g, ''); return m ? parseFloat(m) : 0; };
@@ -99,6 +102,8 @@
       }) : u;
     });
     if (field) field.value = on ? special : '';
+    offerClocks.forEach(function (el) { el.hidden = !on; });
+    barNotes.forEach(function (el, i) { el.textContent = on ? 'سعرك الخاص ينتهي قريباً' : barWas[i]; });
     document.querySelectorAll('[data-offer-note]').forEach(function (el) { el.hidden = !on; });
   };
 
@@ -117,12 +122,15 @@
     var left = ends - Date.now();
     if (left <= 0) { stop(); return; }
     var s = Math.floor(left / 1000);
-    var box = pop.querySelector('[data-pop-count]');
-    if (box) {
-      box.querySelector('[data-h]').textContent = pad(Math.floor(s / 3600));
-      box.querySelector('[data-m]').textContent = pad(Math.floor(s % 3600 / 60));
-      box.querySelector('[data-s]').textContent = pad(s % 60);
-    }
+    var hh = pad(Math.floor(s / 3600)), mm = pad(Math.floor(s % 3600 / 60)), ss = pad(s % 60);
+    var boxes = [pop.querySelector('[data-pop-count]')].concat(offerClocks);
+    boxes.forEach(function (box) {
+      if (!box) return;
+      box.querySelector('[data-h]').textContent = hh;
+      box.querySelector('[data-m]').textContent = mm;
+      box.querySelector('[data-s]').textContent = ss;
+    });
+    barNotes.forEach(function (el) { el.textContent = 'سعرك الخاص: ' + hh + ':' + mm + ':' + ss; });
   };
 
   var close = function () { pop.classList.remove('on'); document.body.style.overflow = ''; };

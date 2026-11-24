@@ -455,3 +455,7 @@ html,body{overflow-x:hidden}
 }
 .lp-about__img{border-radius:20px;overflow:hidden;margin-bottom:6px}
 .lp-about__img img{display:block;width:100%;height:auto}
+.lp-count--hot{border:1px solid rgba(240,85,69,.5);background:linear-gradient(180deg,rgba(240,85,69,.16),rgba(240,85,69,.06));border-radius:18px;padding:10px;width:100%}
+.lp-count--hot .lp-count__t{color:#F6B3AB;font-weight:700}
+.lp-count--hot .lp-count__u{background:rgba(0,0,0,.35)}
+.lp-count--hot .lp-count__u b{color:#FFD7CF}

@@ -41,7 +41,7 @@
 {% if can_register %}
 <div class="lp-top" id="lp-top" hidden>
   <b data-price>{{ h.price }}</b>{% if h.price_before %} <s class="mut" style="font-size:15px" data-was>{{ h.price_before }}</s>{% endif %}
-  {% if h.register_deadline %}<span>التسجيل حتى {{ h.register_deadline|date('Y/m/d') }}</span>{% endif %}
+  {% if h.register_deadline %}<span data-bar-note>التسجيل حتى {{ h.register_deadline|date('Y/m/d') }}</span>{% endif %}
   <a class="btn gold btn--sm" href="{{ cta_href }}" {{ blank|raw }}>{{ cta_label }}</a>
 </div>
 {% endif %}
@@ -76,6 +76,12 @@
           {% if h.price_note %}<p class="lp-fine">{{ h.price_note }}</p>{% endif %}
         {% endif %}
 
+        <div class="lp-count lp-count--hot" data-offer-count role="timer" aria-label="الوقت المتبقي لسعرك الخاص" hidden>
+          <span class="lp-count__t">ينتهي سعرك الخاص بعد</span>
+          <span class="lp-count__u"><b data-h>—</b><i>ساعة</i></span>
+          <span class="lp-count__u"><b data-m>—</b><i>دقيقة</i></span>
+          <span class="lp-count__u"><b data-s>—</b><i>ثانية</i></span>
+        </div>
         {% if h.countdown and h.register_deadline and not expired and h.status == 'open' %}
           {% include 'partials/course-countdown.html.twig' %}
         {% endif %}
@@ -233,6 +239,12 @@
       {% if h.popup and h.popup_price %}<p class="lp-hotline" data-offer-note hidden>{% include 'partials/lp-icons.html.twig' with {i:'spark', size:16} %} هذا سعرك الخاص ما دام العدّاد يعمل، وسيُسجَّل مع طلبك.</p>{% endif %}
     {% endif %}
 
+    <div class="lp-count lp-count--hot" data-offer-count role="timer" aria-label="الوقت المتبقي لسعرك الخاص" hidden>
+      <span class="lp-count__t">ينتهي سعرك الخاص بعد</span>
+      <span class="lp-count__u"><b data-h>—</b><i>ساعة</i></span>
+      <span class="lp-count__u"><b data-m>—</b><i>دقيقة</i></span>
+      <span class="lp-count__u"><b data-s>—</b><i>ثانية</i></span>
+    </div>
     {% if h.register_deadline and not expired %}
       {% include 'partials/course-countdown.html.twig' with {label: 'يُغلق التسجيل بعد'} %}
     {% endif %}
@@ -263,7 +275,7 @@
 {# ── شريط ثابت أسفل الموبايل ───────────────────────────────── #}
 {% if h.sticky_cta and can_register %}
 <div class="lp-bar">
-  <div><b data-price>{{ h.price ?: cta_label }}</b>{% if h.register_deadline %}<span>التسجيل حتى {{ h.register_deadline|date('Y/m/d') }}</span>{% endif %}</div>
+  <div><b data-price>{{ h.price ?: cta_label }}</b>{% if h.register_deadline %}<span data-bar-note>التسجيل حتى {{ h.register_deadline|date('Y/m/d') }}</span>{% endif %}</div>
   <a class="btn gold btn--sm" href="{{ cta_href }}" {{ blank|raw }}>{{ cta_label }}</a>
 </div>
 {% endif %}
