@@ -276,6 +276,10 @@ form:
                     gender: الجنس
                     qualification: المؤهل أو التخصص
                     note: "سؤال مفتوح: لماذا تريد حضور هذه الدورة؟"
+                header.register_note_label:
+                  type: text
+                  label: نص السؤال المفتوح
+                  placeholder: "مثلاً: أي دائرة تتعبك أكثر؟"
                 header.register_intro:
                   type: text
                   label: جملة فوق النموذج

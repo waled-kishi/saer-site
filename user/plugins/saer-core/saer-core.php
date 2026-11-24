@@ -325,6 +325,10 @@ class SaerCorePlugin extends Plugin
             (array) ($h->register_fields ?? ['whatsapp']),
             (array) ($h->register_required ?? ['whatsapp'])
         );
+        $ask = trim((string) ($h->register_note_label ?? ''));
+        if ($ask !== '' && isset($fields['note'])) {
+            $fields['note']['label'] = $ask;   // each course may ask its own open question
+        }
         $vars = ['fields' => $fields, 'values' => [], 'errors' => [], 'state' => $closed ? 'closed' : 'form',
                  'countries' => $core->countries(), 'stamp' => $core->formStamp(),
                  'thanks' => (string) ($h->register_thanks ?? ''), 'intro' => (string) ($h->register_intro ?? '')];
