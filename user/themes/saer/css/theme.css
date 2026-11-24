@@ -188,9 +188,11 @@ a.book-cover:hover{transform:translateY(-4px)}
 .dlform__f{display:flex;flex-direction:column;gap:22px;margin-top:6px}
 .dlform__row{display:flex;flex-direction:column;gap:10px;border:0;margin:0;padding:0;min-width:0}
 .dlform__row>label,.dlform__row legend{font-weight:700;color:var(--ink-strong);padding:0}
-.dlform input[type=text],.dlform select{width:100%;min-height:52px;padding:0 16px;border-radius:14px;border:1px solid var(--glass-line);background:rgba(10,3,24,.55);color:var(--ink);font:inherit;font-size:17px}
+.dlform input[type=text],.dlform input[type=tel],.dlform input[type=email],.dlform textarea,.dlform select{width:100%;min-height:52px;padding:0 16px;border-radius:14px;border:1px solid var(--glass-line);background:rgba(10,3,24,.55);color:var(--ink);font:inherit;font-size:17px}
 .dlform select option,.dlform select optgroup{background:#1B0C30;color:var(--ink)}
-.dlform input[type=text]:focus,.dlform select:focus{outline:2px solid var(--gold);outline-offset:2px;border-color:var(--gold)}
+.dlform textarea{min-height:96px;padding:14px 16px;line-height:1.8;resize:vertical}
+.dlform input:-webkit-autofill,.dlform textarea:-webkit-autofill{-webkit-text-fill-color:var(--ink);box-shadow:0 0 0 1000px #1B0C30 inset;caret-color:var(--ink)}
+.dlform input:focus,.dlform textarea:focus,.dlform select:focus{outline:2px solid var(--gold);outline-offset:2px;border-color:var(--gold)}
 .dlform [aria-invalid=true]{border-color:#E59A8F}
 .dlform__opts{display:flex;flex-wrap:wrap;gap:10px}
 .opt{position:relative;cursor:pointer}
