@@ -18,14 +18,17 @@
   const CSS = `
   :host{display:block;direction:rtl;font-family:inherit;color:inherit}
   *{box-sizing:border-box}
-  .wrap{display:flex;flex-direction:column;gap:20px;padding:4px 0 40px}
+  .wrap{display:flex;flex-direction:column;gap:20px;padding:4px 0 40px;min-width:0;max-width:100%}
+  /* A flex child keeps its content's width unless told otherwise, so a wide table
+     stretched the whole screen instead of scrolling inside its own card. */
+  .wrap>*{min-width:0;max-width:100%}
   .bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
   .ranges{display:flex;flex-wrap:wrap;gap:6px}
   button,.btn{font:inherit;cursor:pointer;border:1px solid rgba(127,127,127,.35);background:transparent;color:inherit;border-radius:8px;padding:6px 12px;font-size:14px}
   button[aria-pressed=true]{background:#7B3FE4;border-color:#7B3FE4;color:#fff}
   button:focus-visible{outline:2px solid #C99A45;outline-offset:2px}
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
-  .card{border:1px solid rgba(127,127,127,.25);border-radius:12px;padding:16px;background:rgba(127,127,127,.06)}
+  .card{border:1px solid rgba(127,127,127,.25);border-radius:12px;padding:16px;background:rgba(127,127,127,.06);min-width:0;overflow:hidden}
   .kpi b{display:block;font-size:30px;font-weight:700;line-height:1.2;margin-top:4px}
   .kpi span{font-size:13px;opacity:.75}
   .kpi small{display:block;font-size:12px;opacity:.65;margin-top:4px}
@@ -52,7 +55,10 @@
   .err{color:#d9534f}
   button.danger{border-color:#d9534f;color:#d9534f}
   a{color:inherit}
-  .scroll{overflow-x:auto}
+  .scroll{overflow-x:auto;overflow-y:hidden;max-width:100%;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  .scroll table{min-width:760px}
+  td.wrap-cell{white-space:normal;min-width:180px;max-width:320px}
+  td.nowrap{white-space:nowrap}
   .note{font-size:12px;opacity:.65;line-height:1.7}
   `;
 
@@ -143,13 +149,13 @@
         <div class="track"><div class="fill gold" style="width:${Math.round((c.count / max) * 100)}%"></div></div>
         <b class="num">${n(c.count)}</b></div>`).join('')}</div>` : '';
       const rows = d.registrations.map((p) => `<tr>
-        <td>${new Date(p.ts * 1000).toLocaleString('ar-SY-u-nu-latn')}</td>
-        <td>${esc(p.course || p.route)}</td><td>${esc(p.name)}</td>
-        <td>${p.whatsapp ? `<a href="https://wa.me/${esc(p.whatsapp)}" target="_blank" rel="noopener">${esc(p.whatsapp)}</a>` : '—'}</td>
-        <td>${esc(p.email || '—')}</td><td>${esc([p.country, p.city].filter(Boolean).join(' · ') || '—')}</td>
-        <td>${esc([p.age, p.gender, p.qualification].filter(Boolean).join(' · ') || '—')}</td>
-        <td>${esc(p.note || '—')}</td>
-        <td><button type="button" class="danger" data-delreg="${p.id}">حذف</button></td></tr>`).join('');
+        <td class="nowrap">${new Date(p.ts * 1000).toLocaleString('ar-SY-u-nu-latn')}</td>
+        <td class="wrap-cell">${esc(p.course || p.route)}</td><td class="wrap-cell">${esc(p.name)}</td>
+        <td class="nowrap">${p.whatsapp ? `<a href="https://wa.me/${esc(p.whatsapp)}" target="_blank" rel="noopener">${esc(p.whatsapp)}</a>` : '—'}</td>
+        <td class="nowrap">${esc(p.email || '—')}</td><td class="wrap-cell">${esc([p.country, p.city].filter(Boolean).join(' · ') || '—')}</td>
+        <td class="wrap-cell">${esc([p.age, p.gender, p.qualification].filter(Boolean).join(' · ') || '—')}</td>
+        <td class="wrap-cell">${esc(p.note || '—')}</td>
+        <td class="nowrap"><button type="button" class="danger" data-delreg="${p.id}">حذف</button></td></tr>`).join('');
 
       this.root.innerHTML = `<style>${CSS}</style><div class="wrap">
         <div class="bar"><div class="ranges" role="group" aria-label="الدورة">${filters}</div>
