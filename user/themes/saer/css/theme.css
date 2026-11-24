@@ -415,3 +415,47 @@ html,body{overflow-x:hidden}
 .lp-chip{position:fixed;inset-inline-end:16px;bottom:16px;z-index:65;display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:999px;border:1px solid rgba(214,178,110,.5);background:linear-gradient(180deg,rgba(42,18,64,.98),rgba(21,8,38,.98));color:var(--ink);font:inherit;font-size:14px;cursor:pointer;box-shadow:0 12px 30px rgba(8,2,20,.55)}
 .lp-chip b{color:var(--gold);font-variant-numeric:tabular-nums;font-size:16px}
 @media (max-width:760px){.lp-chip{bottom:84px;inset-inline-end:12px;font-size:13px;padding:8px 13px}}
+
+/* ── Course landing: price tiers, the About block, and the phone ─────── */
+.lp-tiers{display:flex;flex-direction:column;gap:8px;width:100%}
+.lp-tier{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 16px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid var(--glass-line);font-size:15px}
+.lp-tier span{color:var(--muted)}
+.lp-tier s{color:var(--muted);opacity:.75}
+.lp-tier--now{background:linear-gradient(180deg,rgba(235,211,160,.2),rgba(201,154,69,.12));border-color:var(--gold)}
+.lp-tier--now span{color:var(--ink-strong);font-weight:700}
+.lp-tier--now b{font-size:30px;color:var(--gold);font-family:var(--font-head);line-height:1}
+.lp-pop__later{background:none;border:0;color:var(--muted);font:inherit;font-size:15px;text-decoration:underline;cursor:pointer;padding:4px}
+.lp-chip{gap:9px}
+.lp-chip svg{color:var(--gold);flex:none}
+.lp-chip__t{white-space:nowrap}
+
+.lp-about{position:relative;padding:clamp(24px,4vw,40px);border-radius:28px;background:linear-gradient(160deg,rgba(123,63,228,.2),rgba(10,3,24,.55));border:1px solid var(--glass-line);display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.lp-about::before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,var(--gold),var(--violet))}
+.lp-about__mark{position:absolute;inset-inline-end:18px;top:-18px;font-size:120px;line-height:1;color:rgba(235,211,160,.14);font-family:var(--font-head);pointer-events:none}
+.lp-about .prose{position:relative}
+.lp-about .prose p{margin:0 0 14px}
+.lp-about .prose p:first-child{font-size:clamp(18px,2.4vw,23px);line-height:1.8;color:var(--ink-strong);font-weight:600}
+.lp-about .prose p:last-child{margin-bottom:0;border-top:1px solid var(--glass-line);padding-top:14px;color:var(--gold)}
+
+@media (max-width:600px){
+  .wrap{padding:0 18px}
+  .lp-hero-wrap{padding-top:18px}
+  .lp-hero h1{font-size:clamp(26px,7vw,34px);max-width:none}
+  .lp-offer,.lp-reg,.lp-about,.lp-card,.lp-plan li,.lp-faq details{border-radius:22px}
+  .lp-offer{padding:20px 18px}
+  .lp-reg{padding:22px 18px;gap:14px}
+  .lp-card{padding:20px 18px}
+  .lp-plan li{padding:16px 15px;gap:13px}
+  .lp-faq details{padding:0 18px}
+  .lp-trust{padding:24px 0;gap:10px;grid-template-columns:repeat(2,1fr)}
+  .lp-about{padding:22px 18px}
+  .lp-about__mark{font-size:84px;inset-inline-end:10px}
+  .lp-pay{padding:16px;gap:14px}
+  .lp-count__u{min-width:58px;padding:7px 8px}
+  .lp-count__u b{font-size:22px}
+  .sec{padding:48px 0}
+  .lp-h{margin-bottom:8px}
+  .lp-sub{margin-bottom:24px}
+  .lp-pop{padding:14px}
+  .lp-pop__box{padding:26px 18px;gap:13px}
+}

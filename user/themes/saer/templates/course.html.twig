@@ -136,7 +136,13 @@
 
 {# ── عن الدورة ─────────────────────────────────────────────── #}
 {% if page.content|trim %}
-<section class="wrap wrap--narrow sec sec--tight"><article class="prose">{{ page.content|raw }}</article></section>
+<section class="wrap wrap--narrow sec sec--tight">
+  <div class="lp-about">
+    <span class="lp-about__mark" aria-hidden="true">”</span>
+    <p class="lp-eyebrow" style="margin:0">{% include 'partials/lp-icons.html.twig' with {i:'spark', size:15} %} فكرة الدورة</p>
+    <article class="prose">{{ page.content|raw }}</article>
+  </div>
+</section>
 {% endif %}
 
 {# ── المنهج ────────────────────────────────────────────────── #}
@@ -263,16 +269,20 @@
 
 {# ── العرض الخاص: نافذة تظهر مرة، ومهلة تنتهي فعلاً ────────── #}
 {% if h.popup and can_register %}
-<div class="lp-pop" id="lp-pop" role="dialog" aria-modal="true" aria-labelledby="lp-pop-t" data-hours="{{ h.popup_hours ?: 3 }}" data-price="{{ h.popup_price }}" data-key="pop:{{ page.route }}">
+<div class="lp-pop" id="lp-pop" role="dialog" aria-modal="true" aria-labelledby="lp-pop-t" data-hours="{{ h.popup_hours ?: 1 }}" data-price="{{ h.popup_price }}" data-key="pop:{{ page.route }}">
   <div class="lp-pop__box">
     <button type="button" class="lp-pop__x" data-close aria-label="إغلاق">×</button>
     <p class="lp-eyebrow" style="margin:0 auto">{% include 'partials/lp-icons.html.twig' with {i:'spark', size:16} %} {{ h.popup_badge ?: 'عرض خاص' }}</p>
     <h2 id="lp-pop-t">{{ h.popup_title ?: 'عرضك الخاص' }}</h2>
     {% if h.popup_text %}<p>{{ h.popup_text }}</p>{% endif %}
-    <div class="lp-pricerow">
-      <b>{{ h.popup_price ?: h.price }}</b>
-      {% if h.price %}<s>{{ h.popup_price ? h.price : h.price_before }}</s>{% endif %}
+
+    {# الأسعار الثلاثة، حتى يفهم الزائر أين يقف #}
+    <div class="lp-tiers">
+      {% if h.price_before %}<div class="lp-tier"><span>السعر الأساسي</span><s>{{ h.price_before }}</s></div>{% endif %}
+      {% if h.price %}<div class="lp-tier"><span>سعر فترة التسجيل</span><s>{{ h.price }}</s></div>{% endif %}
+      <div class="lp-tier lp-tier--now"><span>سعرك الآن</span><b>{{ h.popup_price ?: h.price }}</b></div>
     </div>
+
     <div class="lp-count" data-pop-count role="timer" aria-label="الوقت المتبقي للعرض">
       <span class="lp-count__t">ينتهي عرضك بعد</span>
       <span class="lp-count__u"><b data-h>—</b><i>ساعة</i></span>
@@ -281,11 +291,12 @@
     </div>
     <a class="btn gold" href="{{ cta_href }}" data-go {{ blank|raw }}>{{ h.popup_cta ?: cta_label }}</a>
     <p class="lp-fine" style="margin:0">السعر الخاص يسري ما دام العدّاد يعمل، ويُسجَّل مع طلبك.</p>
-    <button type="button" class="btn ghost" data-close>ليس الآن</button>
+    <button type="button" class="lp-pop__later" data-close>ليس الآن</button>
   </div>
 </div>
-<button type="button" class="lp-chip" id="lp-chip" hidden>
-  <span>{{ h.popup_badge ?: 'عرض خاص' }}</span><b data-chip>—</b>
+<button type="button" class="lp-chip" id="lp-chip" aria-haspopup="dialog" hidden>
+  {% include 'partials/lp-icons.html.twig' with {i:'spark', size:17} %}
+  <span class="lp-chip__t">{{ h.popup_badge ?: 'عرضك الخاص' }}</span><b data-chip>—</b>
 </button>
 {% endif %}
 {% endblock %}

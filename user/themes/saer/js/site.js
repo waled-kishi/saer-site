@@ -126,7 +126,14 @@
       else { close(); }
     });
   }
-  if (chip) chip.addEventListener('click', open);
+  if (chip) {
+    chip.addEventListener('click', function () {
+      if (!document.body.contains(pop)) { goRegister(); return; }
+      open();
+      var box = pop.querySelector('.lp-pop__box');
+      if (box) box.scrollTop = 0;
+    });
+  }
 
   var tickPop = function () {
     var left = ends - Date.now();
