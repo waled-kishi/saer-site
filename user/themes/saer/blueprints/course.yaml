@@ -56,3 +56,38 @@ form:
               type: array
               label: محاور الدورة بالترتيب
               value_only: true
+            header.batch:
+              type: text
+              label: اسم الدفعة (اختياري)
+              placeholder: "مثلاً: الدفعة الثانية"
+        register:
+          type: tab
+          title: التسجيل
+          fields:
+            register_info:
+              type: display
+              markdown: true
+              content: "التسجيل حالياً عبر **رابط خارجي** (فورم غوغل). الزر ما بيظهر إلا إذا كانت حالة التسجيل **مفتوح** والرابط موجود وما انتهى الموعد."
+            header.register_mode:
+              type: select
+              label: طريقة التسجيل
+              default: external
+              options:
+                external: رابط خارجي (فورم غوغل)
+                none: بلا زر تسجيل
+            header.register_url:
+              type: url
+              label: رابط التسجيل
+              placeholder: https://forms.gle/...
+            header.register_label:
+              type: text
+              label: نص الزر
+              placeholder: سجّل الآن
+            header.register_deadline:
+              type: date
+              label: آخر موعد للتسجيل
+              help: بآخر هذا اليوم بينغلق التسجيل لحاله. اتركه فاضي إذا ما في موعد نهائي.
+            header.register_note:
+              type: text
+              label: ملاحظة تحت الزر (اختياري)
+              placeholder: "مثلاً: التسجيل عبر نموذج غوغل، وبيوصلك تأكيد على الواتساب"
