@@ -296,7 +296,7 @@ a.book-cover:hover{transform:translateY(-4px)}
 .lp-faq summary::after{content:"+";color:var(--gold);font-weight:800;flex:none}
 .lp-faq details[open] summary::after{content:"−"}
 .lp-faq details>div{padding:0 0 20px;color:var(--muted);line-height:1.9}
-.lp-count{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:6px;background:var(--glass);border:1px solid var(--glass-line);border-radius:999px;padding:10px 22px}
+.lp-count{align-self:flex-start;max-width:100%;display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:6px;background:var(--glass);border:1px solid var(--glass-line);border-radius:999px;padding:10px 22px}
 .lp-count__t{color:var(--muted);font-size:15px}
 .lp-count__u{display:inline-flex;align-items:baseline;gap:6px}
 .lp-count__u b{font-size:24px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
