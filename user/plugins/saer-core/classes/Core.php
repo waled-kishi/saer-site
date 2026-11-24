@@ -24,6 +24,23 @@ class Core
         '55+' => '55 فأكثر',
     ];
     public const GENDERS = ['m' => 'ذكر', 'f' => 'أنثى'];
+    /**
+     * The fields a course registration form can ask for. Each course picks the ones it wants
+     * (header.register_fields) and which of those are required (header.register_required);
+     * the name is always asked and always required.
+     */
+    public const REG_FIELDS = [
+        'name' => ['label' => 'الاسم الكامل', 'type' => 'text', 'autocomplete' => 'name'],
+        'whatsapp' => ['label' => 'رقم واتساب', 'type' => 'tel', 'autocomplete' => 'tel',
+                       'hint' => 'مع رمز الدولة، مثال: 963912345678'],
+        'email' => ['label' => 'البريد الإلكتروني', 'type' => 'email', 'autocomplete' => 'email'],
+        'age' => ['label' => 'الفئة العمرية', 'type' => 'ages'],
+        'country' => ['label' => 'البلد', 'type' => 'countries'],
+        'city' => ['label' => 'المدينة', 'type' => 'text'],
+        'gender' => ['label' => 'الجنس', 'type' => 'genders'],
+        'qualification' => ['label' => 'المؤهل أو التخصص', 'type' => 'text'],
+        'note' => ['label' => 'لماذا تريد حضور هذه الدورة؟', 'type' => 'textarea'],
+    ];
     public const COOKIE = 'saer_dl';
     public const BOTS = '~bot|crawl|spider|slurp|facebookexternalhit|facebot|embedly|preview|whatsapp|telegrambot|'
         . 'curl|wget|python|httpclient|java/|go-http|headless|lighthouse|pingdom|uptime|monitor|scan|'
@@ -331,5 +348,140 @@ class Core
                                           'httponly' => true, 'samesite' => 'Lax']);
         $_COOKIE[self::COOKIE] = $token;
         return ['id' => $id, 'token' => $token] + $v;
+    }
+
+    /* ---------- course registration ---------- */
+
+    /** The fields one course's form shows, in the catalogue's order, with their labels and options. */
+    public function registrationFields(array $on, array $required): array
+    {
+        $on = array_flip(array_map('strval', $on));
+        $req = array_flip(array_map('strval', $required));
+        $out = [];
+        foreach (self::REG_FIELDS as $key => $def) {
+            if ($key !== 'name' && !isset($on[$key])) {
+                continue;
+            }
+            $def['key'] = $key;
+            $def['required'] = $key === 'name' || isset($req[$key]);
+            if ($def['type'] === 'ages') {
+                $def['options'] = self::AGES;
+            } elseif ($def['type'] === 'genders') {
+                $def['options'] = self::GENDERS;
+            }
+            $out[$key] = $def;
+        }
+        return $out;
+    }
+
+    /** Validate what was posted against the fields this course asks for. Returns [values, errors]. */
+    public function validateRegistration(array $post, array $fields): array
+    {
+        $values = [];
+        $errors = [];
+        $c = $this->countries();
+        foreach ($fields as $key => $def) {
+            $raw = (string) ($post[$key] ?? '');
+            $v = trim(preg_replace('/\s+/u', ' ', strip_tags($raw)));
+            if ($def['type'] === 'textarea') {
+                $v = trim(strip_tags($raw));
+            }
+            $filled = $v !== '';
+            switch ($def['type']) {
+                case 'ages':
+                    if ($filled && !isset(self::AGES[$v])) {
+                        $errors[$key] = 'اختر الفئة العمرية.';
+                    }
+                    break;
+                case 'genders':
+                    if ($filled && !isset(self::GENDERS[$v])) {
+                        $errors[$key] = 'اختر الجنس.';
+                    }
+                    break;
+                case 'countries':
+                    $v = strtoupper($v);
+                    if ($filled && !isset($c['top'][$v]) && !isset($c['rest'][$v])) {
+                        $errors[$key] = 'اختر البلد.';
+                    }
+                    break;
+                case 'email':
+                    if ($filled && !filter_var($v, FILTER_VALIDATE_EMAIL)) {
+                        $errors[$key] = 'تحقّق من البريد الإلكتروني.';
+                    }
+                    break;
+                case 'tel':
+                    $digits = preg_replace('/\D+/', '', $v);
+                    if ($filled && (strlen($digits) < 8 || strlen($digits) > 15)) {
+                        $errors[$key] = 'اكتب رقم واتساب صحيحاً مع رمز الدولة.';
+                    } elseif ($filled) {
+                        $v = $digits;
+                    }
+                    break;
+                default:
+                    if ($key === 'name' && $filled && (mb_strlen($v) < 2 || mb_strlen($v) > 80)) {
+                        $errors[$key] = 'اكتب اسمك كاملاً.';
+                    }
+                    if (mb_strlen($v) > 1000) {
+                        $v = mb_substr($v, 0, 1000);
+                    }
+            }
+            if (!$filled && !empty($def['required'])) {
+                $errors[$key] = $def['type'] === 'text' || $def['type'] === 'textarea' || $def['type'] === 'tel'
+                    || $def['type'] === 'email' ? 'هذا الحقل مطلوب.' : 'اختر من القائمة.';
+            }
+            $values[$key] = $v;
+        }
+        return [$values, $errors];
+    }
+
+    /** At most 5 registrations an hour from one visitor, whatever the course. */
+    public function tooManyRegistrations(): bool
+    {
+        $st = $this->pdo()->prepare('SELECT COUNT(*) FROM registrations WHERE visitor = ? AND ts > ?');
+        $st->execute([$this->visitor(), time() - 3600]);
+        return (int) $st->fetchColumn() >= 5;
+    }
+
+    /** Whether this course already holds a registration from the same visitor, phone or email. */
+    public function alreadyRegistered(string $route, array $values): bool
+    {
+        $pdo = $this->pdo();
+        $st = $pdo->prepare('SELECT COUNT(*) FROM registrations WHERE route = ? AND visitor = ? AND ts > ?');
+        $st->execute([$route, $this->visitor(), time() - 30 * 86400]);
+        if ((int) $st->fetchColumn() > 0) {
+            return true;
+        }
+        foreach (['whatsapp', 'email'] as $k) {
+            if (!empty($values[$k])) {
+                $st = $pdo->prepare("SELECT COUNT(*) FROM registrations WHERE route = ? AND $k = ?");
+                $st->execute([$route, $values[$k]]);
+                if ((int) $st->fetchColumn() > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public function createRegistration(string $route, string $course, array $v): int
+    {
+        $cols = ['name', 'whatsapp', 'email', 'age', 'country', 'city', 'gender', 'qualification', 'note'];
+        $row = [$route, $course];
+        foreach ($cols as $c) {
+            $row[] = (string) ($v[$c] ?? '');
+        }
+        $row = array_merge($row, [$this->today(), time(), $this->visitor(), $this->geo(), $this->device(), $this->referrer()]);
+        $sql = 'INSERT INTO registrations (route, course, ' . implode(', ', $cols)
+             . ', day, ts, visitor, geo, device, ref) VALUES (' . rtrim(str_repeat('?,', count($row)), ',') . ')';
+        $this->pdo()->prepare($sql)->execute($row);
+        return (int) $this->pdo()->lastInsertId();
+    }
+
+    /** How many people have registered for a course. */
+    public function registrationCount(string $route): int
+    {
+        $st = $this->pdo()->prepare('SELECT COUNT(*) FROM registrations WHERE route = ?');
+        $st->execute([$route]);
+        return (int) $st->fetchColumn();
     }
 }

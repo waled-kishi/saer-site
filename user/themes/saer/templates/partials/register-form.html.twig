@@ -1,0 +1,85 @@
+{#
+  The registration form of a course whose register_mode is "internal".
+  Everything comes from saer-core in `reg`: fields (the catalogue this course asks for),
+  values, errors, state (form|thanks|already|closed), countries, stamp, thanks, intro.
+#}
+{%- set v = reg.values -%}
+<section class="wrap wrap--narrow" id="register" style="padding-bottom:40px">
+  <div class="glass dlform">
+    {% if reg.state == 'thanks' %}
+      <span class="chip chip--gold" style="align-self:flex-start">تم التسجيل</span>
+      <h2 class="h2">وصلنا طلبك</h2>
+      <p class="lead">{{ reg.thanks ?: 'سجّلنا اسمك في الدورة بإذن الله، وسنتواصل معك قبل موعد البدء.' }}</p>
+    {% elseif reg.state == 'already' %}
+      <span class="chip" style="align-self:flex-start">مسجّل من قبل</span>
+      <h2 class="h2">أنت مسجَّل في هذه الدورة</h2>
+      <p class="mut">وصلنا طلبك سابقاً، فلا داعي لإرساله مرة أخرى. إن كنت تظن أن هناك خطأ فتواصل معنا.</p>
+    {% elseif reg.state == 'closed' %}
+      <span class="chip" style="align-self:flex-start">التسجيل مغلق</span>
+      <h2 class="h2">باب التسجيل مغلق حالياً</h2>
+      <p class="mut">تابع الموقع ليصلك إعلان الدفعة القادمة بإذن الله.</p>
+    {% else %}
+      <span class="chip chip--gold" style="align-self:flex-start">التسجيل</span>
+      <h2 class="h2">سجّل في الدورة</h2>
+      <p class="mut">{{ reg.intro ?: 'املأ البيانات التالية، ولا تُنشر ولا تُشارك مع أحد.' }}</p>
+
+      {% if reg.errors.form %}<p class="dlform__err" role="alert">{{ reg.errors.form }}</p>{% endif %}
+
+      <form method="post" action="{{ page.url }}#register" class="dlform__f" novalidate>
+        {% for key, f in reg.fields %}
+          {% set err = reg.errors[key] ?? '' %}
+          {% if f.type == 'ages' or f.type == 'genders' %}
+            <fieldset class="dlform__row">
+              <legend>{{ f.label }}{% if not f.required %} <span class="mut">(اختياري)</span>{% endif %}</legend>
+              <div class="dlform__opts">
+                {% for k, l in f.options %}
+                  <label class="opt"><input type="radio" name="{{ key }}" value="{{ k }}" {{ f.required ? 'required' }} {{ (v[key] ?? '') == k ? 'checked' }}><span>{{ l }}</span></label>
+                {% endfor %}
+              </div>
+              {% if err %}<p class="dlform__err">{{ err }}</p>{% endif %}
+            </fieldset>
+          {% elseif f.type == 'countries' %}
+            <div class="dlform__row">
+              <label for="rg-{{ key }}">{{ f.label }}{% if not f.required %} <span class="mut">(اختياري)</span>{% endif %}</label>
+              <select id="rg-{{ key }}" name="{{ key }}" {{ f.required ? 'required' }} {% if err %}aria-invalid="true"{% endif %}>
+                <option value="">اختر البلد…</option>
+                <optgroup label="الأكثر اختياراً">
+                  {% for k, l in reg.countries.top %}<option value="{{ k }}" {{ (v[key] ?? '') == k ? 'selected' }}>{{ l }}</option>{% endfor %}
+                </optgroup>
+                <optgroup label="كل الدول">
+                  {% for k, l in reg.countries.rest %}<option value="{{ k }}" {{ (v[key] ?? '') == k ? 'selected' }}>{{ l }}</option>{% endfor %}
+                </optgroup>
+              </select>
+              {% if err %}<p class="dlform__err">{{ err }}</p>{% endif %}
+            </div>
+          {% elseif f.type == 'textarea' %}
+            <div class="dlform__row">
+              <label for="rg-{{ key }}">{{ f.label }}{% if not f.required %} <span class="mut">(اختياري)</span>{% endif %}</label>
+              <textarea id="rg-{{ key }}" name="{{ key }}" rows="3" maxlength="1000" {{ f.required ? 'required' }}
+                {% if err %}aria-invalid="true"{% endif %}>{{ v[key] ?? '' }}</textarea>
+              {% if err %}<p class="dlform__err">{{ err }}</p>{% endif %}
+            </div>
+          {% else %}
+            <div class="dlform__row">
+              <label for="rg-{{ key }}">{{ f.label }}{% if not f.required %} <span class="mut">(اختياري)</span>{% endif %}</label>
+              <input id="rg-{{ key }}" name="{{ key }}" type="{{ f.type }}" maxlength="120" {{ f.required ? 'required' }}
+                {% if f.autocomplete %}autocomplete="{{ f.autocomplete }}"{% endif %}
+                {% if f.type == 'tel' %}inputmode="numeric"{% endif %}
+                value="{{ v[key] ?? '' }}" {% if err %}aria-invalid="true" aria-describedby="rg-{{ key }}-e"{% endif %}>
+              {% if f.hint and not err %}<p class="mut" style="font-size:14px;margin:2px 0 0">{{ f.hint }}</p>{% endif %}
+              {% if err %}<p class="dlform__err" id="rg-{{ key }}-e">{{ err }}</p>{% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        <div class="dlform__hp" aria-hidden="true"><label>اتركه فارغاً <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <input type="hidden" name="stamp" value="{{ reg.stamp }}">
+        <input type="hidden" name="saer_register" value="1">
+
+        <div class="actions">
+          <button type="submit" class="btn gold">{{ page.header.register_label ?: 'سجّل الآن' }}</button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</section>

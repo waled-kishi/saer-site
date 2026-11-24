@@ -105,6 +105,44 @@
       }
     }
 
+    /** Course registrations: a line per course, then the people who signed up, newest first. */
+    async registrations() {
+      const el = this.root.querySelector('[data-registrations]');
+      if (!el) return;
+      try {
+        const r = await fetch(api('/saer-core/registrations?limit=200'), { headers: headers(), credentials: 'same-origin' });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const d = (await r.json()).data;
+        if (!d.total) { el.innerHTML = '<p class="muted">لا تسجيلات بعد. تظهر هنا تسجيلات الدورات التي يكون التسجيل فيها عبر نموذج الموقع.</p>'; return; }
+        const courses = d.courses.map((c) => `<div class="row"><span>${esc(c.title)}</span>
+          <div class="track"><div class="fill gold" style="width:${Math.round((c.count / Math.max(...d.courses.map((x) => x.count), 1)) * 100)}%"></div></div>
+          <b class="num">${n(c.count)}</b></div>`).join('');
+        const rows = d.registrations.map((p) => `<tr>
+          <td>${new Date(p.ts * 1000).toLocaleString('ar-SY-u-nu-latn')}</td>
+          <td>${esc(p.course || p.route)}</td><td>${esc(p.name)}</td>
+          <td>${p.whatsapp ? `<a href="https://wa.me/${esc(p.whatsapp)}" target="_blank" rel="noopener">${esc(p.whatsapp)}</a>` : '—'}</td>
+          <td>${esc(p.email || '—')}</td><td>${esc([p.country, p.city].filter(Boolean).join(' · ') || '—')}</td>
+          <td>${esc([p.age, p.gender, p.qualification].filter(Boolean).join(' · ') || '—')}</td>
+          <td>${esc(p.note || '—')}</td>
+          <td><button type="button" class="danger" data-delreg="${p.id}" title="حذف هذا التسجيل">حذف</button></td></tr>`).join('');
+        el.innerHTML = `<div class="rows">${courses}</div>
+          <div class="scroll" style="margin-top:14px"><table><thead><tr><th>الوقت</th><th>الدورة</th><th>الاسم</th>
+          <th>واتساب</th><th>البريد</th><th>البلد</th><th>بيانات أخرى</th><th>سبب التسجيل</th><th></th></tr></thead>
+          <tbody>${rows}</tbody></table></div>
+          <p class="note">المجموع ${n(d.total)} تسجيل. رقم الواتساب يفتح محادثة مباشرة.</p>`;
+        el.querySelectorAll('[data-delreg]').forEach((b) => b.addEventListener('click', () => this.deleteRegistration(+b.dataset.delreg)));
+      } catch (e) {
+        el.innerHTML = '<p class="muted">تعذّرت قراءة التسجيلات.</p>';
+      }
+    }
+
+    async deleteRegistration(id) {
+      if (!confirm('سيُحذف هذا التسجيل نهائياً. متابعة؟')) return;
+      const r = await fetch(api(`/saer-core/registrations/${id}`), { method: 'DELETE', headers: headers(), credentials: 'same-origin' });
+      if (!r.ok) { alert('تعذّر الحذف'); return; }
+      this.registrations();
+    }
+
     async rebuildSearch(btn) {
       const label = btn.textContent;
       btn.disabled = true;
@@ -139,13 +177,15 @@
         <div class="bar"><div class="ranges" role="group" aria-label="المدة">${ranges}</div>
           <div class="ranges"><button type="button" data-export="people">تصدير بيانات المحمّلين</button>
           <button type="button" data-export="downloads">تصدير التحميلات</button>
-          <button type="button" data-export="views">تصدير الزيارات</button></div></div>
+          <button type="button" data-export="views">تصدير الزيارات</button>
+          <button type="button" data-export="registrations">تصدير تسجيلات الدورات</button></div></div>
         ${body}</div>`;
       this.root.querySelectorAll('[data-days]').forEach((b) => b.addEventListener('click', () => { this.days = +b.dataset.days; this.load(); }));
       this.root.querySelectorAll('[data-export]').forEach((b) => b.addEventListener('click', () => this.exportCsv(b.dataset.export)));
       this.root.querySelectorAll('[data-reset]').forEach((b) => b.addEventListener('click', () => this.reset(b.dataset.reset)));
       this.root.querySelectorAll('[data-search]').forEach((b) => b.addEventListener('click', () => this.rebuildSearch(b)));
       if (this.root.querySelector('[data-search-status]')) this.searchStatus();
+      if (this.root.querySelector('[data-registrations]')) this.registrations();
       this.root.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', () => this.del(+b.dataset.del)));
     }
 
@@ -214,6 +254,7 @@
         </div>
         <div class="card"><h2>آخر من حمّل</h2>${recent}</div>
         <p class="note">لا يحفظ الموقع عناوين IP ولا يضع كوكيز للعدّ. "الزائر" يُحسب مرة واحدة في اليوم. البلد في الزيارات من قاعدة DB-IP Lite (IP Geolocation by DB-IP)، وفي النموذج من اختيار الشخص. الروبوتات ومحركات البحث لا تُحسب، وكذلك أي زائر يفتح 30 صفحة خلال 5 دقائق (زاحف آلي يتظاهر بأنه متصفح).</p>
+        <div class="card"><h2>تسجيلات الدورات</h2><div data-registrations>…</div></div>
         <div class="card"><h2>فهرس البحث</h2>
           <p class="note" data-search-status>…</p>
           <div class="ranges"><button type="button" data-search="rebuild">إعادة بناء الفهرس</button></div></div>

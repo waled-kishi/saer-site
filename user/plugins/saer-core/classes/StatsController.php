@@ -239,6 +239,15 @@ class StatsController extends AbstractApiController
         return ApiResponse::create(['deleted' => $st->rowCount()]);
     }
 
+    /** DELETE /saer-core/registrations/{id}: remove one registration (a test entry, or spam). */
+    public function deleteRegistration(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.system.write');
+        $st = $this->pdo()->prepare('DELETE FROM registrations WHERE id = ?');
+        $st->execute([(int) $this->getRouteParam($request, 'id')]);
+        return ApiResponse::create(['deleted' => $st->rowCount()]);
+    }
+
     /**
      * DELETE /saer-core/data?scope=views|all: start the statistics from zero.
      * views: page views (and the crawler list). all: also downloads and download-form answers.
@@ -347,6 +356,43 @@ class StatsController extends AbstractApiController
         ], file_get_contents($path));
     }
 
+    /**
+     * GET /saer-core/registrations[?route=/courses/x]: course registrations, newest first,
+     * with a count per course. The answers are what people typed into the course form.
+     */
+    public function registrations(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.system.read');
+        $q = $request->getQueryParams();
+        $route = trim((string) ($q['route'] ?? ''));
+        $limit = max(1, min(500, (int) ($q['limit'] ?? 200)));
+        $core = $this->core();
+
+        $courses = [];
+        foreach ($this->all('SELECT route, MAX(course) AS course, COUNT(*) AS n, MAX(ts) AS last FROM registrations
+            GROUP BY route ORDER BY n DESC') as $r) {
+            $page = $this->page($r['route']);
+            $courses[] = ['route' => $r['route'], 'title' => $page ? $page->title() : ($r['course'] ?: $r['route']),
+                          'count' => (int) $r['n'], 'last' => (int) $r['last']];
+        }
+
+        $sql = 'SELECT * FROM registrations' . ($route !== '' ? ' WHERE route = ?' : '') . ' ORDER BY ts DESC LIMIT ' . $limit;
+        $rows = [];
+        foreach ($this->all($sql, $route !== '' ? [$route] : []) as $r) {
+            $rows[] = [
+                'id' => (int) $r['id'], 'ts' => (int) $r['ts'], 'route' => $r['route'],
+                'course' => $r['course'], 'name' => $r['name'], 'whatsapp' => $r['whatsapp'],
+                'email' => $r['email'], 'city' => $r['city'], 'qualification' => $r['qualification'],
+                'note' => $r['note'], 'device' => $r['device'],
+                'age' => $r['age'] ? (Core::AGES[$r['age']] ?? $r['age']) : '',
+                'gender' => $r['gender'] ? (Core::GENDERS[$r['gender']] ?? $r['gender']) : '',
+                'country' => $r['country'] ? $core->countryName($r['country']) : '',
+            ];
+        }
+        return ApiResponse::create(['courses' => $courses, 'total' => array_sum(array_column($courses, 'count')),
+                                    'registrations' => $rows]);
+    }
+
     public function export(ServerRequestInterface $request): ResponseInterface
     {
         $this->requirePermission($request, 'api.system.read');
@@ -370,6 +416,18 @@ class StatsController extends AbstractApiController
                 $rows[] = [$when($r['ts']), $page ? $page->title() : $r['route'], $r['file'], $r['name'] ?? '',
                            Core::AGES[$r['age'] ?? ''] ?? '', $r['country'] ? $core->countryName($r['country']) : '',
                            Core::GENDERS[$r['gender'] ?? ''] ?? '', $r['geo'] ? $core->countryName($r['geo']) : '', $r['device']];
+            }
+        } elseif ($type === 'registrations') {
+            $head = ['الوقت', 'الدورة', 'الاسم', 'واتساب', 'البريد', 'العمر', 'البلد', 'المدينة', 'الجنس', 'المؤهل', 'سبب التسجيل'];
+            $rows = [];
+            $route = trim((string) ($request->getQueryParams()['route'] ?? ''));
+            $sql = 'SELECT * FROM registrations' . ($route !== '' ? ' WHERE route = ?' : '') . ' ORDER BY ts DESC';
+            foreach ($this->all($sql, $route !== '' ? [$route] : []) as $r) {
+                $page = $this->page($r['route']);
+                $rows[] = [$when($r['ts']), $page ? $page->title() : ($r['course'] ?: $r['route']), $r['name'],
+                           $r['whatsapp'], $r['email'], Core::AGES[$r['age'] ?? ''] ?? '',
+                           $r['country'] ? $core->countryName($r['country']) : '', $r['city'],
+                           Core::GENDERS[$r['gender'] ?? ''] ?? '', $r['qualification'], $r['note']];
             }
         } else {
             $type = 'people';

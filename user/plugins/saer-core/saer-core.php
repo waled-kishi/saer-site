@@ -14,6 +14,8 @@ use RocketTheme\Toolbox\Event\Event;
 class SaerCorePlugin extends Plugin
 {
     private ?array $dl = null;
+    /** Registration form state for a course page: fields, values, errors, state. */
+    private ?array $reg = null;
     private $viewPage = null;
 
     public static function getSubscribedEvents(): array
@@ -222,6 +224,9 @@ class SaerCorePlugin extends Plugin
         if ($this->dl !== null) {
             $this->grav['twig']->twig_vars['dl'] = $this->dl;
         }
+        if ($this->reg !== null) {
+            $this->grav['twig']->twig_vars['reg'] = $this->reg;
+        }
         $page = $this->grav['page'] ?? null;
         if ($page && $page->template() === 'search') {
             $this->grav['twig']->twig_vars['search'] = $this->runSearch();
@@ -292,6 +297,65 @@ class SaerCorePlugin extends Plugin
     public function onPageInitialized(Event $event): void
     {
         $this->viewPage = $event['page'] ?? null;
+        $this->prepareRegistration($this->viewPage);
+    }
+
+    /* ---------------- course registration ---------------- */
+
+    /**
+     * The registration form of a course page whose register_mode is "internal": renders it,
+     * and on POST validates the answers, stores them and shows the thank-you message.
+     * Nothing happens on any other page, or once the deadline has passed.
+     */
+    private function prepareRegistration($page): void
+    {
+        if (!$page || $page->template() !== 'course') {
+            return;
+        }
+        $h = $page->header();
+        if ((string) ($h->register_mode ?? 'external') !== 'internal') {
+            return;
+        }
+        $deadline = (string) ($h->register_deadline ?? '');
+        $closed = (string) ($h->status ?? 'soon') !== 'open'
+            || ($deadline !== '' && strtotime($deadline . ' 23:59:59') < time());
+        /** @var Core $core */
+        $core = $this->grav['saer_core'];
+        $fields = $core->registrationFields(
+            (array) ($h->register_fields ?? ['whatsapp']),
+            (array) ($h->register_required ?? ['whatsapp'])
+        );
+        $vars = ['fields' => $fields, 'values' => [], 'errors' => [], 'state' => $closed ? 'closed' : 'form',
+                 'countries' => $core->countries(), 'stamp' => $core->formStamp(),
+                 'thanks' => (string) ($h->register_thanks ?? ''), 'intro' => (string) ($h->register_intro ?? '')];
+
+        if (!$closed && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['saer_register'])) {
+            $post = $_POST;
+            [$values, $errors] = $core->validateRegistration($post, $fields);
+            $vars['values'] = $values;
+            if (!empty($post['website']) || !$core->stampOk((string) ($post['stamp'] ?? ''))) {
+                $errors['form'] = 'تعذّر إرسال النموذج. أعد المحاولة بعد لحظات.';
+            } elseif ($core->tooManyRegistrations()) {
+                $errors['form'] = 'محاولات كثيرة. حاول لاحقاً.';
+            } elseif (!$errors && $core->alreadyRegistered($page->route(), $values)) {
+                $vars['state'] = 'already';
+            }
+            if ($vars['state'] !== 'already') {
+                if ($errors) {
+                    $vars['errors'] = $errors;
+                } else {
+                    try {
+                        $core->createRegistration($page->route(), (string) $page->title(), $values);
+                        $vars['state'] = 'thanks';
+                        $vars['values'] = [];
+                    } catch (\Throwable $e) {
+                        $this->grav['log']->warning('saer-core: registration not stored: ' . $e->getMessage());
+                        $vars['errors'] = ['form' => 'تعذّر حفظ التسجيل. أعد المحاولة بعد قليل.'];
+                    }
+                }
+            }
+        }
+        $this->reg = $vars;
     }
 
     public function onShutdown(): void
@@ -331,6 +395,8 @@ class SaerCorePlugin extends Plugin
         $routes->get('/saer-core/file', [StatsController::class, 'file']);
         $routes->delete('/saer-core/profiles/{id:\d+}', [StatsController::class, 'deleteProfile']);
         $routes->delete('/saer-core/data', [StatsController::class, 'reset']);
+        $routes->get('/saer-core/registrations', [StatsController::class, 'registrations']);
+        $routes->delete('/saer-core/registrations/{id:\d+}', [StatsController::class, 'deleteRegistration']);
         $routes->get('/saer-core/search', [StatsController::class, 'searchStatus']);
         $routes->post('/saer-core/search/rebuild', [StatsController::class, 'searchRebuild']);
     }

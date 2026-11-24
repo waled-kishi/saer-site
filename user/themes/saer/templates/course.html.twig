@@ -13,7 +13,8 @@
 {%- set st = {soon: 'التسجيل قريباً', open: 'التسجيل مفتوح', closed: 'التسجيل مغلق', done: 'انتهت الدورة'} -%}
 {# The deadline closes the door by itself at the end of its own day. #}
 {%- set expired = h.register_deadline and date(h.register_deadline) < date('today') -%}
-{%- set can_register = h.status == 'open' and h.register_mode != 'none' and h.register_url and not expired -%}
+{%- set internal = h.register_mode == 'internal' -%}
+{%- set can_register = h.status == 'open' and h.register_mode != 'none' and not expired and (internal or h.register_url) -%}
 
 {% block head_extra %}
 <script type="application/ld+json">
@@ -38,7 +39,9 @@
   {% if h.register_deadline and not expired %}{% set facts = facts|merge(['آخر موعد للتسجيل: ' ~ h.register_deadline|date('Y/m/d')]) %}{% endif %}
   {% if facts|length %}<div class="chips">{% for f in facts %}<span class="chip">{{ f }}</span>{% endfor %}</div>{% endif %}
   <div class="actions" style="margin-top:6px">
-    {% if can_register %}
+    {% if can_register and internal %}
+      <a class="btn gold" href="#register">{{ h.register_label ?: 'سجّل الآن' }}</a>
+    {% elseif can_register %}
       <a class="btn gold" href="{{ h.register_url }}" target="_blank" rel="noopener">{{ h.register_label ?: 'سجّل الآن' }}</a>
     {% elseif expired and h.status == 'open' %}
       <span class="btn ghost" aria-disabled="true">انتهى موعد التسجيل</span>
@@ -67,4 +70,6 @@
   </aside>
   {% endif %}
 </section>
+
+{% if internal and reg %}{% include 'partials/register-form.html.twig' %}{% endif %}
 {% endblock %}

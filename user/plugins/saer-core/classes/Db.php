@@ -12,6 +12,7 @@ use PDO;
  *   downloads  one row per download (linked to a profile when the visitor filled the form)
  *   views      one row per page view (no IP stored; "visitor" is a salted daily hash)
  *   crawlers   daily visitor hashes caught opening pages faster than a person reads (not counted)
+ *   registrations  one row per course registration sent from the course page's own form
  *   search_docs / search_fts   the site search index (see Search)
  */
 class Db
@@ -115,6 +116,36 @@ class Db
         if ($version < 3) {
             Search::migrate($pdo);
             $pdo->exec('PRAGMA user_version = 3');
+        }
+        if ($version < 4) {
+            // One row per registration. Every answer but the name is optional, because each
+            // course decides which fields its form shows.
+            $pdo->exec(<<<SQL
+                CREATE TABLE IF NOT EXISTS registrations (
+                    id INTEGER PRIMARY KEY,
+                    route TEXT NOT NULL,
+                    course TEXT,
+                    name TEXT NOT NULL,
+                    whatsapp TEXT,
+                    email TEXT,
+                    age TEXT,
+                    country TEXT,
+                    city TEXT,
+                    gender TEXT,
+                    qualification TEXT,
+                    note TEXT,
+                    day TEXT NOT NULL,
+                    ts INTEGER NOT NULL,
+                    visitor TEXT,
+                    geo TEXT,
+                    device TEXT,
+                    ref TEXT
+                );
+                CREATE INDEX IF NOT EXISTS registrations_route ON registrations(route);
+                CREATE INDEX IF NOT EXISTS registrations_day ON registrations(day);
+                CREATE INDEX IF NOT EXISTS registrations_visitor ON registrations(route, visitor);
+                PRAGMA user_version = 4;
+            SQL);
         }
     }
 }
