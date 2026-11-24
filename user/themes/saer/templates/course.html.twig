@@ -151,7 +151,7 @@
   {% if can_register %}
   <div class="lp-cta" style="margin-top:34px">
     <a class="btn gold" href="{{ cta_href }}" {{ blank|raw }}>{{ cta_label }}</a>
-    {% if h.price %}<p class="mut" style="margin:0;font-size:15px">{{ h.price }}{% if h.price_before %} بدل {{ h.price_before }}{% endif %}{% if h.register_deadline %} · حتى {{ h.register_deadline|date('Y/m/d') }}{% endif %}</p>{% endif %}
+    {% if h.price %}<p class="mut" style="margin:0;font-size:15px"><b data-price style="color:var(--gold)">{{ h.price }}</b>{% if h.price_before %} بدل <s data-was>{{ h.price_before }}</s>{% endif %}{% if h.register_deadline %} · حتى {{ h.register_deadline|date('Y/m/d') }}{% endif %}</p>{% endif %}
   </div>
   {% endif %}
 </section>

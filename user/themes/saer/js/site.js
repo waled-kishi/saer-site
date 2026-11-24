@@ -86,16 +86,14 @@
   var waHrefs = was.map(function (a) { return a.href; });
   var num = function (t) { var m = String(t).replace(/[^\d.]/g, ''); return m ? parseFloat(m) : 0; };
 
+  wases.forEach(function (el) { if (!el.dataset.orig) el.dataset.orig = el.textContent.trim(); });
   var applyOffer = function (on) {
     if (!special) return;
     prices.forEach(function (el) { el.textContent = on ? special : usual; });
-    wases.forEach(function (el) { el.textContent = on ? usual : el.dataset.orig || el.textContent; });
-    if (on) { wases.forEach(function (el) { if (!el.dataset.orig) el.dataset.orig = el.textContent; }); }
-    var base = wases.length ? num(wases[0].dataset.orig || wases[0].textContent) : 0;
+    var base = wases.length ? num(wases[0].dataset.orig) : 0;   // the usual full price, always
     offs.forEach(function (el) {
-      var from = on ? (base || num(usual)) : base;
       var to = on ? num(special) : num(usual);
-      el.textContent = from && to ? 'خصم ' + Math.round((1 - to / from) * 100) + '%' : el.textContent;
+      el.textContent = base && to ? 'خصم ' + Math.round((1 - to / base) * 100) + '%' : el.textContent;
       el.classList.toggle('lp-off--hot', on);
     });
     was.forEach(function (a, i) {
