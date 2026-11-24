@@ -67,7 +67,7 @@ form:
             register_info:
               type: display
               markdown: true
-              content: "زر التسجيل ما بيظهر إلا إذا كانت حالة التسجيل **مفتوح** وما انتهى الموعد النهائي. اختر طريقة التسجيل أولاً، وبعدين عبّي مجموعة الحقول الخاصة فيها."
+              content: "اختر **طريقة التسجيل**، وبعدين افتح المجموعة الخاصة فيها تحت. زر التسجيل ما بيظهر بالموقع إلا إذا كانت حالة التسجيل **مفتوح** وما انتهى الموعد النهائي."
             header.register_mode:
               type: select
               label: طريقة التسجيل
@@ -76,14 +76,6 @@ form:
                 external: رابط خارجي (فورم غوغل)
                 internal: نموذج تسجيل على الموقع
                 none: بلا زر تسجيل
-            external_section:
-              type: section
-              title: مع "رابط خارجي" فقط
-              underline: true
-            header.register_url:
-              type: url
-              label: رابط التسجيل
-              placeholder: https://forms.gle/...
             header.register_label:
               type: text
               label: نص الزر
@@ -92,51 +84,65 @@ form:
               type: date
               label: آخر موعد للتسجيل
               help: بآخر هذا اليوم بينغلق التسجيل لحاله. اتركه فاضي إذا ما في موعد نهائي.
-            header.register_note:
-              type: text
-              label: ملاحظة تحت الزر (اختياري)
-              placeholder: "مثلاً: التسجيل عبر نموذج غوغل، وبيوصلك تأكيد على الواتساب"
-            internal_section:
-              type: section
-              title: مع "نموذج تسجيل على الموقع" فقط
-              underline: true
-            internal_info:
-              type: display
-              markdown: true
-              content: "حقل **الاسم الكامل** موجود دائماً وإجباري. شيّك على الحقول الثانية يلي بدك ياها تظهر بالنموذج، وبعدين شيّك بالقائمة التانية على يلي بدها تكون إجبارية. التسجيلات بتوصل لقسم **الإحصائيات ← تسجيلات الدورات** باللوحة، وبتتصدّر CSV."
-            header.register_fields:
-              type: checkboxes
-              label: الحقول الظاهرة بالنموذج
-              default: [whatsapp]
-              options:
-                whatsapp: رقم واتساب
-                email: البريد الإلكتروني
-                age: الفئة العمرية
-                country: البلد
-                city: المدينة
-                gender: الجنس
-                qualification: المؤهل أو التخصص
-                note: "سؤال مفتوح: لماذا تريد حضور هذه الدورة؟"
-            header.register_required:
-              type: checkboxes
-              label: الحقول الإجبارية
-              help: لازم تكون مشيّكة بالقائمة يلي فوق كمان، وإلا ما بتظهر أصلاً.
-              default: [whatsapp]
-              options:
-                whatsapp: رقم واتساب
-                email: البريد الإلكتروني
-                age: الفئة العمرية
-                country: البلد
-                city: المدينة
-                gender: الجنس
-                qualification: المؤهل أو التخصص
-                note: "سؤال مفتوح: لماذا تريد حضور هذه الدورة؟"
-            header.register_intro:
-              type: text
-              label: جملة فوق النموذج
-              placeholder: املأ البيانات التالية، ولا تُنشر ولا تُشارك مع أحد.
-            header.register_thanks:
-              type: textarea
-              label: رسالة الشكر بعد الإرسال
-              rows: 2
-              placeholder: سجّلنا اسمك في الدورة بإذن الله، وسنتواصل معك قبل موعد البدء.
+            external_group:
+              type: fieldset
+              title: 'إذا اخترت: رابط خارجي (فورم غوغل)'
+              icon: link
+              collapsible: true
+              collapsed: false
+              fields:
+                header.register_url:
+                  type: url
+                  label: رابط التسجيل
+                  placeholder: https://forms.gle/...
+                header.register_note:
+                  type: text
+                  label: ملاحظة تحت الزر (اختياري)
+                  placeholder: "مثلاً: التسجيل عبر نموذج غوغل، وبيوصلك تأكيد على الواتساب"
+            internal_group:
+              type: fieldset
+              title: 'إذا اخترت: نموذج تسجيل على الموقع'
+              icon: list-checks
+              collapsible: true
+              collapsed: true
+              fields:
+                internal_info:
+                  type: display
+                  markdown: true
+                  content: "حقل **الاسم الكامل** موجود دائماً وإجباري. شيّك على الحقول الثانية يلي بدك ياها تظهر، وبعدين على يلي بدها تكون إجبارية. التسجيلات بتوصل لقسم **تسجيلات الدورات** بالقائمة الجانبية، وبتتصدّر CSV."
+                header.register_fields:
+                  type: checkboxes
+                  label: الحقول الظاهرة بالنموذج
+                  default: [whatsapp]
+                  options:
+                    whatsapp: رقم واتساب
+                    email: البريد الإلكتروني
+                    age: الفئة العمرية
+                    country: البلد
+                    city: المدينة
+                    gender: الجنس
+                    qualification: المؤهل أو التخصص
+                    note: "سؤال مفتوح: لماذا تريد حضور هذه الدورة؟"
+                header.register_required:
+                  type: checkboxes
+                  label: الحقول الإجبارية
+                  help: لازم تكون مشيّكة بالقائمة يلي فوق كمان، وإلا ما بتظهر أصلاً.
+                  default: [whatsapp]
+                  options:
+                    whatsapp: رقم واتساب
+                    email: البريد الإلكتروني
+                    age: الفئة العمرية
+                    country: البلد
+                    city: المدينة
+                    gender: الجنس
+                    qualification: المؤهل أو التخصص
+                    note: "سؤال مفتوح: لماذا تريد حضور هذه الدورة؟"
+                header.register_intro:
+                  type: text
+                  label: جملة فوق النموذج
+                  placeholder: املأ البيانات التالية، ولا تُنشر ولا تُشارك مع أحد.
+                header.register_thanks:
+                  type: textarea
+                  label: رسالة الشكر بعد الإرسال
+                  rows: 2
+                  placeholder: سجّلنا اسمك في الدورة بإذن الله، وسنتواصل معك قبل موعد البدء.
